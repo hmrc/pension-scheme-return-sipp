@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.pensionschemereturnsipp.controllers.MicroserviceHelloWorldController.hello
+POST        /psr/sipp              uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.submitSippPsr
+GET         /psr/sipp/:pstr        uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getSippPsr(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String] )
