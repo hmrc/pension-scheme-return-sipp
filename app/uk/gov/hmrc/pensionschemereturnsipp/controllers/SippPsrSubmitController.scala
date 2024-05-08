@@ -48,7 +48,7 @@ class SippPsrSubmitController @Inject()(
   def submitSippPsr: Action[AnyContent] = Action.async { implicit request =>
     authorisedAsPsrUser { _ =>
       val sippPsrSubmission = requiredBody.as[SippPsrSubmission]
-      logger.debug(message = s"Submitting SIPP PSR")
+      logger.debug(s"Submitting SIPP PSR - $something")
       sippPsrSubmissionService
         .submitSippPsr(sippPsrSubmission)
         .map(response => {
