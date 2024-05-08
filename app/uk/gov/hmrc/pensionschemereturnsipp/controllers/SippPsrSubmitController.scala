@@ -52,7 +52,7 @@ class SippPsrSubmitController @Inject()(
       sippPsrSubmissionService
         .submitSippPsr(sippPsrSubmission)
         .map(response => {
-          logger.debug(message = s"Submit SIPP PSR - response: ${response.status}")
+          logger.debug(s"Submit SIPP PSR - response: ${response.status}")
           NoContent
         })
     }
