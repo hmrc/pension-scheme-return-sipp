@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
-import org.mockito.MockitoSugar
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.generators.Generators
-import uk.gov.hmrc.pensionschemereturnsipp.utils.models.ModelSerializers
+import org.scalatestplus.mockito.MockitoSugar
+import generators.Generators
 
 abstract class BaseSpec
     extends AnyWordSpec
@@ -32,5 +31,4 @@ abstract class BaseSpec
     with BeforeAndAfterEach
     with OptionValues
     with Generators
-    with ModelSerializers
     with TestValues

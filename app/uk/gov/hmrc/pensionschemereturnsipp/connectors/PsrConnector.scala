@@ -21,7 +21,7 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{HeaderCarrier, _}
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
 import uk.gov.hmrc.pensionschemereturnsipp.models.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
@@ -95,6 +95,7 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
         s"$pstr?periodStartDate=$periodStartDate&psrVersion=$psrVersion"
       case _ => throw new BadRequestException("Missing url parameters")
     }
+
   private def getCorrelationId: String = randomUUID.toString.slice(0, maxLengthCorrelationId)
 
   private def integrationFrameworkHeader: Seq[(String, String)] =
@@ -104,5 +105,4 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
       "Content-Type" -> "application/json",
       "CorrelationId" -> getCorrelationId
     )
-
 }

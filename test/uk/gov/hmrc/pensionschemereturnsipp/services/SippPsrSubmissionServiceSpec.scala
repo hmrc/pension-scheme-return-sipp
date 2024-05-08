@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar
+import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
@@ -33,7 +33,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, Sche
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SippPsrSubmissionServiceSpec extends BaseSpec with MockitoSugar with TestValues with SippEtmpTestValues {
+class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtmpTestValues {
 
   override def beforeEach(): Unit = {
     reset(mockPsrConnector)

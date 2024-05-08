@@ -13,7 +13,10 @@ object CodeCoverageSettings {
     "testOnly.*",
     "testOnlyDoNotUseInAppConf.*",
     "uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig",
-    "uk.gov.hmrc.pensionschemereturnsipp.config.Module"
+    "uk.gov.hmrc.pensionschemereturnsipp.config.Module",
+    "uk.gov.hmrc.pensionschemereturnsipp.models.*",
+    "uk.gov.hmrc.pensionschemereturnsipp.utils.*",
+    "uk.gov.hmrc.pensionschemereturnsipp.auth.*"
   )
 
   val settings: Seq[Setting[?]] = Seq(
