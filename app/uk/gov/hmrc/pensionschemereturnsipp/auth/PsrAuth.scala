@@ -72,12 +72,5 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
       .map(_.value)
 
   private def getPsaPspId(enrolments: Enrolments): Option[String] =
-    getPsaId(enrolments) match {
-      case id @ Some(_) => id
-      case _ =>
-        getPspId(enrolments) match {
-          case id @ Some(_) => id
-          case _ => None
-        }
-    }
+    getPsaId(enrolments).orElse(getPspId(enrolments))
 }
