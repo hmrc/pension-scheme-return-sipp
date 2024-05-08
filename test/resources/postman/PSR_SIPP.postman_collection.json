@@ -1,0 +1,369 @@
+{
+	"info": {
+		"_postman_id": "e2218fc8-dfe1-4c1d-aaeb-277d1f510b88",
+		"name": "PSR_SIPP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21518169"
+	},
+	"item": [
+		{
+			"name": "Ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "reportVersionNumber",
+						"value": "001",
+						"type": "default"
+					},
+					{
+						"key": "reportStartDate",
+						"value": "2021-04-06",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/ping",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR - Success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reportDetails\" : {\n    \"pstr\" : \"17836742CF\",\n    \"psrStatus\" : \"Compiled\",\n    \"periodStart\" : \"2022-04-06\",\n    \"periodEnd\" : \"2023-04-05\",\n    \"memberTransactions\": \"Yes\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR - Missing body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR - Unprocessable",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 422\", function () {",
+							"    pm.response.to.have.status(422);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reportDetails\" : {\n    \"pstr\" : \"17836742CF\",\n    \"psrStatus\" : \"Compiled\",\n    \"periodStart\" : \"2023-04-05\",\n    \"periodEnd\" : \"2022-04-06\",\n    \"memberTransactions\": \"Yes\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR with periodStartDate&psrVersion",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp/24000001IN?periodStartDate=2021-04-06&psrVersion=456",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp",
+						"24000001IN"
+					],
+					"query": [
+						{
+							"key": "periodStartDate",
+							"value": "2021-04-06"
+						},
+						{
+							"key": "psrVersion",
+							"value": "456"
+						},
+						{
+							"key": "fbNumber",
+							"value": "123",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR with fbNumber",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp/24000001IN?fbNumber=123",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp",
+						"24000001IN"
+					],
+					"query": [
+						{
+							"key": "periodStartDate",
+							"value": "2021-04-06",
+							"disabled": true
+						},
+						{
+							"key": "psrVersion",
+							"value": "456",
+							"disabled": true
+						},
+						{
+							"key": "fbNumber",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIPP PSR - 422",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 422\", function () {",
+							"    pm.response.to.have.status(422);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{pension-scheme-return-sipp}}/psr/sipp/24000001IN?psrVersion=456&periodStartDate=9999-04-06",
+					"host": [
+						"{{pension-scheme-return-sipp}}"
+					],
+					"path": [
+						"psr",
+						"sipp",
+						"24000001IN"
+					],
+					"query": [
+						{
+							"key": "psrVersion",
+							"value": "456"
+						},
+						{
+							"key": "fbNumber",
+							"value": "123",
+							"disabled": true
+						},
+						{
+							"key": "periodStartDate",
+							"value": "9999-04-06"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

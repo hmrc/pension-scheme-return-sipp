@@ -26,13 +26,30 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 
 import java.time.LocalDate
 
 trait TestValues {
 
+  val externalId: String = "externalId"
+
   val pstr = "testPstr"
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
+
+  val enrolments: Enrolments = Enrolments(
+    Set(
+      Enrolment(
+        psaEnrolmentKey,
+        Seq(
+          EnrolmentIdentifier(psaIdKey, "A0000000")
+        ),
+        "Activated",
+        None
+      )
+    )
+  )
 
   // SIPP - PSR
   val sampleSippReportDetailsSubmission: SippReportDetailsSubmission = SippReportDetailsSubmission(

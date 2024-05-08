@@ -18,10 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils.generators
 
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import org.scalacheck.Gen.{alphaNumChar, alphaNumStr, alphaStr, choose, chooseNum, listOfN, nonEmptyListOf}
+import org.scalacheck.Gen._
 
 import java.time.{Instant, LocalDate, ZoneOffset}
-import scala.collection.Seq
 
 trait BasicGenerators {
 
@@ -54,7 +53,7 @@ trait BasicGenerators {
     arbitrary[BigInt].suchThat(x => x < Int.MinValue)
 
   def nonNumerics: Gen[String] =
-    alphaStr.suchThat(_.size > 0)
+    alphaStr.suchThat(_.nonEmpty)
 
   def decimals: Gen[String] =
     arbitrary[BigDecimal]

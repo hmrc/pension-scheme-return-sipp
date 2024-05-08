@@ -19,7 +19,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
+import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.SippPsrSubmission
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -28,25 +30,32 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class SippPsrSubmitController @Inject()(cc: ControllerComponents, sippPsrSubmissionService: SippPsrSubmissionService)(
+class SippPsrSubmitController @Inject()(
+  cc: ControllerComponents,
+  sippPsrSubmissionService: SippPsrSubmissionService,
+  val authConnector: AuthConnector
+)(
   implicit ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
+    with PsrAuth
     with Logging {
 
   private def requiredBody(implicit request: Request[AnyContent]): JsValue =
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
 
   def submitSippPsr: Action[AnyContent] = Action.async { implicit request =>
-    val sippPsrSubmission = requiredBody.as[SippPsrSubmission]
-    logger.debug(message = s"Submitting SIPP PSR - Incoming payload: $sippPsrSubmission")
-    sippPsrSubmissionService
-      .submitSippPsr(sippPsrSubmission)
-      .map(response => {
-        logger.debug(message = s"Submit SIPP PSR - response: ${response.status}, body: ${response.body}")
-        NoContent
-      })
+    authorisedAsPsrUser { _ =>
+      val sippPsrSubmission = requiredBody.as[SippPsrSubmission]
+      logger.debug(s"Submitting SIPP PSR - $sippPsrSubmission")
+      sippPsrSubmissionService
+        .submitSippPsr(sippPsrSubmission)
+        .map(response => {
+          logger.debug(s"Submit SIPP PSR - response: ${response.status}")
+          NoContent
+        })
+    }
   }
 
   def getSippPsr(
@@ -55,12 +64,14 @@ class SippPsrSubmitController @Inject()(cc: ControllerComponents, sippPsrSubmiss
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    logger.debug(
-      s"Retrieving SIPP PSR - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
-    )
-    sippPsrSubmissionService.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
-      case None => NotFound
-      case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
+        case None => NotFound
+        case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+      }
     }
   }
 }

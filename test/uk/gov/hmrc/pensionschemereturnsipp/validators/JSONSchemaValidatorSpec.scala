@@ -23,7 +23,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.utils.{SippEtmpDummyTestValues, SippE
 
 import java.io.{BufferedWriter, FileWriter}
 
-class JSONSchemaValidatorSippSpec
+class JSONSchemaValidatorSpec
     extends AnyWordSpec
     with Matchers
     with JsonFileReader

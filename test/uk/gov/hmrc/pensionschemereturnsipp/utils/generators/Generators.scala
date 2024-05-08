@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils.generators
 
 import org.scalacheck.Shrink
 
-trait Generators extends BasicGenerators with ModelGenerators {
+trait Generators extends BasicGenerators {
 
   implicit val dontShrinkString: Shrink[String] = Shrink.shrinkAny
 
