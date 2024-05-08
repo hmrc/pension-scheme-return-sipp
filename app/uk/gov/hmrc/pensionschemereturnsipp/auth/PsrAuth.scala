@@ -53,7 +53,7 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
         case Some(externalId) ~ enrolments ~ name =>
           getPsaPspId(enrolments) match {
             case Some(psaPspId) => block(PsrAuthContext(externalId, psaPspId, name, request))
-            case psa => Future.failed(new BadRequestException(s"Bad Request without psaPspId $psa"))
+            case None => Future.failed(new BadRequestException(s"Bad Request without psaPspId"))
           }
         case _ =>
           Future.failed(new UnauthorizedException("Not Authorised - Unable to retrieve credentials - externalId"))
