@@ -40,9 +40,9 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
 
   private type PsrAction[A] = PsrAuthContext[A] => Future[Result]
 
-  def authorisedAsPsrUser(
-    body: PsrAction[Any]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[_]): Future[Result] =
+  def authorisedAsPsrUser[A](
+    body: PsrAction[A]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] =
     authorisedUser(body)
 
   private def authorisedUser[A](
