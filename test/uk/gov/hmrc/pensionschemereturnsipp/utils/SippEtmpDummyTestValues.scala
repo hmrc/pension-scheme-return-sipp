@@ -26,7 +26,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   SippTangibleProperty,
   SippUnquotedShares
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
 trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 
@@ -45,7 +45,7 @@ trait SippEtmpDummyTestValues extends SippEtmpTestValues {
     transactionDetails = Some(List.fill(1)(sippOtherAssetsConnectedPartyTransactionDetail))
   )
 
-  private val sippLandArmsLengthLong = SippLandArmsLength(
+  protected val sippLandArmsLengthLong = SippLandArmsLength(
     noOfTransactions = 1,
     transactionDetails = Some(List.fill(1)(sippLandArmsLengthTransactionDetail))
   )

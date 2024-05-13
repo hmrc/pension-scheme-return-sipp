@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-trait Transformer
+sealed abstract class YesNo(val value: String, val boolean: Boolean)
+object YesNo {
+  case object Yes extends YesNo("Yes", true)
+  case object No extends YesNo("No", false)
+
+  def apply(yes: Boolean): YesNo = if (yes) Yes else No
+}
