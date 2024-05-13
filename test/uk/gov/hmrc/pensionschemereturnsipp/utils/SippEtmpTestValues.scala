@@ -21,7 +21,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMark
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
 import java.time.LocalDate
 

@@ -18,20 +18,12 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
 import play.api.libs.json.{Format, JsError, JsString, JsSuccess}
 
-sealed trait SectionStatus {
-  val value: String
-}
+sealed abstract class SectionStatus(val value: String)
 
 object SectionStatus {
-  case object New extends SectionStatus {
-    val value = "New"
-  }
-  case object Changed extends SectionStatus {
-    val value = "Changed"
-  }
-  private case object Deleted extends SectionStatus {
-    val value = "Deleted"
-  }
+  case object New extends SectionStatus("New")
+  case object Changed extends SectionStatus("Changed")
+  case object Deleted extends SectionStatus("Deleted")
 
   implicit val format: Format[SectionStatus] = Format(
     {

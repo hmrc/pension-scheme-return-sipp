@@ -23,7 +23,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, _}
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
 import java.util.UUID.randomUUID
