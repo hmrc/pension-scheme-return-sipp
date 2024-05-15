@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-
-case class EtmpSippReportDetails(
-  pstr: Option[String],
-  status: EtmpPsrStatus,
-  periodStart: LocalDate,
-  periodEnd: LocalDate,
-  schemeName: Option[String],
-  psrVersion: Option[String]
+case class LandOrConnectedPropertyRequest(
+  reportDetails: ReportDetails,
+  transactions: LandOrConnectedProperty
 )
 
-object EtmpSippReportDetails {
-  implicit val format: OFormat[EtmpSippReportDetails] = Json.format[EtmpSippReportDetails]
+object LandOrConnectedPropertyRequest {
+  implicit val format: OFormat[LandOrConnectedPropertyRequest] = Json.format[LandOrConnectedPropertyRequest]
 }

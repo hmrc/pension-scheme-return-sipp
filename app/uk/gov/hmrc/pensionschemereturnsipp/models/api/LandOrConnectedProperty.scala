@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import java.time.LocalDate
-import common._
 import cats.data.NonEmptyList
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
+
+import java.time.LocalDate
 
 case class LandOrConnectedProperty(
   noOfTransactions: Int,

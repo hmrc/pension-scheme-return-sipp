@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 
 import java.time.LocalDate
 
-case class EtmpSippReportDetails(
-  pstr: Option[String],
+case class ReportDetails(
+  pstr: String,
   status: EtmpPsrStatus,
   periodStart: LocalDate,
   periodEnd: LocalDate,
@@ -29,6 +30,6 @@ case class EtmpSippReportDetails(
   psrVersion: Option[String]
 )
 
-object EtmpSippReportDetails {
-  implicit val format: OFormat[EtmpSippReportDetails] = Json.format[EtmpSippReportDetails]
+object ReportDetails {
+  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
 }

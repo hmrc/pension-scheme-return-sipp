@@ -19,6 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{JsPath, Json, Reads}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
   EtmsSippAccountingPeriod
@@ -26,7 +27,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 
 case class SippPsrSubmissionEtmpResponse(
   reportDetails: EtmpSippReportDetails,
-  accountingPeriodDetails: EtmpSippAccountingPeriodDetails
+  accountingPeriodDetails: EtmpSippAccountingPeriodDetails,
+  memberAndTransactions: Option[List[EtmpMemberAndTransactions]]
 )
 
 object SippPsrSubmissionEtmpResponse {

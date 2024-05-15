@@ -22,7 +22,9 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandArmsLengthTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -34,8 +36,21 @@ class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
   jsonPayloadSchemaValidator: JSONSchemaValidator,
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
-  sippPsrFromEtmp: SippPsrFromEtmp
+  sippPsrFromEtmp: SippPsrFromEtmp,
+  landArmsLengthTransformer: LandArmsLengthTransformer
 ) extends Logging {
+
+  def submitLandOrConnectedProperty(
+    landOrConnectedProperty: LandOrConnectedPropertyRequest
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
+    val maybeLandOrPropertySubmission =
+      landOrConnectedProperty.transactions.transactionDetails
+        .map(details => landArmsLengthTransformer.transform(details.toList))
+
+    //TODO: here need to retrieve existing PSR from ETMP and "merge" LandOrConnectedProperty properties with the response
+
+    psrConnector.submitSippPsr(landOrConnectedProperty.reportDetails.pstr, Json.toJson(maybeLandOrPropertySubmission))
+  }
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission
