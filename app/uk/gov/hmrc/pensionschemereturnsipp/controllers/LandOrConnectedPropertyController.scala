@@ -46,12 +46,12 @@ class LandOrConnectedPropertyController @Inject()(
     )
     sippPsrSubmissionService
       .submitLandOrConnectedProperty(landOrPropertySubmission)
-      .map(response => {
+      .map { response =>
         logger.debug(
           message = s"Submit LandOrConnectedProperty PSR details - response: ${response.status}, body: ${response.body}"
         )
         NoContent
-      })
+      }
   }
 
 }
