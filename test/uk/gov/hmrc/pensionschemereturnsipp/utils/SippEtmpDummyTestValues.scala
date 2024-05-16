@@ -30,7 +30,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissio
 
 trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 
-  private val sippLandConnectedPartyLong = SippLandConnectedParty(
+  protected val sippLandConnectedPartyLong = SippLandConnectedParty(
     noOfTransactions = 1,
     transactionDetails = Some(List.fill(1)(sippLandConnectedPartyTransactionDetail))
   )

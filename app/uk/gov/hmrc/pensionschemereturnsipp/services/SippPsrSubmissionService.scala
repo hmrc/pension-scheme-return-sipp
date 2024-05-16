@@ -23,8 +23,9 @@ import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandArmsLengthTransformer
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{LandArmsLengthTransformer, LandConnectedPartyTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -37,18 +38,36 @@ class SippPsrSubmissionService @Inject()(
   jsonPayloadSchemaValidator: JSONSchemaValidator,
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
   sippPsrFromEtmp: SippPsrFromEtmp,
-  landArmsLengthTransformer: LandArmsLengthTransformer
+  landConnectedPartyTransformer: LandConnectedPartyTransformer
 ) extends Logging {
   def submitLandOrConnectedProperty(
     landOrConnectedProperty: LandOrConnectedPropertyRequest
   )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
-    val maybeLandOrPropertySubmission =
-      landOrConnectedProperty.transactions.transactionDetails
-        .map(details => landArmsLengthTransformer.transform(details.toList))
 
-    //TODO: here need to retrieve existing PSR from ETMP and "merge" LandOrConnectedProperty properties with the response
+    def constructMembersAndTransactions(
+      landOrConnectedProperty: LandOrConnectedPropertyRequest
+    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext) =
+      psrConnector
+        .getSippPsr(landOrConnectedProperty.reportDetails.pstr, None, None, None)
+        .map { //TODO: not sure about the other parameters to the getSippPsr request
+          case Some(existingEtmpData) =>
+            for {
+              landOrPropertyTxs <- landOrConnectedProperty.transactions.transactionDetails
+              etmpTxs <- existingEtmpData.memberAndTransactions
+            } yield {
+              landConnectedPartyTransformer.merge(landOrPropertyTxs.toList, etmpTxs)
+            }
+          case None =>
+            landOrConnectedProperty.transactions.transactionDetails
+              .map(details => landConnectedPartyTransformer.transform(details.toList))
+        }
 
-    psrConnector.submitSippPsr(landOrConnectedProperty.reportDetails.pstr, Json.toJson(maybeLandOrPropertySubmission))
+    constructMembersAndTransactions(landOrConnectedProperty).flatMap(
+      maybeLandOrPropertyMembersAndTxs =>
+        //TODO: implement code to construct the whole ETMP request where 'maybeLandOrPropertyMembersAndTxs' can be added
+        psrConnector
+          .submitSippPsr(landOrConnectedProperty.reportDetails.pstr, ???)
+    )
   }
 
   def submitSippPsr(
