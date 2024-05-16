@@ -16,6 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Format, Json}
+
 import java.time.LocalDate
 
 case class NameDOB(firstName: String, lastName: String, dob: LocalDate)
+
+object NameDOB {
+  implicit val format: Format[NameDOB] = Json.format[NameDOB]
+}

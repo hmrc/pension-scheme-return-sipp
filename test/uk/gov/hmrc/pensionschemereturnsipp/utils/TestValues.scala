@@ -95,7 +95,8 @@ trait TestValues {
       schemeName = Some("PSR Scheme"),
       psrVersion = Some("001")
     ),
-    accountingPeriodDetails = sampleEtmpAccountingPeriodDetails
+    accountingPeriodDetails = sampleEtmpAccountingPeriodDetails,
+    memberAndTransactions = None
   )
 
   val validationMessage: ValidationMessage = {

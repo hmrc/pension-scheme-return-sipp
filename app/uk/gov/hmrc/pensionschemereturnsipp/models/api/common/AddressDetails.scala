@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Json, OFormat}
+
 case class AddressDetails(
   addressLine1: String,
   addressLine2: Option[String],
@@ -25,3 +27,7 @@ case class AddressDetails(
   ukPostCode: Option[String],
   countryCode: String
 )
+
+object AddressDetails {
+  implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
+}

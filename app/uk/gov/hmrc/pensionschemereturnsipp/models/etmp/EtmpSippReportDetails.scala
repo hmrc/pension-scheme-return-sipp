@@ -25,6 +25,7 @@ case class EtmpSippReportDetails(
   status: EtmpPsrStatus,
   periodStart: LocalDate,
   periodEnd: LocalDate,
+  memberTransactions: String,
   schemeName: Option[String],
   psrVersion: Option[String]
 )

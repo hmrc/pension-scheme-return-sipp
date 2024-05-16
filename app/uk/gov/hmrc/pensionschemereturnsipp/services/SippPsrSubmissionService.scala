@@ -39,7 +39,6 @@ class SippPsrSubmissionService @Inject()(
   sippPsrFromEtmp: SippPsrFromEtmp,
   landArmsLengthTransformer: LandArmsLengthTransformer
 ) extends Logging {
-
   def submitLandOrConnectedProperty(
     landOrConnectedProperty: LandOrConnectedPropertyRequest
   )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {

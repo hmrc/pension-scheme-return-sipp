@@ -24,6 +24,44 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class LandArmsLengthTransformer @Inject() {
+
+  def merge(
+    landArmsData: List[LandOrConnectedProperty.TransactionDetails],
+    etmpData: List[EtmpMemberAndTransactions]
+  ): List[EtmpMemberAndTransactions] = {
+
+    val landArmsDataByMember =
+      landArmsData.groupBy(k => k.nameDOB.firstName -> k.nameDOB.lastName -> k.nameDOB.dob -> k.nino.nino)
+
+    val etmpDataByMember = etmpData.groupBy(
+      k => k.memberDetails.firstName -> k.memberDetails.lastName -> k.memberDetails.dateOfBirth -> k.memberDetails.nino
+    )
+
+    val updatedEtmpDataByMember = etmpDataByMember.flatMap {
+      case (memberKey, etmpTxsByMember) =>
+        val landArmsDataToUpdate = landArmsDataByMember
+          .get(memberKey)
+          .map { landArmsTxs =>
+            landArmsTxs.map(transformSingle)
+          }
+
+        etmpTxsByMember.map(
+          etmpTx =>
+            etmpTx.copy(
+              landArmsLength =
+                landArmsDataToUpdate.map(landArmsTxs => SippLandArmsLength(landArmsTxs.length, Some(landArmsTxs)))
+            )
+        )
+    }.toList
+
+    val newMembers = landArmsDataByMember.keySet.diff(etmpDataByMember.keySet)
+
+    val newEtmpDataByMember =
+      newMembers.toList.flatMap(memberKey => landArmsDataByMember.get(memberKey)).flatMap(transform)
+
+    updatedEtmpDataByMember ++ newEtmpDataByMember
+  }
+
   def transform(list: List[LandOrConnectedProperty.TransactionDetails]): List[EtmpMemberAndTransactions] =
     list
       .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
