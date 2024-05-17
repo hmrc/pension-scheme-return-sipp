@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 
 import java.time.LocalDate
 
-case class NameDOB(firstName: String, lastName: String, dob: LocalDate)
+case class ReportDetails(
+  pstr: String,
+  status: EtmpPsrStatus,
+  periodStart: LocalDate,
+  periodEnd: LocalDate,
+  schemeName: Option[String],
+  psrVersion: Option[String]
+)
 
-object NameDOB {
-  implicit val format: Format[NameDOB] = Json.format[NameDOB]
+object ReportDetails {
+  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
 }

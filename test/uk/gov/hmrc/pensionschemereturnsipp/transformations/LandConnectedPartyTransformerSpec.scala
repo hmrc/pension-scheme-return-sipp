@@ -30,14 +30,19 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, SectionStatus, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
+  MemberDetails,
+  SippLandArmsLength,
+  SippLandConnectedParty
+}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
-class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+import java.time.LocalDate
 
-  import java.time.LocalDate
+class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
 
-  private val transformer: LandArmsLengthTransformer = new LandArmsLengthTransformer()
+  private val transformer: LandConnectedPartyTransformer = new LandConnectedPartyTransformer()
 
   val landArmsDataRow1 = TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
@@ -79,14 +84,12 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       reasonNoNINO = None,
       dateOfBirth = LocalDate.of(2020, 1, 1)
     ),
-    landConnectedParty = None,
-    otherAssetsConnectedParty = None,
-    landArmsLength = Some(
-      SippLandArmsLength(
+    landConnectedParty = Some(
+      SippLandConnectedParty(
         1,
         Some(
           List(
-            TransactionDetail(
+            SippLandConnectedParty.TransactionDetail(
               LocalDate.of(2020, 1, 1),
               YesNo.Yes,
               EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
@@ -114,6 +117,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
         )
       )
     ),
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
     tangibleProperty = None,
     loanOutstanding = None,
     unquotedShares = None
@@ -121,18 +126,18 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
   "merge" should {
     "update LandArms data for a single member when member match is found" in {
-      val testEtmpData = etmpData.copy(landArmsLength = None)
+      val testEtmpData = etmpData.copy(landConnectedParty = None)
 
       val result = transformer.merge(List(landArmsDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
-          landArmsLength = Some(
-            SippLandArmsLength(
+          landConnectedParty = Some(
+            SippLandConnectedParty(
               1,
               Some(
                 List(
-                  TransactionDetail(
+                  SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
@@ -172,12 +177,12 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
       result mustBe List(
         etmpData.copy(
-          landArmsLength = Some(
-            SippLandArmsLength(
+          landConnectedParty = Some(
+            SippLandConnectedParty(
               1,
               Some(
                 List(
-                  TransactionDetail(
+                  SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
@@ -215,7 +220,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(landArmsLength = None),
+        etmpData.copy(landConnectedParty = None),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
@@ -232,31 +237,30 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
   }
 
-  "LandArmsLengthTransformerSpec" should {
-    "transform" in {
-      transformer.transform(List(sipp)) mustEqual List(
-        EtmpMemberAndTransactions(
-          SectionStatus.New,
-          None,
-          sippMemberDetails.copy(middleName = None),
-          landConnectedParty = None,
-          otherAssetsConnectedParty = None,
-          landArmsLength = Some(sippLandArmsLengthLong),
-          tangibleProperty = None,
-          loanOutstanding = None,
-          unquotedShares = None
-        )
+  "transform" in {
+    transformer.transform(List(sipp)) mustEqual List(
+      EtmpMemberAndTransactions(
+        SectionStatus.New,
+        None,
+        sippMemberDetails.copy(middleName = None),
+        landConnectedParty = Some(sippLandConnectedPartyLong),
+        otherAssetsConnectedParty = None,
+        landArmsLength = None,
+        tangibleProperty = None,
+        loanOutstanding = None,
+        unquotedShares = None
       )
-    }
+    )
   }
 
   val sipp = {
-    import sippLandArmsLengthTransactionDetail._
+    import sippLandConnectedPartyTransactionDetail._
+
     LandOrConnectedProperty.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
-      landOrPropertyinUK = ApiYesNo(landOrPropertyinUK.boolean),
+      landOrPropertyinUK = ApiYesNo(landOrPropertyInUK.boolean),
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
         addressDetails.addressLine2.some,
@@ -283,7 +287,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
           noOfPersonsForLessees,
           None, // todo model diff
           ApiYesNo(anyOfLesseesConnected.get.boolean),
-          lesseesGrantedAt.get,
+          leaseGrantedDate.get,
           annualLeaseAmount.get
         )
       ),
@@ -299,6 +303,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
         )
       }
     )
+
   }
 
 }

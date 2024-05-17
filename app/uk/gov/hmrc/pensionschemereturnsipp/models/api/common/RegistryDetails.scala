@@ -16,8 +16,14 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Json, OFormat}
+
 case class RegistryDetails(
   registryRefExist: YesNo,
   registryReference: Option[String],
   noRegistryRefReason: Option[String]
 )
+
+object RegistryDetails {
+  implicit val format: OFormat[RegistryDetails] = Json.format[RegistryDetails]
+}

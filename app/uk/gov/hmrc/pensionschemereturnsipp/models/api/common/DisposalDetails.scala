@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Json, OFormat}
+
 case class DisposalDetails(
   disposedPropertyProceedsAmt: Double,
   namesOfPurchasers: String,
@@ -23,3 +25,7 @@ case class DisposalDetails(
   independentValuationDisposal: YesNo,
   propertyFullyDisposed: YesNo
 )
+
+object DisposalDetails {
+  implicit val format: OFormat[DisposalDetails] = Json.format[DisposalDetails]
+}

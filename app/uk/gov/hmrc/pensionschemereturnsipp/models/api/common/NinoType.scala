@@ -16,4 +16,9 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Json, OFormat}
+
 case class NinoType(nino: Option[String], reasonNoNino: Option[String])
+object NinoType {
+  implicit val format: OFormat[NinoType] = Json.format[NinoType]
+}
