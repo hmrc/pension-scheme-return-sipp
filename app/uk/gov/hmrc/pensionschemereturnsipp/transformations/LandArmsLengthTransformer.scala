@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.NinoType
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandArmsLength}
 
@@ -64,14 +65,16 @@ class LandArmsLengthTransformer @Inject() {
 
   def transform(list: List[LandOrConnectedProperty.TransactionDetails]): List[EtmpMemberAndTransactions] =
     list
-      .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
+      .groupBy(p => p.nameDOB -> p.nino.nino)
       .map {
         case ((nameDoB, nino), transactions) =>
-          val armsLength = SippLandArmsLength(transactions.length, Some(transactions).filter(_.nonEmpty))
+          val reasonNoNino = transactions.find(_.nino.reasonNoNino.nonEmpty).flatMap(_.nino.reasonNoNino)
+          val armsLength =
+            SippLandArmsLength(transactions.length, Some(transactions.map(transformSingle)).filter(_.nonEmpty))
           EtmpMemberAndTransactions(
             status = SectionStatus.New,
             version = None,
-            memberDetails = toMemberDetails(nameDoB, nino),
+            memberDetails = toMemberDetails(nameDoB, NinoType(nino, reasonNoNino)),
             landConnectedParty = None,
             otherAssetsConnectedParty = None,
             landArmsLength = Some(armsLength),
