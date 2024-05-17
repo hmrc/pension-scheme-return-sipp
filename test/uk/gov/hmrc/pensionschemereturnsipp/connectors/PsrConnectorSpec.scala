@@ -799,7 +799,7 @@ object PsrConnectorSpec {
 
   val sampleSippPsrResponseAsJsonString: String =
     """
-      |{
+     {
       |  "reportDetails": {
       |    "pstr": "12345678AA",
       |    "schemeName": "PSR Scheme",
@@ -827,13 +827,11 @@ object PsrConnectorSpec {
       |      "status": "New",
       |      "version": "000",
       |      "memberDetails": {
-      |        "personalDetails": {
-      |          "firstName": "Dave",
-      |          "middleName": "K",
-      |          "lastName": "Robin",
-      |          "nino": "AA200000A",
-      |          "dateOfBirth": "1900-03-14"
-      |        },
+      |        "firstName": "Dave",
+      |        "middleName": "K",
+      |        "lastName": "Robin",
+      |        "nino": "AA200000A",
+      |        "dateOfBirth": "1900-03-14",
       |        "isUKAddress": "Yes",
       |        "addressDetails": {
       |          "addressLine1": "Brignton",
@@ -850,7 +848,7 @@ object PsrConnectorSpec {
       |        "transactionDetails": [
       |          {
       |            "acquisitionDate": "2023-03-14",
-      |            "landOrPropertyinUK": "Yes",
+      |            "landOrPropertyInUK": "Yes",
       |            "addressDetails": {
       |              "addressLine1": "London1",
       |              "addressLine2": "London2",
