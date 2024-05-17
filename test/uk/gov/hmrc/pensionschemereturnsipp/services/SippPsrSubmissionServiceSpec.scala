@@ -20,13 +20,11 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
 import play.api.libs.json.Json
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{LandArmsLengthTransformer, LandConnectedPartyTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandConnectedPartyTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
@@ -58,7 +56,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  private implicit val rq: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   "getSippPsr" should {
     "return 200 without data when connector returns successfully" in {
@@ -96,7 +93,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(sampleSippPsrSubmissionEtmpRequest)
       when(mockJSONSchemaValidator.validatePayload(any(), any()))
         .thenReturn(SchemaValidationResult(Set.empty))
-      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
 
       whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
@@ -104,7 +101,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
         verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
         verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
       }
     }
 
@@ -114,7 +111,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(fullSippPsrSubmissionEtmpRequest)
       when(mockJSONSchemaValidator.validatePayload(any(), any()))
         .thenReturn(SchemaValidationResult(Set.empty))
-      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
 
       whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
@@ -122,7 +119,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
         verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
         verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
       }
     }
 
@@ -139,14 +136,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
       verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-      verify(mockPsrConnector, never).submitSippPsr(any(), any())(any(), any(), any())
+      verify(mockPsrConnector, never).submitSippPsr(any(), any())(any(), any())
     }
 
     "throw exception when connector call not successful for submitSippPsr" in {
       when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(sampleSippPsrSubmissionEtmpRequest)
       when(mockJSONSchemaValidator.validatePayload(any(), any()))
         .thenReturn(SchemaValidationResult(Set.empty))
-      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.failed(new BadRequestException("invalid-request")))
 
       val thrown = intercept[ExpectationFailedException] {
@@ -157,7 +154,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
       verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any(), any())
+      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
     }
   }
 

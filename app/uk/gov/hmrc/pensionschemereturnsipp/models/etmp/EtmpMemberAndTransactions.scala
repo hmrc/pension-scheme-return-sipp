@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
 import java.time.LocalDate
 
@@ -57,7 +58,7 @@ object SippLandConnectedParty {
     acquisitionDate: LocalDate,
     landOrPropertyInUK: YesNo,
     addressDetails: EtmpAddress,
-    registryDetails: EtmpRegistryDetails,
+    registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo, // Previous api has that Valution typo!
@@ -120,7 +121,7 @@ object SippLandArmsLength {
     acquisitionDate: LocalDate,
     landOrPropertyinUK: YesNo,
     addressDetails: EtmpAddress,
-    registryDetails: EtmpRegistryDetails,
+    registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo,

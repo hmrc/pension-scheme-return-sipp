@@ -73,7 +73,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       thrown.reason mustBe "Bearer token expired"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -89,7 +89,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       }
 
       thrown.reason mustBe "Bearer token not supplied"
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -101,7 +101,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.submitSippPsr(any())(any(), any(), any()))
+      when(mockSippPsrSubmissionService.submitSippPsr(any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK, responseJson.toString)))
 
       val requestJson: JsValue = Json.parse(
@@ -131,7 +131,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any(), any()))
+      when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(sampleSippPsrSubmission)))
 
       val result = controller.getSippPsr("testPstr", Some("fbNumber"), None, None)(fakeRequest)
@@ -144,7 +144,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any(), any()))
+      when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = controller.getSippPsr("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)

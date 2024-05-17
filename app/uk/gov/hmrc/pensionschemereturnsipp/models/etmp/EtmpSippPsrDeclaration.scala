@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 case class EtmpSippPsrDeclaration(
   submittedBy: String,

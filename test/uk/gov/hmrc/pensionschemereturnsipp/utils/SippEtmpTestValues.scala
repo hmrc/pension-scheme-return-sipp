@@ -15,11 +15,12 @@
  */
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
@@ -38,7 +39,7 @@ trait SippEtmpTestValues {
     countryCode = "GB"
   )
 
-  private val sippRegistryDetails: EtmpRegistryDetails = EtmpRegistryDetails(
+  private val sippRegistryDetails: RegistryDetails = RegistryDetails(
     registryRefExist = Yes,
     registryReference = Some("RegistryReference"),
     noRegistryRefReason = Some("I have a registry and I have entered my registry reference")

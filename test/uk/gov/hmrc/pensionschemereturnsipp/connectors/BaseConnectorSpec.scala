@@ -24,6 +24,7 @@ import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.time.{Millis, Span}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Writes
 import uk.gov.hmrc.http.test.{HttpClientSupport, WireMockSupport}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 
@@ -54,11 +55,11 @@ abstract class BaseConnectorSpec
         .willReturn(response)
     )
 
-  def stubPost(url: String, requestBody: String, response: ResponseDefinitionBuilder): StubMapping =
+  def stubPost[A: Writes](url: String, requestBody: A, response: ResponseDefinitionBuilder): StubMapping =
     wireMockServer.stubFor(
       post(urlEqualTo(url))
         .withHeader("Content-Type", equalTo("application/json"))
-        .withRequestBody(equalTo(requestBody))
+        .withRequestBody(equalToJson(Writes.of[A].writes(requestBody).toString))
         .willReturn(response)
     )
 

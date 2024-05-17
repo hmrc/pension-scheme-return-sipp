@@ -16,22 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  RegistryDetails,
-  AddressDetails => ApiAddressDetails,
-  YesNo => ApiYesNo
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, AddressDetails => ApiAddressDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, YesNo => EtmpYesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
 
 package object transformations {
-  def toEtmp(yesNo: ApiYesNo): EtmpYesNo = yesNo match {
-    case ApiYesNo.Yes => EtmpYesNo.Yes
-    case ApiYesNo.No => EtmpYesNo.No
-  }
-
   def toEtmp(address: ApiAddressDetails): EtmpAddress =
     EtmpAddress(
       addressLine1 = address.addressLine1,
@@ -41,13 +30,6 @@ package object transformations {
       addressLine5 = address.addressLine5,
       ukPostCode = address.ukPostCode,
       countryCode = address.countryCode
-    )
-
-  def toEtmp(registry: RegistryDetails): EtmpRegistryDetails =
-    EtmpRegistryDetails(
-      registryRefExist = toEtmp(registry.registryRefExist),
-      registryReference = registry.registryReference,
-      noRegistryRefReason = registry.noRegistryRefReason
     )
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =

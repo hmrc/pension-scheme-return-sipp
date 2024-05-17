@@ -89,26 +89,26 @@ class LandConnectedPartyTransformer @Inject() {
   ): etmp.SippLandConnectedParty.TransactionDetail =
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
-      landOrPropertyInUK = toEtmp(property.landOrPropertyinUK),
+      landOrPropertyInUK = property.landOrPropertyinUK,
       addressDetails = toEtmp(property.addressDetails),
-      registryDetails = toEtmp(property.registryDetails),
+      registryDetails = property.registryDetails,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
-      independentValution = toEtmp(property.independentValuation),
-      jointlyHeld = toEtmp(property.jointlyHeld),
+      independentValution = property.independentValuation,
+      jointlyHeld = property.jointlyHeld,
       noOfPersonsIfJointlyHeld = property.noOfPersons,
-      residentialSchedule29A = toEtmp(property.residentialSchedule29A),
-      isLeased = toEtmp(property.isLeased),
+      residentialSchedule29A = property.residentialSchedule29A,
+      isLeased = property.isLeased,
       noOfPersonsForLessees = property.lesseeDetails.flatMap(_.countOfLessees),
-      anyOfLesseesConnected = property.lesseeDetails.map(l => toEtmp(l.anyOfLesseesConnected)),
+      anyOfLesseesConnected = property.lesseeDetails.map(_.anyOfLesseesConnected),
       leaseGrantedDate = property.lesseeDetails.map(_.leaseGrantedDate),
       annualLeaseAmount = property.lesseeDetails.map(_.annualLeaseAmount),
       totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = toEtmp(property.isPropertyDisposed),
+      isPropertyDisposed = property.isPropertyDisposed,
       disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
       purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(d => toEtmp(d.anyPurchaserConnected)),
-      independentValutionDisposal = property.disposalDetails.map(d => toEtmp(d.independentValuationDisposal)),
-      propertyFullyDisposed = property.disposalDetails.map(d => toEtmp(d.propertyFullyDisposed))
+      anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
+      independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
+      propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
     )
 }

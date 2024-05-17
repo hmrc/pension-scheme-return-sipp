@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EtmpRegistryDetails(
+case class RegistryDetails(
   registryRefExist: YesNo,
   registryReference: Option[String],
   noRegistryRefReason: Option[String]
 )
-object EtmpRegistryDetails {
-  implicit val format: OFormat[EtmpRegistryDetails] = Json.format[EtmpRegistryDetails]
+
+object RegistryDetails {
+  implicit val format: OFormat[RegistryDetails] = Json.format[RegistryDetails]
 }

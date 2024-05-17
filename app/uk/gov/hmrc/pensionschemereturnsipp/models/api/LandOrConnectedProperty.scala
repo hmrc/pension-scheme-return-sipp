@@ -19,6 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
 import java.time.LocalDate
 

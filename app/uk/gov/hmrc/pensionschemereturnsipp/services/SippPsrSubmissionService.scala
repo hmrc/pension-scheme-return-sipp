@@ -19,13 +19,11 @@ package uk.gov.hmrc.pensionschemereturnsipp.services
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{LandArmsLengthTransformer, LandConnectedPartyTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandConnectedPartyTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -42,7 +40,7 @@ class SippPsrSubmissionService @Inject()(
 ) extends Logging {
   def submitLandOrConnectedProperty(
     landOrConnectedProperty: LandOrConnectedPropertyRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
     def constructMembersAndTransactions(
       landOrConnectedProperty: LandOrConnectedPropertyRequest
@@ -72,15 +70,15 @@ class SippPsrSubmissionService @Inject()(
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
-    val payloadAsJson = Json.toJson(sippPsrSubmissionToEtmp.transform(sippPsrSubmission))
-    val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, payloadAsJson)
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val request = sippPsrSubmissionToEtmp.transform(sippPsrSubmission)
+    val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, Json.toJson(request))
     if (validationResult.hasErrors) {
       throw PensionSchemeReturnValidationFailureException(
         s"Invalid payload when submitSippPsr :-\n${validationResult.toString}"
       )
     } else {
-      psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, payloadAsJson).recover {
+      psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, request).recover {
         case _: BadRequestException =>
           throw new ExpectationFailedException("Nothing to submit")
       }
@@ -92,11 +90,7 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
-    ec: ExecutionContext,
-    request: RequestHeader
-  ): Future[Option[SippPsrSubmission]] =
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[SippPsrSubmission]] =
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.map(sippPsrFromEtmp.transform))

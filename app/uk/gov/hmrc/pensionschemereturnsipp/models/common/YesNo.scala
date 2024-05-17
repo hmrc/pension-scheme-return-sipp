@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
 
