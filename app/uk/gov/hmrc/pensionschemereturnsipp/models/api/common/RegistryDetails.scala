@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-trait Transformer
+case class RegistryDetails(
+  registryRefExist: YesNo,
+  registryReference: Option[String],
+  noRegistryRefReason: Option[String]
+)

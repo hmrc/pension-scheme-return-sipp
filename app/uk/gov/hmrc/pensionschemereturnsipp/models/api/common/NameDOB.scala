@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-trait Transformer
+import java.time.LocalDate
+
+case class NameDOB(firstName: String, lastName: String, dob: LocalDate)

@@ -18,16 +18,13 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.pensionschemereturnsipp.models.SippPsrSubmission
-import uk.gov.hmrc.pensionschemereturnsipp.models.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
 @Singleton()
-class SippPsrSubmissionToEtmp @Inject()(
-  sippReportDetailsToEtmp: SippReportDetailsToEtmp
-) {
+class SippPsrSubmissionToEtmp @Inject()(sippReportDetailsToEtmp: SippReportDetailsToEtmp) {
 
   def transform(sippPsrSubmission: SippPsrSubmission): SippPsrSubmissionEtmpRequest = {
-    val etmpSippReportDetails =
-      sippReportDetailsToEtmp.transform(sippPsrSubmission.reportDetails)
+    val etmpSippReportDetails = sippReportDetailsToEtmp.transform(sippPsrSubmission.reportDetails)
     SippPsrSubmissionEtmpRequest(etmpSippReportDetails, None, None, None)
   }
 }

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-trait Transformer
+import java.time.LocalDate
+
+case class LesseeDetails(
+  countOfLessees: Option[Int],
+  namesOfLessees: Option[String],
+  anyOfLesseesConnected: YesNo,
+  leaseGrantedDate: LocalDate,
+  annualLeaseAmount: Double
+)

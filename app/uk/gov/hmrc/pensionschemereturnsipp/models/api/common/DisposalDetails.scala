@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-trait Transformer
+case class DisposalDetails(
+  disposedPropertyProceedsAmt: Double,
+  namesOfPurchasers: String,
+  anyPurchaserConnected: YesNo,
+  independentValuationDisposal: YesNo,
+  propertyFullyDisposed: YesNo
+)
