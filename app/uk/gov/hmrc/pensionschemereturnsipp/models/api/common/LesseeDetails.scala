@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{Json, OFormat}
+
 import java.time.LocalDate
 
 case class LesseeDetails(
@@ -25,3 +27,7 @@ case class LesseeDetails(
   leaseGrantedDate: LocalDate,
   annualLeaseAmount: Double
 )
+
+object LesseeDetails {
+  implicit val format: OFormat[LesseeDetails] = Json.format[LesseeDetails]
+}

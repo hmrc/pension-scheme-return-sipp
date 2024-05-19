@@ -26,6 +26,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{LandArmsLengthTransformer, LandConnectedPartyTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
@@ -46,12 +47,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockJSONSchemaValidator = mock[JSONSchemaValidator]
   private val mockSippPsrSubmissionToEtmp = mock[SippPsrSubmissionToEtmp]
   private val mockSippPsrFromEtmp = mock[SippPsrFromEtmp]
+  private val mockLandConnectedPartyTransformer = mock[LandConnectedPartyTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockJSONSchemaValidator,
     mockSippPsrSubmissionToEtmp,
-    mockSippPsrFromEtmp
+    mockSippPsrFromEtmp,
+    mockLandConnectedPartyTransformer
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()

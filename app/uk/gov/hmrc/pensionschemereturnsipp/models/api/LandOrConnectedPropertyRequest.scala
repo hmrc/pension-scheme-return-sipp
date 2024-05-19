@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
+case class LandOrConnectedPropertyRequest(
+  reportDetails: ReportDetails,
+  transactions: LandOrConnectedProperty
+)
 
-case class NameDOB(firstName: String, lastName: String, dob: LocalDate)
-
-object NameDOB {
-  implicit val format: Format[NameDOB] = Json.format[NameDOB]
+object LandOrConnectedPropertyRequest {
+  implicit val format: OFormat[LandOrConnectedPropertyRequest] = Json.format[LandOrConnectedPropertyRequest]
 }

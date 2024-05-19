@@ -16,10 +16,20 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
+import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
+
 sealed abstract class YesNo(val value: String, val boolean: Boolean)
 object YesNo {
   case object Yes extends YesNo("Yes", true)
   case object No extends YesNo("No", false)
 
   def apply(yes: Boolean): YesNo = if (yes) Yes else No
+
+  implicit val writes: Writes[YesNo] = yesNo => JsString(yesNo.value)
+
+  implicit val reads: Reads[YesNo] = Reads {
+    case JsString(Yes.value) => JsSuccess(Yes)
+    case JsString(No.value) => JsSuccess(No)
+    case unknown => JsError(s"Unknown value for YesNo: $unknown")
+  }
 }
