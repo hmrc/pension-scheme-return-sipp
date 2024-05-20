@@ -16,24 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  RegistryDetails,
-  AddressDetails => ApiAddressDetails,
-  YesNo => ApiYesNo
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, AddressDetails => ApiAddressDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, YesNo => EtmpYesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
 
 package object transformations {
-  implicit class YesNoOps(val yesNo: ApiYesNo) extends AnyVal {
-    def toEtmp: EtmpYesNo = yesNo match {
-      case ApiYesNo.Yes => EtmpYesNo.Yes
-      case ApiYesNo.No => EtmpYesNo.No
-    }
-  }
-
   implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
     def toEtmp = EtmpAddress(
       addressLine1 = address.addressLine1,
@@ -44,15 +31,6 @@ package object transformations {
       ukPostCode = address.ukPostCode,
       countryCode = address.countryCode
     )
-  }
-
-  implicit class RegistryOps(val registry: RegistryDetails) extends AnyVal {
-    def toEtmp: EtmpRegistryDetails =
-      EtmpRegistryDetails(
-        registryRefExist = registry.registryRefExist.toEtmp,
-        registryReference = registry.registryReference,
-        noRegistryRefReason = registry.noRegistryRefReason
-      )
   }
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =

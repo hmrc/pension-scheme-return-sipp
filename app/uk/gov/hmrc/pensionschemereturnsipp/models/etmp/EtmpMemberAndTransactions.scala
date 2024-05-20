@@ -205,14 +205,14 @@ object SippLoanOutstanding {
           dateOfLoan = transactionDetail.dateOfLoan,
           amountOfLoan = transactionDetail.amountOfLoan,
           loanConnectedParty =
-            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) ApiYesNo.Yes
-            else ApiYesNo.No,
+            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) YesNo.Yes
+            else YesNo.No,
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,
-          loanSecurity = transactionDetail.loanSecurity.toApi,
+          loanSecurity = transactionDetail.loanSecurity,
           capitalRepayments = transactionDetail.capitalRepayments,
           interestPayments = transactionDetail.interestPayments,
-          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears.toApi,
+          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears,
           outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
         )
     }
