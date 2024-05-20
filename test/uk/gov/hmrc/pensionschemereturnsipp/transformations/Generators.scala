@@ -24,15 +24,7 @@ import java.time.{Instant, LocalDate, ZoneId}
 import scala.util.Random
 
 object Generators {
-  private val minInstant: Instant = Instant.MIN
-  private val maxInstant: Instant = Instant.MAX
-
-  val instant: Gen[Instant] = for {
-    second <- Gen.choose(min = minInstant.getEpochSecond, max = maxInstant.getEpochSecond)
-    nano <- Gen.choose(min = minInstant.getNano, max = maxInstant.getNano)
-  } yield Instant.ofEpochSecond(second, nano.toLong)
-
-  val localDate: Gen[LocalDate] = instant.map(LocalDate.ofInstant(_, ZoneId.systemDefault))
+  val localDate = Gen.chooseNum(LocalDate.MIN.toEpochDay, LocalDate.MAX.toEpochDay).map(LocalDate.ofEpochDay)
 
   val yesNo: Gen[YesNo] = Gen.oneOf(YesNo.Yes, YesNo.No)
   val ninoType: Gen[NinoType] = Gen.option(Gen.asciiPrintableStr).flatMap {

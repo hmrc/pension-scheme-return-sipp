@@ -18,25 +18,19 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
 import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
 
-sealed trait ConnectedOrUnconnectedType {
-  val value: String
-  val definition: String
-}
+sealed abstract class ConnectedOrUnconnectedType(val value: String, val definition: String)
 
 object ConnectedOrUnconnectedType {
-  case object Connected extends ConnectedOrUnconnectedType {
-    val value = "01"
-    val definition = "CONNECTED"
-  }
-  case object Unconnected extends ConnectedOrUnconnectedType {
-    val value = "02"
-    val definition = "UNCONNECTED"
-  }
+  case object Connected extends ConnectedOrUnconnectedType("01", "CONNECTED")
+  case object Unconnected extends ConnectedOrUnconnectedType("02", "UNCONNECTED")
 
   def apply(definition: String): ConnectedOrUnconnectedType = definition match {
     case Connected.definition => Connected
     case Unconnected.definition => Unconnected
-    case _ => throw new RuntimeException("Couldn't match the type for ConnectedOrUnconnectedType!")
+    case other =>
+      throw new RuntimeException(
+        s"Expected either ${Connected.definition} or ${Unconnected.definition} for ConnectedOrUnconnectedType, but got: $other"
+      )
   }
 
   implicit val writes: Writes[ConnectedOrUnconnectedType] = invOrOrgType => JsString(invOrOrgType.value)
