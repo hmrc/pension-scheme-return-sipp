@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
 import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{YesNo => ApiYesNo}
 
 sealed trait YesNo {
   val value: String
@@ -42,5 +43,12 @@ object YesNo {
     case JsString(Yes.value) => JsSuccess(Yes)
     case JsString(No.value) => JsSuccess(No)
     case unknown => JsError(s"Unknown value for YesNo: $unknown")
+  }
+
+  implicit class TransformationOps(val yesNo: YesNo) extends AnyVal {
+    def toApi: ApiYesNo = yesNo match {
+      case Yes => ApiYesNo.Yes
+      case No => ApiYesNo.No
+    }
   }
 }

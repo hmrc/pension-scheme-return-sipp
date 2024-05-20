@@ -16,74 +16,29 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
+import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.NinoType
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandArmsLength}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class LandArmsLengthTransformer @Inject() {
-
   def merge(
-    landArmsData: List[LandOrConnectedProperty.TransactionDetails],
+    landArmsData: NonEmptyList[LandOrConnectedProperty.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
-  ): List[EtmpMemberAndTransactions] = {
-
-    val landArmsDataByMember =
-      landArmsData.groupBy(k => k.nameDOB.firstName -> k.nameDOB.lastName -> k.nameDOB.dob -> k.nino.nino)
-
-    val etmpDataByMember = etmpData.groupBy(
-      k => k.memberDetails.firstName -> k.memberDetails.lastName -> k.memberDetails.dateOfBirth -> k.memberDetails.nino
-    )
-
-    val updatedEtmpDataByMember = etmpDataByMember.flatMap {
-      case (memberKey, etmpTxsByMember) =>
-        val landArmsDataToUpdate = landArmsDataByMember
-          .get(memberKey)
-          .map { landArmsTxs =>
-            landArmsTxs.map(transformSingle)
-          }
-
-        etmpTxsByMember.map(
-          etmpTx =>
-            etmpTx.copy(
-              landArmsLength =
-                landArmsDataToUpdate.map(landArmsTxs => SippLandArmsLength(landArmsTxs.length, Some(landArmsTxs)))
-            )
-        )
-    }.toList
-
-    val newMembers = landArmsDataByMember.keySet.diff(etmpDataByMember.keySet)
-
-    val newEtmpDataByMember =
-      newMembers.toList.flatMap(memberKey => landArmsDataByMember.get(memberKey)).flatMap(transform)
-
-    updatedEtmpDataByMember ++ newEtmpDataByMember
-  }
-
-  def transform(list: List[LandOrConnectedProperty.TransactionDetails]): List[EtmpMemberAndTransactions] =
-    list
-      .groupBy(p => p.nameDOB -> p.nino.nino)
-      .map {
-        case ((nameDoB, nino), transactions) =>
-          val reasonNoNino = transactions.find(_.nino.reasonNoNino.nonEmpty).flatMap(_.nino.reasonNoNino)
-          val armsLength =
-            SippLandArmsLength(transactions.length, Some(transactions.map(transformSingle)).filter(_.nonEmpty))
-          EtmpMemberAndTransactions(
-            status = SectionStatus.New,
-            version = None,
-            memberDetails = toMemberDetails(nameDoB, NinoType(nino, reasonNoNino)),
-            landConnectedParty = None,
-            otherAssetsConnectedParty = None,
-            landArmsLength = Some(armsLength),
-            tangibleProperty = None,
-            loanOutstanding = None,
-            unquotedShares = None
+  ): List[EtmpMemberAndTransactions] =
+    EtmpMemberAndTransactionsUpdater
+      .merge[LandOrConnectedProperty.TransactionDetails, SippLandArmsLength.TransactionDetail](
+        landArmsData,
+        etmpData,
+        transformSingle,
+        (maybeTransactions, etmpMemberAndTransactions) =>
+          etmpMemberAndTransactions.copy(
+            landArmsLength =
+              maybeTransactions.map(transactions => SippLandArmsLength(transactions.length, Some(transactions.toList)))
           )
-      }
-      .toList
+      )
 
   private def transformSingle(
     property: LandOrConnectedProperty.TransactionDetails

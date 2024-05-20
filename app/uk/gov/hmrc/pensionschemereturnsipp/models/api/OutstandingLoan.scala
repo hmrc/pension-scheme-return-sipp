@@ -17,7 +17,10 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
+import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLoanOutstanding
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType
 
 import java.time.LocalDate
 
@@ -41,5 +44,37 @@ object OutstandingLoan {
     interestPayments: Double,
     arrearsOutstandingPrYears: YesNo,
     outstandingYearEndAmount: Double
+  ) extends MemberKey
+
+  object TransactionDetail {
+    implicit val format: OFormat[TransactionDetail] = Json.format[TransactionDetail]
+
+    implicit class TransformationOps(val transactionDetail: TransactionDetail) extends AnyVal {
+      def toEtmp: SippLoanOutstanding.TransactionDetail =
+        SippLoanOutstanding.TransactionDetail(
+          loanRecipientName = transactionDetail.loanRecipientName,
+          dateOfLoan = transactionDetail.dateOfLoan,
+          amountOfLoan = transactionDetail.amountOfLoan,
+          loanConnectedParty =
+            if (transactionDetail.loanConnectedParty == YesNo.Yes) EtmpSippConnectedOrUnconnectedType.Connected
+            else EtmpSippConnectedOrUnconnectedType.Unconnected, //TODO change api type
+          repayDate = transactionDetail.repayDate,
+          interestRate = transactionDetail.interestRate,
+          loanSecurity = transactionDetail.loanSecurity.toEtmp,
+          capitalRepayments = transactionDetail.capitalRepayments,
+          interestPayments = transactionDetail.interestPayments,
+          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears.toEtmp,
+          outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
+        )
+    }
+  }
+
+  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
+    Reads.list[T].flatMap { xs =>
+      NonEmptyList.fromList(xs).fold[Reads[NonEmptyList[T]]](Reads.failed("The list is empty"))(Reads.pure(_))
+    },
+    Writes.list[T].contramap(_.toList)
   )
+
+  implicit val format: OFormat[OutstandingLoan] = Json.format[OutstandingLoan]
 }
