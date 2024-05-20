@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
 import play.api.libs.json._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.ConnectedOrUnconnectedType
 
 // 01 = Connected, 02 = Unconnected
 sealed trait EtmpSippConnectedOrUnconnectedType {
@@ -45,5 +46,13 @@ object EtmpSippConnectedOrUnconnectedType {
     case JsString(Connected.value) => JsSuccess(Connected)
     case JsString(Unconnected.value) => JsSuccess(Unconnected)
     case unknown => JsError(s"Unknown value for YesNo: $unknown")
+  }
+
+  implicit class TransformationOps(val etmpSippConnectedOrUnconnectedType: EtmpSippConnectedOrUnconnectedType)
+      extends AnyVal {
+    def toApi: ConnectedOrUnconnectedType = etmpSippConnectedOrUnconnectedType match {
+      case Connected => ConnectedOrUnconnectedType.Connected
+      case Unconnected => ConnectedOrUnconnectedType.Unconnected
+    }
   }
 }

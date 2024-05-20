@@ -17,6 +17,8 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
@@ -192,6 +194,29 @@ object SippLoanOutstanding {
   )
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
+
+  object TransactionDetail {
+    implicit class TransformationOps(val transactionDetail: TransactionDetail) extends AnyVal {
+      def toApi(nameDOB: NameDOB, nino: NinoType): OutstandingLoan.TransactionDetail =
+        OutstandingLoan.TransactionDetail(
+          nameDOB,
+          nino,
+          loanRecipientName = transactionDetail.loanRecipientName,
+          dateOfLoan = transactionDetail.dateOfLoan,
+          amountOfLoan = transactionDetail.amountOfLoan,
+          loanConnectedParty =
+            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) ApiYesNo.Yes
+            else ApiYesNo.No,
+          repayDate = transactionDetail.repayDate,
+          interestRate = transactionDetail.interestRate,
+          loanSecurity = transactionDetail.loanSecurity.toApi,
+          capitalRepayments = transactionDetail.capitalRepayments,
+          interestPayments = transactionDetail.interestPayments,
+          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears.toApi,
+          outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
+        )
+    }
+  }
 }
 
 case class SippUnquotedShares(
@@ -216,6 +241,18 @@ object SippUnquotedShares {
 }
 
 object EtmpMemberAndTransactions {
+  def empty(sectionStatus: SectionStatus, memberDetails: MemberDetails) = new EtmpMemberAndTransactions(
+    sectionStatus,
+    version = None,
+    memberDetails = memberDetails,
+    landConnectedParty = None,
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = None,
+    unquotedShares = None
+  )
+
   implicit val formatMemberDetails: OFormat[MemberDetails] = Json.format[MemberDetails]
   implicit val formatLandConnectedParty: OFormat[SippLandConnectedParty] = Json.format[SippLandConnectedParty]
   implicit val formatOtherAssetsConnectedParty: OFormat[SippOtherAssetsConnectedParty] =

@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import uk.gov.hmrc.http.HttpErrorFunctions
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class LandOrConnectedPropertyController @Inject()(
+class OutstandingLoansController @Inject()(
   cc: ControllerComponents,
   sippPsrSubmissionService: SippPsrSubmissionService
 )(
@@ -39,15 +39,15 @@ class LandOrConnectedPropertyController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val landOrPropertySubmission = request.body.as[LandOrConnectedPropertyRequest]
+    val outstandingLoansRequest = request.body.as[OutstandingLoansRequest]
     logger.debug(
-      message = s"Submitting LandOrConnectedProperty PSR details - Incoming payload: $landOrPropertySubmission"
+      message = s"Submitting OutstandingLoan PSR details - Incoming payload: $outstandingLoansRequest"
     )
     sippPsrSubmissionService
-      .submitLandOrConnectedProperty(landOrPropertySubmission)
+      .submitOutstandingLoans(outstandingLoansRequest)
       .map { response =>
         logger.debug(
-          message = s"Submit LandOrConnectedProperty PSR details - response: ${response.status}, body: ${response.body}"
+          message = s"Submit OutstandingLoan PSR details - response: ${response.status}, body: ${response.body}"
         )
         NoContent
       }

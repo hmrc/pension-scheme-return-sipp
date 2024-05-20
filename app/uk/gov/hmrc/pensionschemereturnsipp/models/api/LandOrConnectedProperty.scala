@@ -47,7 +47,7 @@ object LandOrConnectedProperty {
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
     disposalDetails: Option[DisposalDetails]
-  )
+  ) extends MemberKey
 
   object TransactionDetails {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]

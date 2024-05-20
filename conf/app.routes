@@ -4,3 +4,4 @@ POST        /psr/sipp              uk.gov.hmrc.pensionschemereturnsipp.controlle
 GET         /psr/sipp/:pstr        uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getSippPsr(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String] )
 
 PUT        /psr/land-or-connected-property              uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
+PUT        /psr/outstanding-loans                       uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.put

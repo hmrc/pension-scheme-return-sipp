@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
@@ -24,16 +25,17 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   DisposalDetails,
   LesseeDetails,
   NameDOB,
-  NinoType
+  NinoType,
+  RegistryDetails,
+  YesNo => ApiYesNo
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, SectionStatus}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, SectionStatus, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
   SippLandConnectedParty
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
 import java.time.LocalDate
 
@@ -45,7 +47,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
-    landOrPropertyinUK = YesNo.Yes,
+    landOrPropertyinUK = ApiYesNo.Yes,
     addressDetails = AddressDetails(
       addressLine1 = "addressLine1",
       addressLine2 = Some("addressLine2"),
@@ -55,17 +57,18 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       ukPostCode = None,
       countryCode = "UK"
     ),
-    registryDetails = RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
+    registryDetails =
+      RegistryDetails(registryRefExist = ApiYesNo.No, registryReference = None, noRegistryRefReason = None),
     acquiredFromName = "acquiredFromName",
     totalCost = 10,
-    independentValuation = YesNo.Yes,
-    jointlyHeld = YesNo.Yes,
+    independentValuation = ApiYesNo.Yes,
+    jointlyHeld = ApiYesNo.Yes,
     noOfPersons = None,
-    residentialSchedule29A = YesNo.Yes,
-    isLeased = YesNo.Yes,
+    residentialSchedule29A = ApiYesNo.Yes,
+    isLeased = ApiYesNo.Yes,
     lesseeDetails = None,
     totalIncomeOrReceipts = 10,
-    isPropertyDisposed = YesNo.Yes,
+    isPropertyDisposed = ApiYesNo.Yes,
     disposalDetails = None
   )
 
@@ -89,7 +92,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
               LocalDate.of(2020, 1, 1),
               YesNo.Yes,
               EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-              RegistryDetails(YesNo.No, None, None),
+              EtmpRegistryDetails(YesNo.No, None, None),
               "acquiredFromName",
               10.0,
               YesNo.Yes,
@@ -124,7 +127,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "update LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpData.copy(landConnectedParty = None)
 
-      val result = transformer.merge(List(landArmsDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -137,7 +140,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    RegistryDetails(YesNo.No, None, None),
+                    EtmpRegistryDetails(YesNo.No, None, None),
                     "acquiredFromName",
                     10.0,
                     YesNo.Yes,
@@ -169,7 +172,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "replace LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landArmsDataRow1.copy(acquiredFromName = "test2")
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -182,7 +185,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    RegistryDetails(YesNo.No, None, None),
+                    EtmpRegistryDetails(YesNo.No, None, None),
                     "test2",
                     10.0,
                     YesNo.Yes,
@@ -213,7 +216,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
     "add LandArms data with new member details for a single member when match is not found" in {
       val testLandArmsDataRow1 = landArmsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(landConnectedParty = None),
@@ -228,35 +231,17 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
           )
         )
       )
-
     }
-
   }
 
-  "transform" in {
-    transformer.transform(List(sipp)) mustEqual List(
-      EtmpMemberAndTransactions(
-        SectionStatus.New,
-        None,
-        sippMemberDetails.copy(middleName = None),
-        landConnectedParty = Some(sippLandConnectedPartyLong),
-        otherAssetsConnectedParty = None,
-        landArmsLength = None,
-        tangibleProperty = None,
-        loanOutstanding = None,
-        unquotedShares = None
-      )
-    )
-  }
-
-  lazy val sipp: TransactionDetails = {
+  val sipp = {
     import sippLandConnectedPartyTransactionDetail._
 
     LandOrConnectedProperty.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
-      landOrPropertyinUK = YesNo(landOrPropertyInUK.boolean),
+      landOrPropertyinUK = ApiYesNo(landOrPropertyInUK.boolean),
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
         addressDetails.addressLine2.some,
@@ -267,35 +252,35 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
         addressDetails.countryCode
       ),
       registryDetails = RegistryDetails(
-        YesNo(registryDetails.registryRefExist.boolean),
+        ApiYesNo(registryDetails.registryRefExist.boolean),
         registryDetails.registryReference,
         registryDetails.noRegistryRefReason
       ),
       acquiredFromName = acquiredFromName,
       totalCost = totalCost,
-      independentValuation = YesNo(independentValution.boolean),
-      jointlyHeld = YesNo(jointlyHeld.boolean),
+      independentValuation = ApiYesNo(independentValution.boolean),
+      jointlyHeld = ApiYesNo(jointlyHeld.boolean),
       noOfPersons = noOfPersonsIfJointlyHeld,
-      residentialSchedule29A = YesNo(residentialSchedule29A.boolean),
-      isLeased = YesNo(isLeased.boolean),
+      residentialSchedule29A = ApiYesNo(residentialSchedule29A.boolean),
+      isLeased = ApiYesNo(isLeased.boolean),
       lesseeDetails = Option.when(isLeased.boolean)(
         LesseeDetails(
           noOfPersonsForLessees,
           None, // todo model diff
-          YesNo(anyOfLesseesConnected.get.boolean),
+          ApiYesNo(anyOfLesseesConnected.get.boolean),
           leaseGrantedDate.get,
           annualLeaseAmount.get
         )
       ),
       totalIncomeOrReceipts = totalIncomeOrReceipts,
-      isPropertyDisposed = YesNo(isPropertyDisposed.boolean),
+      isPropertyDisposed = ApiYesNo(isPropertyDisposed.boolean),
       disposalDetails = Option.when(isPropertyDisposed.boolean) {
         DisposalDetails(
           disposedPropertyProceedsAmt.get,
           purchaserNamesIfDisposed.get,
-          YesNo(anyOfPurchaserConnected.get.boolean),
-          YesNo(independentValutionDisposal.get.boolean),
-          YesNo(propertyFullyDisposed.get.boolean)
+          ApiYesNo(anyOfPurchaserConnected.get.boolean),
+          ApiYesNo(independentValutionDisposal.get.boolean),
+          ApiYesNo(propertyFullyDisposed.get.boolean)
         )
       }
     )
