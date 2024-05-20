@@ -5,3 +5,4 @@ GET         /psr/sipp/:pstr        uk.gov.hmrc.pensionschemereturnsipp.controlle
 
 PUT        /psr/land-or-connected-property              uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
 PUT        /psr/outstanding-loans                       uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.put
+PUT        /psr/assets-from-connected-party             uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put
