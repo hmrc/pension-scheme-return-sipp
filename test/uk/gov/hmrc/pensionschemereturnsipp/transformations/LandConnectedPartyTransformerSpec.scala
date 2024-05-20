@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
@@ -28,12 +29,10 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   RegistryDetails,
   YesNo => ApiYesNo
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, SectionStatus, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
-  SippLandArmsLength,
   SippLandConnectedParty
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
@@ -128,7 +127,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "update LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpData.copy(landConnectedParty = None)
 
-      val result = transformer.merge(List(landArmsDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -173,7 +172,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "replace LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landArmsDataRow1.copy(acquiredFromName = "test2")
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -217,7 +216,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
     "add LandArms data with new member details for a single member when match is not found" in {
       val testLandArmsDataRow1 = landArmsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(landConnectedParty = None),
@@ -232,25 +231,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
           )
         )
       )
-
     }
-
-  }
-
-  "transform" in {
-    transformer.transform(List(sipp)) mustEqual List(
-      EtmpMemberAndTransactions(
-        SectionStatus.New,
-        None,
-        sippMemberDetails.copy(middleName = None),
-        landConnectedParty = Some(sippLandConnectedPartyLong),
-        otherAssetsConnectedParty = None,
-        landArmsLength = None,
-        tangibleProperty = None,
-        loanOutstanding = None,
-        unquotedShares = None
-      )
-    )
   }
 
   val sipp = {

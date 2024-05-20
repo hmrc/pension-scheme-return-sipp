@@ -27,13 +27,15 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, YesNo => EtmpYesNo}
 
 package object transformations {
-  def toEtmp(yesNo: ApiYesNo): EtmpYesNo = yesNo match {
-    case ApiYesNo.Yes => EtmpYesNo.Yes
-    case ApiYesNo.No => EtmpYesNo.No
+  implicit class YesNoOps(val yesNo: ApiYesNo) extends AnyVal {
+    def toEtmp: EtmpYesNo = yesNo match {
+      case ApiYesNo.Yes => EtmpYesNo.Yes
+      case ApiYesNo.No => EtmpYesNo.No
+    }
   }
 
-  def toEtmp(address: ApiAddressDetails): EtmpAddress =
-    EtmpAddress(
+  implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
+    def toEtmp = EtmpAddress(
       addressLine1 = address.addressLine1,
       addressLine2 = address.addressLine2.get, // todo check with ETMP why it's mandatory
       addressLine3 = address.addressLine3,
@@ -42,13 +44,16 @@ package object transformations {
       ukPostCode = address.ukPostCode,
       countryCode = address.countryCode
     )
+  }
 
-  def toEtmp(registry: RegistryDetails): EtmpRegistryDetails =
-    EtmpRegistryDetails(
-      registryRefExist = toEtmp(registry.registryRefExist),
-      registryReference = registry.registryReference,
-      noRegistryRefReason = registry.noRegistryRefReason
-    )
+  implicit class RegistryOps(val registry: RegistryDetails) extends AnyVal {
+    def toEtmp: EtmpRegistryDetails =
+      EtmpRegistryDetails(
+        registryRefExist = registry.registryRefExist.toEtmp,
+        registryReference = registry.registryReference,
+        noRegistryRefReason = registry.noRegistryRefReason
+      )
+  }
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =
     MemberDetails(

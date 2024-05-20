@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
@@ -123,7 +124,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     "update LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpData.copy(landArmsLength = None)
 
-      val result = transformer.merge(List(landArmsDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -168,7 +169,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     "replace LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landArmsDataRow1.copy(acquiredFromName = "test2")
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -212,7 +213,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
     "add LandArms data with new member details for a single member when match is not found" in {
       val testLandArmsDataRow1 = landArmsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(List(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(landArmsLength = None),
@@ -228,25 +229,6 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
         )
       )
 
-    }
-
-  }
-
-  "LandArmsLengthTransformerSpec" should {
-    "transform" in {
-      transformer.transform(List(sipp)) mustEqual List(
-        EtmpMemberAndTransactions(
-          SectionStatus.New,
-          None,
-          sippMemberDetails.copy(middleName = None),
-          landConnectedParty = None,
-          otherAssetsConnectedParty = None,
-          landArmsLength = Some(sippLandArmsLengthLong),
-          tangibleProperty = None,
-          loanOutstanding = None,
-          unquotedShares = None
-        )
-      )
     }
   }
 

@@ -16,99 +16,56 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
+import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandConnectedParty}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class LandConnectedPartyTransformer @Inject() {
-
   def merge(
-    landConnectedPartyData: List[LandOrConnectedProperty.TransactionDetails],
+    landConnectedPartyData: NonEmptyList[LandOrConnectedProperty.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
-  ): List[EtmpMemberAndTransactions] = {
-
-    val landConnectedDataByMember =
-      landConnectedPartyData.groupBy(k => k.nameDOB.firstName -> k.nameDOB.lastName -> k.nameDOB.dob -> k.nino.nino)
-
-    val etmpDataByMember = etmpData.groupBy(
-      k => k.memberDetails.firstName -> k.memberDetails.lastName -> k.memberDetails.dateOfBirth -> k.memberDetails.nino
-    )
-
-    val updatedEtmpDataByMember = etmpDataByMember.flatMap {
-      case (memberKey, etmpTxsByMember) =>
-        val landConnectedDataToUpdate = landConnectedDataByMember
-          .get(memberKey)
-          .map { landArmsTxs =>
-            landArmsTxs.map(transformSingle)
-          }
-
-        etmpTxsByMember.map(
-          etmpTx =>
-            etmpTx.copy(
-              landConnectedParty = landConnectedDataToUpdate.map(
-                landArmsTxs => SippLandConnectedParty(landArmsTxs.length, Some(landArmsTxs))
-              )
+  ): List[EtmpMemberAndTransactions] =
+    EtmpMemberAndTransactionsUpdater
+      .merge[LandOrConnectedProperty.TransactionDetails, SippLandConnectedParty.TransactionDetail](
+        landConnectedPartyData,
+        etmpData,
+        transformSingle,
+        (maybeTransactions, etmpMemberAndTransactions) =>
+          etmpMemberAndTransactions.copy(
+            landConnectedParty = maybeTransactions.map(
+              transactions => SippLandConnectedParty(transactions.length, Some(transactions.toList))
             )
-        )
-    }.toList
-
-    val newMembers = landConnectedDataByMember.keySet.diff(etmpDataByMember.keySet)
-
-    val newEtmpDataByMember =
-      newMembers.toList.flatMap(memberKey => landConnectedDataByMember.get(memberKey)).flatMap(transform)
-
-    updatedEtmpDataByMember ++ newEtmpDataByMember
-  }
-
-  def transform(list: List[LandOrConnectedProperty.TransactionDetails]): List[EtmpMemberAndTransactions] =
-    list
-      .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
-      .map {
-        case ((nameDoB, nino), transactions) =>
-          val landConnected = SippLandConnectedParty(transactions.length, Some(transactions).filter(_.nonEmpty))
-          EtmpMemberAndTransactions(
-            status = SectionStatus.New,
-            version = None,
-            memberDetails = toMemberDetails(nameDoB, nino),
-            landConnectedParty = Some(landConnected),
-            otherAssetsConnectedParty = None,
-            landArmsLength = None,
-            tangibleProperty = None,
-            loanOutstanding = None,
-            unquotedShares = None
           )
-      }
-      .toList
+      )
 
   private def transformSingle(
     property: LandOrConnectedProperty.TransactionDetails
-  ): etmp.SippLandConnectedParty.TransactionDetail =
+  ): SippLandConnectedParty.TransactionDetail =
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
-      landOrPropertyInUK = toEtmp(property.landOrPropertyinUK),
-      addressDetails = toEtmp(property.addressDetails),
-      registryDetails = toEtmp(property.registryDetails),
+      landOrPropertyInUK = property.landOrPropertyinUK.toEtmp,
+      addressDetails = property.addressDetails.toEtmp,
+      registryDetails = property.registryDetails.toEtmp,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
-      independentValution = toEtmp(property.independentValuation),
-      jointlyHeld = toEtmp(property.jointlyHeld),
+      independentValution = property.independentValuation.toEtmp,
+      jointlyHeld = property.jointlyHeld.toEtmp,
       noOfPersonsIfJointlyHeld = property.noOfPersons,
-      residentialSchedule29A = toEtmp(property.residentialSchedule29A),
-      isLeased = toEtmp(property.isLeased),
+      residentialSchedule29A = property.residentialSchedule29A.toEtmp,
+      isLeased = property.isLeased.toEtmp,
       noOfPersonsForLessees = property.lesseeDetails.flatMap(_.countOfLessees),
-      anyOfLesseesConnected = property.lesseeDetails.map(l => toEtmp(l.anyOfLesseesConnected)),
+      anyOfLesseesConnected = property.lesseeDetails.map(l => l.anyOfLesseesConnected.toEtmp),
       leaseGrantedDate = property.lesseeDetails.map(_.leaseGrantedDate),
       annualLeaseAmount = property.lesseeDetails.map(_.annualLeaseAmount),
       totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = toEtmp(property.isPropertyDisposed),
+      isPropertyDisposed = property.isPropertyDisposed.toEtmp,
       disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
       purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(d => toEtmp(d.anyPurchaserConnected)),
-      independentValutionDisposal = property.disposalDetails.map(d => toEtmp(d.independentValuationDisposal)),
-      propertyFullyDisposed = property.disposalDetails.map(d => toEtmp(d.propertyFullyDisposed))
+      anyOfPurchaserConnected = property.disposalDetails.map(d => d.anyPurchaserConnected.toEtmp),
+      independentValutionDisposal = property.disposalDetails.map(d => d.independentValuationDisposal.toEtmp),
+      propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed.toEtmp)
     )
 }
