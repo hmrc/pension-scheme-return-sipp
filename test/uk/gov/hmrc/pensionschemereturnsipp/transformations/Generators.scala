@@ -18,13 +18,15 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import org.scalacheck.Gen
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
-import java.time.{Instant, LocalDate, ZoneId}
+import java.time.LocalDate
 import scala.util.Random
 
 object Generators {
-  val localDate = Gen.chooseNum(LocalDate.MIN.toEpochDay, LocalDate.MAX.toEpochDay).map(LocalDate.ofEpochDay)
+  val localDate: Gen[LocalDate] =
+    Gen.chooseNum(LocalDate.MIN.toEpochDay, LocalDate.MAX.toEpochDay).map(LocalDate.ofEpochDay)
 
   val yesNo: Gen[YesNo] = Gen.oneOf(YesNo.Yes, YesNo.No)
   val ninoType: Gen[NinoType] = Gen.option(Gen.asciiPrintableStr).flatMap {

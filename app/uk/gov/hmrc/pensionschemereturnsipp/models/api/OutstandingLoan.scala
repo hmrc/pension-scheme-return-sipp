@@ -18,7 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLoanOutstanding
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType
 
@@ -60,10 +61,10 @@ object OutstandingLoan {
             else EtmpSippConnectedOrUnconnectedType.Unconnected, //TODO change api type
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,
-          loanSecurity = transactionDetail.loanSecurity.toEtmp,
+          loanSecurity = transactionDetail.loanSecurity,
           capitalRepayments = transactionDetail.capitalRepayments,
           interestPayments = transactionDetail.interestPayments,
-          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears.toEtmp,
+          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears,
           outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
         )
     }

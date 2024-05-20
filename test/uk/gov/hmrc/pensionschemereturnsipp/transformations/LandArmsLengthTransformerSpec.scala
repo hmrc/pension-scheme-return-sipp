@@ -20,17 +20,17 @@ import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   AddressDetails,
   DisposalDetails,
   LesseeDetails,
   NameDOB,
-  NinoType,
-  RegistryDetails,
-  YesNo => ApiYesNo
+  NinoType
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpRegistryDetails, SectionStatus, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, SectionStatus}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -44,7 +44,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
-    landOrPropertyinUK = ApiYesNo.Yes,
+    landOrPropertyinUK = YesNo.Yes,
     addressDetails = AddressDetails(
       addressLine1 = "addressLine1",
       addressLine2 = Some("addressLine2"),
@@ -54,18 +54,17 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       ukPostCode = None,
       countryCode = "UK"
     ),
-    registryDetails =
-      RegistryDetails(registryRefExist = ApiYesNo.No, registryReference = None, noRegistryRefReason = None),
+    registryDetails = RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
     acquiredFromName = "acquiredFromName",
     totalCost = 10,
-    independentValuation = ApiYesNo.Yes,
-    jointlyHeld = ApiYesNo.Yes,
+    independentValuation = YesNo.Yes,
+    jointlyHeld = YesNo.Yes,
     noOfPersons = None,
-    residentialSchedule29A = ApiYesNo.Yes,
-    isLeased = ApiYesNo.Yes,
+    residentialSchedule29A = YesNo.Yes,
+    isLeased = YesNo.Yes,
     lesseeDetails = None,
     totalIncomeOrReceipts = 10,
-    isPropertyDisposed = ApiYesNo.Yes,
+    isPropertyDisposed = YesNo.Yes,
     disposalDetails = None
   )
 
@@ -91,7 +90,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
               LocalDate.of(2020, 1, 1),
               YesNo.Yes,
               EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-              EtmpRegistryDetails(YesNo.No, None, None),
+              RegistryDetails(YesNo.No, None, None),
               "acquiredFromName",
               10.0,
               YesNo.Yes,
@@ -137,7 +136,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    EtmpRegistryDetails(YesNo.No, None, None),
+                    RegistryDetails(YesNo.No, None, None),
                     "acquiredFromName",
                     10.0,
                     YesNo.Yes,
@@ -182,7 +181,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
                     EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    EtmpRegistryDetails(YesNo.No, None, None),
+                    RegistryDetails(YesNo.No, None, None),
                     "test2",
                     10.0,
                     YesNo.Yes,
@@ -232,13 +231,13 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     }
   }
 
-  val sipp = {
+  lazy val sipp = {
     import sippLandArmsLengthTransactionDetail._
     LandOrConnectedProperty.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
-      landOrPropertyinUK = ApiYesNo(landOrPropertyinUK.boolean),
+      landOrPropertyinUK = landOrPropertyinUK,
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
         addressDetails.addressLine2.some,
@@ -249,35 +248,35 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
         addressDetails.countryCode
       ),
       registryDetails = RegistryDetails(
-        ApiYesNo(registryDetails.registryRefExist.boolean),
+        registryDetails.registryRefExist,
         registryDetails.registryReference,
         registryDetails.noRegistryRefReason
       ),
       acquiredFromName = acquiredFromName,
       totalCost = totalCost,
-      independentValuation = ApiYesNo(independentValution.boolean),
-      jointlyHeld = ApiYesNo(jointlyHeld.boolean),
+      independentValuation = independentValution,
+      jointlyHeld = jointlyHeld,
       noOfPersons = noOfPersonsIfJointlyHeld,
-      residentialSchedule29A = ApiYesNo(residentialSchedule29A.boolean),
-      isLeased = ApiYesNo(isLeased.boolean),
+      residentialSchedule29A = residentialSchedule29A,
+      isLeased = isLeased,
       lesseeDetails = Option.when(isLeased.boolean)(
         LesseeDetails(
           noOfPersonsForLessees,
           None, // todo model diff
-          ApiYesNo(anyOfLesseesConnected.get.boolean),
+          anyOfLesseesConnected.get,
           lesseesGrantedAt.get,
           annualLeaseAmount.get
         )
       ),
       totalIncomeOrReceipts = totalIncomeOrReceipts,
-      isPropertyDisposed = ApiYesNo(isPropertyDisposed.boolean),
+      isPropertyDisposed = isPropertyDisposed,
       disposalDetails = Option.when(isPropertyDisposed.boolean) {
         DisposalDetails(
           disposedPropertyProceedsAmt.get,
           purchaserNamesIfDisposed.get,
-          ApiYesNo(anyOfPurchaserConnected.get.boolean),
-          ApiYesNo(independentValutionDisposal.get.boolean),
-          ApiYesNo(propertyFullyDisposed.get.boolean)
+          anyOfPurchaserConnected.get,
+          independentValutionDisposal.get,
+          propertyFullyDisposed.get
         )
       }
     )

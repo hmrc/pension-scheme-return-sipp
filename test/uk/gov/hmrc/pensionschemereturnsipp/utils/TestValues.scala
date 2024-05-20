@@ -36,17 +36,16 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandConnectedParty.TransactionDetail
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
   EtmpAddress,
-  EtmpRegistryDetails,
   EtmpSippSharesCompanyDetail,
   EtmpSippSharesDisposalDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 
 import java.time.LocalDate
 
@@ -145,7 +144,7 @@ trait TestValues {
                         Some("LH3 4DG"),
                         "GB"
                       ),
-                      EtmpRegistryDetails(No, Some("Lost"), None),
+                      RegistryDetails(No, Some("Lost"), None),
                       "SUN Ltd",
                       1234.99,
                       No,
@@ -214,7 +213,7 @@ trait TestValues {
                         Some("BN12 4XL"),
                         "GB"
                       ),
-                      EtmpRegistryDetails(Yes, Some("1234XDF"), None),
+                      RegistryDetails(Yes, Some("1234XDF"), None),
                       "Willco",
                       999999.99,
                       No,

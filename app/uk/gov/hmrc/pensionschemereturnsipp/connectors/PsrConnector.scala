@@ -19,10 +19,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, _}
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
@@ -34,25 +33,19 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
     with HttpResponseHelper
     with Logging {
 
-  private val maxLengthCorrelationId = 36
-
   def submitSippPsr(
     pstr: String,
-    data: JsValue
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
+    request: SippPsrSubmissionEtmpRequest
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
     val url: String = config.submitSippPsrUrl.format(pstr)
-    logger.info(s"Submit SIPP PSR called URL: $url with payload: ${Json.stringify(data)}")
-
-    implicit val hc: HeaderCarrier = headerCarrier.withExtraHeaders(headers = integrationFrameworkHeader: _*)
+    logger.info(s"Submit SIPP PSR called URL: $url with payload: $request")
 
     http
-      .POST[JsValue, HttpResponse](url, data)(implicitly, implicitly, hc, implicitly)
-      .map { response =>
-        response.status match {
-          case OK => response
-          case _ => handleErrorResponse("POST", url)(response)
-        }
+      .POST(url, request, integrationFrameworkHeaders)
+      .map {
+        case response if response.status == OK => response
+        case response => handleErrorResponse("POST", url)(response)
       }
   }
 
@@ -69,9 +62,7 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
 
     logger.info(logMessage)
 
-    implicit val hc: HeaderCarrier = headerCarrier.withExtraHeaders(headers = integrationFrameworkHeader: _*)
-
-    http.GET[HttpResponse](url)(implicitly, hc, implicitly).map { response =>
+    http.GET[HttpResponse](url, headers = integrationFrameworkHeaders).map { response =>
       response.status match {
         case OK =>
           Some(response.json.as[SippPsrSubmissionEtmpResponse])
@@ -96,9 +87,9 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
       case _ => throw new BadRequestException("Missing url parameters")
     }
 
-  private def getCorrelationId: String = randomUUID.toString.slice(0, maxLengthCorrelationId)
+  private def getCorrelationId: String = randomUUID.toString
 
-  private def integrationFrameworkHeader: Seq[(String, String)] =
+  private def integrationFrameworkHeaders: Seq[(String, String)] =
     Seq(
       "Environment" -> config.integrationFrameworkEnvironment,
       "Authorization" -> config.integrationFrameworkAuthorization,

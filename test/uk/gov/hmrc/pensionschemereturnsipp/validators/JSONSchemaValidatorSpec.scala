@@ -18,10 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.validators
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.Json
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{SippEtmpDummyTestValues, SippEtmpTestValues}
-
-import java.io.{BufferedWriter, FileWriter}
 
 class JSONSchemaValidatorSpec
     extends AnyWordSpec

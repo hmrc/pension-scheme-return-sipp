@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{YesNo => ApiYesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
 import java.time.LocalDate
 
@@ -60,7 +60,7 @@ object SippLandConnectedParty {
     acquisitionDate: LocalDate,
     landOrPropertyInUK: YesNo,
     addressDetails: EtmpAddress,
-    registryDetails: EtmpRegistryDetails,
+    registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo, // Previous api has that Valution typo!
@@ -123,7 +123,7 @@ object SippLandArmsLength {
     acquisitionDate: LocalDate,
     landOrPropertyinUK: YesNo,
     addressDetails: EtmpAddress,
-    registryDetails: EtmpRegistryDetails,
+    registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo,
@@ -205,14 +205,14 @@ object SippLoanOutstanding {
           dateOfLoan = transactionDetail.dateOfLoan,
           amountOfLoan = transactionDetail.amountOfLoan,
           loanConnectedParty =
-            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) ApiYesNo.Yes
-            else ApiYesNo.No,
+            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) YesNo.Yes
+            else YesNo.No,
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,
-          loanSecurity = transactionDetail.loanSecurity.toApi,
+          loanSecurity = transactionDetail.loanSecurity,
           capitalRepayments = transactionDetail.capitalRepayments,
           interestPayments = transactionDetail.interestPayments,
-          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears.toApi,
+          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears,
           outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
         )
     }

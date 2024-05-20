@@ -25,7 +25,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, OutstandingLoansRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{LandArmsLengthTransformer, LandConnectedPartyTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandConnectedPartyTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -84,17 +84,16 @@ class SippPsrSubmissionService @Inject()(
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
-    val payloadAsJson = Json.toJson(sippPsrSubmissionToEtmp.transform(sippPsrSubmission))
-    val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, payloadAsJson)
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val request = sippPsrSubmissionToEtmp.transform(sippPsrSubmission)
+    val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, Json.toJson(request))
     if (validationResult.hasErrors) {
       throw PensionSchemeReturnValidationFailureException(
         s"Invalid payload when submitSippPsr :-\n${validationResult.toString}"
       )
     } else {
-      psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, payloadAsJson).recover {
-        case _: BadRequestException =>
-          throw new ExpectationFailedException("Nothing to submit")
+      psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, request).recover {
+        case _: BadRequestException => throw new ExpectationFailedException("Nothing to submit")
       }
     }
   }
@@ -104,11 +103,7 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
-    ec: ExecutionContext,
-    request: RequestHeader
-  ): Future[Option[SippPsrSubmission]] =
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[SippPsrSubmission]] =
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.map(sippPsrFromEtmp.transform))
