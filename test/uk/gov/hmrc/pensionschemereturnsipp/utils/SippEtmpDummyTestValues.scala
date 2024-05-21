@@ -40,7 +40,7 @@ trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 //    transactionDetails = Some(List.fill(2)(sippLandConnectedPartyTransactionDetail))
 //  )
 
-  private val sippOtherAssetsConnectedPartyLong = SippOtherAssetsConnectedParty(
+  protected val sippOtherAssetsConnectedPartyLong = SippOtherAssetsConnectedParty(
     noOfTransactions = 1,
     transactionDetails = Some(List.fill(1)(sippOtherAssetsConnectedPartyTransactionDetail))
   )

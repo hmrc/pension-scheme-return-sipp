@@ -16,9 +16,14 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, AddressDetails => ApiAddressDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
+  NameDOB,
+  NinoType,
+  SharesCompanyDetails,
+  AddressDetails => ApiAddressDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesCompanyDetail}
 
 package object transformations {
   implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
@@ -32,6 +37,15 @@ package object transformations {
       countryCode = address.countryCode
     )
   }
+
+  def toEtmp(companyDetails: SharesCompanyDetails): EtmpSippSharesCompanyDetail =
+    EtmpSippSharesCompanyDetail(
+      companySharesName = companyDetails.companySharesName,
+      companySharesCRN = companyDetails.companySharesCRN,
+      reasonNoCRN = companyDetails.reasonNoCRN,
+      sharesClass = companyDetails.sharesClass,
+      noOfShares = companyDetails.noOfShares
+    )
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =
     MemberDetails(

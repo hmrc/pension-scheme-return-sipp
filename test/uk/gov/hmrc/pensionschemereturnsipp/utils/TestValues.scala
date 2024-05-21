@@ -188,7 +188,7 @@ trait TestValues {
                       None,
                       None,
                       None,
-                      Some(No),
+                      No,
                       Some(0),
                       None
                     )
