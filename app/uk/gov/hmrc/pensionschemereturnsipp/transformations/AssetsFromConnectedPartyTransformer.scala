@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedParty
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpSippSharesCompanyDetail, SectionStatus}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
 
 import javax.inject.{Inject, Singleton}

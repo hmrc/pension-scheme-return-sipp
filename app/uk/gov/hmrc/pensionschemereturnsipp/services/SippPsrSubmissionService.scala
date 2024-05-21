@@ -22,9 +22,12 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, OutstandingLoansRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, LandOrConnectedPropertyRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AssetsFromConnectedPartyRequest,
+  LandOrConnectedPropertyRequest,
+  OutstandingLoansRequest
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
