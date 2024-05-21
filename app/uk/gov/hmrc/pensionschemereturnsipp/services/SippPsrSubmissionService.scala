@@ -24,8 +24,12 @@ import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, Header
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, OutstandingLoansRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, LandOrConnectedPropertyRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.LandConnectedPartyTransformer
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
+  AssetsFromConnectedPartyTransformer,
+  LandConnectedPartyTransformer
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -38,7 +42,8 @@ class SippPsrSubmissionService @Inject()(
   jsonPayloadSchemaValidator: JSONSchemaValidator,
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
   sippPsrFromEtmp: SippPsrFromEtmp,
-  landConnectedPartyTransformer: LandConnectedPartyTransformer
+  landConnectedPartyTransformer: LandConnectedPartyTransformer,
+  assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -87,6 +92,35 @@ class SippPsrSubmissionService @Inject()(
   //TODO implement along with above
   def submitLandArmsLength(request: LandOrConnectedPropertyRequest): Future[Option[List[EtmpMemberAndTransactions]]] =
     Future.successful(None)
+
+  def submitAssetsFromConnectedParty(
+    assetsFromConnectedParty: AssetsFromConnectedPartyRequest
+  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+
+    def constructMembersAndTransactions(
+      assetsFromConnectedParty: AssetsFromConnectedPartyRequest
+    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext) =
+      psrConnector
+        .getSippPsr(assetsFromConnectedParty.reportDetails.pstr, None, None, None)
+        .map {
+          case Some(existingEtmpData) =>
+            for {
+              assetsFromConnectedPartyTxs <- assetsFromConnectedParty.transactions.transactionDetails
+              etmpTxs <- existingEtmpData.memberAndTransactions
+            } yield {
+              assetsFromConnectedPartyTransformer.merge(assetsFromConnectedPartyTxs.toList, etmpTxs)
+            }
+          case None =>
+            assetsFromConnectedParty.transactions.transactionDetails
+              .map(details => assetsFromConnectedPartyTransformer.transform(details.toList))
+        }
+
+    constructMembersAndTransactions(assetsFromConnectedParty).flatMap(
+      maybeAssetsFromConnectedPartyMembersAndTxs =>
+        psrConnector
+          .submitSippPsr(assetsFromConnectedParty.reportDetails.pstr, ???)
+    )
+  }
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission

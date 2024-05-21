@@ -105,7 +105,7 @@ object SippOtherAssetsConnectedParty {
     purchaserNamesIfDisposed: Option[String],
     anyOfPurchaserConnected: Option[YesNo],
     independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
-    disposalOfShares: Option[YesNo],
+    disposalOfShares: YesNo,
     noOfSharesHeld: Option[Int],
     propertyFullyDisposed: Option[YesNo]
   )

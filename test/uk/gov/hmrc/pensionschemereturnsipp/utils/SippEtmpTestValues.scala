@@ -142,7 +142,7 @@ trait SippEtmpTestValues {
       disposedPropertyProceedsAmt = Some(999999.99),
       purchaserNamesIfDisposed = Some("Name1 Surname1, Name2 Surname2, Name3 Surname3"),
       anyOfPurchaserConnected = Some(No),
-      disposalOfShares = Some(No),
+      disposalOfShares = No,
       independentValutionDisposal = Some(No),
       noOfSharesHeld = Some(2),
       propertyFullyDisposed = Some(Yes)
