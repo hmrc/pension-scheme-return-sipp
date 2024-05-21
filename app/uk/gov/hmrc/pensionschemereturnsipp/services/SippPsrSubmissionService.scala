@@ -22,9 +22,12 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, OutstandingLoansRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, LandOrConnectedPropertyRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AssetsFromConnectedPartyRequest,
+  LandOrConnectedPropertyRequest,
+  OutstandingLoansRequest
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -44,10 +47,12 @@ class SippPsrSubmissionService @Inject()(
   sippPsrFromEtmp: SippPsrFromEtmp,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer
-) extends Logging {
+)(implicit ec: ExecutionContext)
+    extends Logging {
+
   def submitLandOrConnectedProperty(
     landOrConnectedProperty: LandOrConnectedPropertyRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
+  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] = {
 
     def constructMembersAndTransactions(
       landOrConnectedProperty: LandOrConnectedPropertyRequest
@@ -78,7 +83,7 @@ class SippPsrSubmissionService @Inject()(
   //TODO implement along with above
   def submitOutstandingLoans(
     outstandingLoansRequest: OutstandingLoansRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] =
+  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] =
     Future.successful(
       HttpResponse.apply(
         status = 201,
@@ -86,6 +91,10 @@ class SippPsrSubmissionService @Inject()(
         headers = Map.empty
       )
     )
+
+  //TODO implement along with above
+  def submitLandArmsLength(request: LandOrConnectedPropertyRequest): Future[Option[List[EtmpMemberAndTransactions]]] =
+    Future.successful(None)
 
   def submitAssetsFromConnectedParty(
     assetsFromConnectedParty: AssetsFromConnectedPartyRequest

@@ -19,9 +19,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectedOrUnconnectedType, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLoanOutstanding
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType
 
 import java.time.LocalDate
 
@@ -57,8 +56,8 @@ object OutstandingLoan {
           dateOfLoan = transactionDetail.dateOfLoan,
           amountOfLoan = transactionDetail.amountOfLoan,
           loanConnectedParty =
-            if (transactionDetail.loanConnectedParty == YesNo.Yes) EtmpSippConnectedOrUnconnectedType.Connected
-            else EtmpSippConnectedOrUnconnectedType.Unconnected, //TODO change api type
+            if (transactionDetail.loanConnectedParty == YesNo.Yes) ConnectedOrUnconnectedType.Connected
+            else ConnectedOrUnconnectedType.Unconnected, //TODO change api type
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,
           loanSecurity = transactionDetail.loanSecurity,

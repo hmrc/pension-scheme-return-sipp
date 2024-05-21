@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectedOrUnconnectedType, RegistryDetails, YesNo}
 
 import java.time.LocalDate
 
@@ -183,7 +183,7 @@ object SippLoanOutstanding {
     loanRecipientName: String,
     dateOfLoan: LocalDate,
     amountOfLoan: Double,
-    loanConnectedParty: EtmpSippConnectedOrUnconnectedType,
+    loanConnectedParty: ConnectedOrUnconnectedType,
     repayDate: LocalDate,
     interestRate: Double,
     loanSecurity: YesNo,
@@ -204,9 +204,7 @@ object SippLoanOutstanding {
           loanRecipientName = transactionDetail.loanRecipientName,
           dateOfLoan = transactionDetail.dateOfLoan,
           amountOfLoan = transactionDetail.amountOfLoan,
-          loanConnectedParty =
-            if (transactionDetail.loanConnectedParty == EtmpSippConnectedOrUnconnectedType.Connected) YesNo.Yes
-            else YesNo.No,
+          loanConnectedParty = YesNo(transactionDetail.loanConnectedParty == ConnectedOrUnconnectedType.Connected),
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,
           loanSecurity = transactionDetail.loanSecurity,
