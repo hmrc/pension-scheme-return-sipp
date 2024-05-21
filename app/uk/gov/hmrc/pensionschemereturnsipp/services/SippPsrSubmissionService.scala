@@ -39,10 +39,12 @@ class SippPsrSubmissionService @Inject()(
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
   sippPsrFromEtmp: SippPsrFromEtmp,
   landConnectedPartyTransformer: LandConnectedPartyTransformer
-) extends Logging {
+)(implicit ec: ExecutionContext)
+    extends Logging {
+
   def submitLandOrConnectedProperty(
     landOrConnectedProperty: LandOrConnectedPropertyRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] = {
+  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] = {
 
     def constructMembersAndTransactions(
       landOrConnectedProperty: LandOrConnectedPropertyRequest
@@ -73,7 +75,7 @@ class SippPsrSubmissionService @Inject()(
   //TODO implement along with above
   def submitOutstandingLoans(
     outstandingLoansRequest: OutstandingLoansRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext, request: RequestHeader): Future[HttpResponse] =
+  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] =
     Future.successful(
       HttpResponse.apply(
         status = 201,
@@ -81,6 +83,10 @@ class SippPsrSubmissionService @Inject()(
         headers = Map.empty
       )
     )
+
+  //TODO implement along with above
+  def submitLandArmsLength(request: LandOrConnectedPropertyRequest): Future[Option[List[EtmpMemberAndTransactions]]] =
+    Future.successful(None)
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission

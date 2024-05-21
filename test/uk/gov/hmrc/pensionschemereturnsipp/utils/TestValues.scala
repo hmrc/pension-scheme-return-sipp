@@ -37,7 +37,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
   EtmpAddress,

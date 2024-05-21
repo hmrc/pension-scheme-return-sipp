@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
+import play.api.libs.json.Reads.StringReads
 import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
 
 sealed abstract class ConnectedOrUnconnectedType(val value: String, val definition: String)
 
 object ConnectedOrUnconnectedType {
-  case object Connected extends ConnectedOrUnconnectedType("01", "CONNECTED")
-  case object Unconnected extends ConnectedOrUnconnectedType("02", "UNCONNECTED")
-
-  def apply(definition: String): ConnectedOrUnconnectedType = definition match {
-    case Connected.definition => Connected
-    case Unconnected.definition => Unconnected
-    case other =>
-      throw new RuntimeException(
-        s"Expected either ${Connected.definition} or ${Unconnected.definition} for ConnectedOrUnconnectedType, but got: $other"
-      )
-  }
+  case object Connected extends ConnectedOrUnconnectedType("01", "Connected")
+  case object Unconnected extends ConnectedOrUnconnectedType("02", "Unconnected")
 
   implicit val writes: Writes[ConnectedOrUnconnectedType] = invOrOrgType => JsString(invOrOrgType.value)
-  implicit val reads: Reads[ConnectedOrUnconnectedType] = Reads {
-    case JsString(Connected.value) => JsSuccess(Connected)
-    case JsString(Unconnected.value) => JsSuccess(Unconnected)
-    case unknown => JsError(s"Unknown value for ConnectedOrUnconnectedType: $unknown")
-  }
+  implicit val reads: Reads[ConnectedOrUnconnectedType] =
+    StringReads.flatMapResult {
+      case Connected.value => JsSuccess(Connected)
+      case Unconnected.value => JsSuccess(Unconnected)
+      case other => JsError(s"Unknown value for ConnectedOrUnconnectedType: $other")
+    }
+
 }
