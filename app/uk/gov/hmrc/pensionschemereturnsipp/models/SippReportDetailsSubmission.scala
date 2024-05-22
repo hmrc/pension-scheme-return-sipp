@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 import java.time.LocalDate
 
@@ -24,7 +25,7 @@ case class SippReportDetailsSubmission(
   pstr: String,
   periodStart: LocalDate,
   periodEnd: LocalDate,
-  memberTransactions: String
+  memberTransactions: YesNo
 )
 
 object SippReportDetailsSubmission {

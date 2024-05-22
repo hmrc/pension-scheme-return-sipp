@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
@@ -64,7 +64,7 @@ trait SippEtmpTestValues {
     status = Compiled,
     periodStart = sampleDate,
     periodEnd = sampleDate,
-    memberTransactions = "Yes",
+    memberTransactions = YesNo.Yes,
     schemeName = None,
     psrVersion = None
   )

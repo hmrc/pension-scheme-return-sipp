@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
@@ -52,12 +52,6 @@ object LandOrConnectedProperty {
   object TransactionDetails {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
-  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
-    Reads.list[T].flatMap { xs =>
-      NonEmptyList.fromList(xs).fold[Reads[NonEmptyList[T]]](Reads.failed("The list is empty"))(Reads.pure(_))
-    },
-    Writes.list[T].contramap(_.toList)
-  )
 
   implicit val format: OFormat[LandOrConnectedProperty] = Json.format[LandOrConnectedProperty]
 }

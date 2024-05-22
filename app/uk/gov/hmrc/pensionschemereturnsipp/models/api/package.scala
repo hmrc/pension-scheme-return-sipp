@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import cats.data.NonEmptyList
+import play.api.libs.json.{Format, JsError, JsSuccess, Reads, Writes}
 
-import java.time.LocalDate
-
-case class EtmpSippReportDetails(
-  pstr: Option[String],
-  status: EtmpPsrStatus,
-  periodStart: LocalDate,
-  periodEnd: LocalDate,
-  memberTransactions: YesNo,
-  schemeName: Option[String],
-  psrVersion: Option[String]
-)
-
-object EtmpSippReportDetails {
-  implicit val format: OFormat[EtmpSippReportDetails] = Json.format[EtmpSippReportDetails]
+package object api {
+  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
+    Reads.list[T].flatMapResult {
+      case Nil => JsError("The list is empty")
+      case head :: tail => JsSuccess(NonEmptyList(head, tail))
+    },
+    Writes.list[T].contramap(_.toList)
+  )
 }
