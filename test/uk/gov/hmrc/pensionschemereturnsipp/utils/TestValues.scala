@@ -19,7 +19,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  Compiled,
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
@@ -46,6 +45,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 
 import java.time.LocalDate
 

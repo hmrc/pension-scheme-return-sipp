@@ -16,34 +16,13 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
-import play.api.libs.json._
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-// Cost Value = Cost, Market Value = Market
-sealed trait EtmpSippCostOrMarketType {
-  val value: String
-  val definition: String
-}
+sealed abstract class EtmpSippCostOrMarketType(override val entryName: String) extends EnumEntry
 
-object EtmpSippCostOrMarketType {
-  case object Market extends EtmpSippCostOrMarketType {
-    val value = "Market Value"
-    val definition = "Market"
-  }
-  case object Cost extends EtmpSippCostOrMarketType {
-    val value = "Cost Value"
-    val definition = "Cost"
-  }
+object EtmpSippCostOrMarketType extends Enum[EtmpSippCostOrMarketType] with PlayJsonEnum[EtmpSippCostOrMarketType] {
+  case object Market extends EtmpSippCostOrMarketType("Market Value")
+  case object Cost extends EtmpSippCostOrMarketType("Cost Value")
 
-  def apply(definition: String): EtmpSippCostOrMarketType = definition match {
-    case Market.definition => Market
-    case Cost.definition => Cost
-    case _ => throw new RuntimeException("Couldn't match the type for EtmpSippCostOrMarketType!")
-  }
-
-  implicit val writes: Writes[EtmpSippCostOrMarketType] = invOrOrgType => JsString(invOrOrgType.value)
-  implicit val reads: Reads[EtmpSippCostOrMarketType] = Reads {
-    case JsString(Market.value) => JsSuccess(Market)
-    case JsString(Cost.value) => JsSuccess(Cost)
-    case unknown => JsError(s"Unknown value for YesNo: $unknown")
-  }
+  override def values = findValues
 }

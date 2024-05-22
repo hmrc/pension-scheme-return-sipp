@@ -16,20 +16,17 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed abstract class YesNo(val value: String, val boolean: Boolean)
-object YesNo {
-  case object Yes extends YesNo("Yes", true)
-  case object No extends YesNo("No", false)
+sealed trait YesNo extends EnumEntry {
+  def boolean: Boolean = this == YesNo.Yes
+}
+
+object YesNo extends Enum[YesNo] with PlayJsonEnum[YesNo] {
+  case object Yes extends YesNo
+  case object No extends YesNo
 
   def apply(yes: Boolean): YesNo = if (yes) Yes else No
 
-  implicit val writes: Writes[YesNo] = yesNo => JsString(yesNo.value)
-
-  implicit val reads: Reads[YesNo] = Reads {
-    case JsString(Yes.value) => JsSuccess(Yes)
-    case JsString(No.value) => JsSuccess(No)
-    case unknown => JsError(s"Unknown value for YesNo: $unknown")
-  }
+  val values = findValues
 }

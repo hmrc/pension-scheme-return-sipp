@@ -18,7 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.pensionschemereturnsipp.models.SippReportDetailsSubmission
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{Compiled, EtmpSippReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippReportDetails
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.Transformer
 
 @Singleton()
