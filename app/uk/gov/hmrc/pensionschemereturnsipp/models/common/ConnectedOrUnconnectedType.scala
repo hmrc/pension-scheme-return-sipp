@@ -16,21 +16,16 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import play.api.libs.json.Reads.StringReads
-import play.api.libs.json.{JsError, JsString, JsSuccess, Reads, Writes}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed abstract class ConnectedOrUnconnectedType(val value: String, val definition: String)
+sealed abstract class ConnectedOrUnconnectedType(override val entryName: String) extends EnumEntry
 
-object ConnectedOrUnconnectedType {
-  case object Connected extends ConnectedOrUnconnectedType("01", "Connected")
-  case object Unconnected extends ConnectedOrUnconnectedType("02", "Unconnected")
+object ConnectedOrUnconnectedType
+    extends Enum[ConnectedOrUnconnectedType]
+    with PlayJsonEnum[ConnectedOrUnconnectedType] {
 
-  implicit val writes: Writes[ConnectedOrUnconnectedType] = invOrOrgType => JsString(invOrOrgType.value)
-  implicit val reads: Reads[ConnectedOrUnconnectedType] =
-    StringReads.flatMapResult {
-      case Connected.value => JsSuccess(Connected)
-      case Unconnected.value => JsSuccess(Unconnected)
-      case other => JsError(s"Unknown value for ConnectedOrUnconnectedType: $other")
-    }
+  case object Connected extends ConnectedOrUnconnectedType("01")
+  case object Unconnected extends ConnectedOrUnconnectedType("02")
 
+  val values = findValues
 }

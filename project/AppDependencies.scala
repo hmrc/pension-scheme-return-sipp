@@ -1,4 +1,3 @@
-import play.core.PlayVersion
 import sbt.*
 
 object AppDependencies {
@@ -11,7 +10,8 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"             %% "hmrc-mongo-play-30"         % hmrcMongoVersion,
     "org.typelevel"                 %% "cats-core"                  % "2.10.0",
     "com.networknt"                 % "json-schema-validator"       % "1.4.0" exclude("org.slf4j", "slf4j-api"),
-    "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.17.0"
+    "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.17.0",
+    "com.beachape"                  %% "enumeratum-play-json"       % "1.8.0"
   )
 
   val test: Seq[ModuleID] = Seq(

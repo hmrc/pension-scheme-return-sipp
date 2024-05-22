@@ -56,7 +56,7 @@ object OutstandingLoan {
           dateOfLoan = transactionDetail.dateOfLoan,
           amountOfLoan = transactionDetail.amountOfLoan,
           loanConnectedParty =
-            if (transactionDetail.loanConnectedParty == YesNo.Yes) ConnectedOrUnconnectedType.Connected
+            if (transactionDetail.loanConnectedParty.boolean) ConnectedOrUnconnectedType.Connected
             else ConnectedOrUnconnectedType.Unconnected, //TODO change api type
           repayDate = transactionDetail.repayDate,
           interestRate = transactionDetail.interestRate,

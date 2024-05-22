@@ -16,33 +16,13 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
-import play.api.libs.json._
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed trait EtmpPsrStatus {
-  val name: String
-}
+sealed trait EtmpPsrStatus extends EnumEntry
 
-case object Compiled extends EtmpPsrStatus {
-  val name = "Compiled"
-}
+object EtmpPsrStatus extends Enum[EtmpPsrStatus] with PlayJsonEnum[EtmpPsrStatus] {
+  case object Compiled extends EtmpPsrStatus
+  case object Submitted extends EtmpPsrStatus
 
-case object Submitted extends EtmpPsrStatus {
-  val name = "Submitted"
-}
-
-object EtmpPsrStatus {
-
-  private val values: List[EtmpPsrStatus] = List(Compiled, Submitted)
-
-  implicit val formats: Format[EtmpPsrStatus] = new Format[EtmpPsrStatus] {
-    override def writes(o: EtmpPsrStatus): JsValue = JsString(o.name)
-
-    override def reads(json: JsValue): JsResult[EtmpPsrStatus] = {
-      val jsonAsString = json.as[String]
-      values.find(_.toString == jsonAsString) match {
-        case Some(status) => JsSuccess(status)
-        case None => JsError(s"Unknown psr status: $jsonAsString")
-      }
-    }
-  }
+  val values = findValues
 }

@@ -16,22 +16,14 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
-import play.api.libs.json.{Format, JsError, JsString, JsSuccess}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed abstract class SectionStatus(val value: String)
+sealed trait SectionStatus extends EnumEntry
 
-object SectionStatus {
-  case object New extends SectionStatus("New")
-  case object Changed extends SectionStatus("Changed")
-  case object Deleted extends SectionStatus("Deleted")
+object SectionStatus extends Enum[SectionStatus] with PlayJsonEnum[SectionStatus] {
+  case object New extends SectionStatus
+  case object Changed extends SectionStatus
+  case object Deleted extends SectionStatus
 
-  implicit val format: Format[SectionStatus] = Format(
-    {
-      case JsString(New.value) => JsSuccess(New)
-      case JsString(Changed.value) => JsSuccess(Changed)
-      case JsString(Deleted.value) => JsSuccess(Deleted)
-      case unknown => JsError(s"Unknown value for SectionStatus $unknown")
-    },
-    status => JsString(status.value)
-  )
+  val values = findValues
 }
