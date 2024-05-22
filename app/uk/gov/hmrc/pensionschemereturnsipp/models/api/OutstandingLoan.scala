@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectedOrUnconnectedType, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLoanOutstanding
@@ -68,13 +68,6 @@ object OutstandingLoan {
         )
     }
   }
-
-  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
-    Reads.list[T].flatMap { xs =>
-      NonEmptyList.fromList(xs).fold[Reads[NonEmptyList[T]]](Reads.failed("The list is empty"))(Reads.pure(_))
-    },
-    Writes.list[T].contramap(_.toList)
-  )
 
   implicit val format: OFormat[OutstandingLoan] = Json.format[OutstandingLoan]
 }
