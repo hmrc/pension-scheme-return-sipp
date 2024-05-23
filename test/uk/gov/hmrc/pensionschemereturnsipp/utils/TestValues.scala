@@ -23,7 +23,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
-  EtmsSippAccountingPeriod,
+  EtmpSippAccountingPeriod,
   MemberDetails,
   SippLandArmsLength,
   SippLandConnectedParty,
@@ -85,11 +85,11 @@ trait TestValues {
   private val sampleEtmpAccountingPeriodDetails: EtmpSippAccountingPeriodDetails = EtmpSippAccountingPeriodDetails(
     version = Some("002"),
     accountingPeriods = List(
-      EtmsSippAccountingPeriod(
+      EtmpSippAccountingPeriod(
         accPeriodStart = LocalDate.parse("2022-04-06"),
         accPeriodEnd = LocalDate.parse("2022-12-31")
       ),
-      EtmsSippAccountingPeriod(
+      EtmpSippAccountingPeriod(
         accPeriodStart = LocalDate.parse("2023-01-01"),
         accPeriodEnd = LocalDate.parse("2023-04-05")
       )
@@ -117,8 +117,8 @@ trait TestValues {
       EtmpSippAccountingPeriodDetails(
         Some("002"),
         List(
-          EtmsSippAccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
-          EtmsSippAccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
+          EtmpSippAccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
+          EtmpSippAccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
         )
       ),
       Some(

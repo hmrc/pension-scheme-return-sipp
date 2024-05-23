@@ -67,7 +67,7 @@ trait SippEtmpTestValues {
     psrVersion = None
   )
 
-  private val period: EtmsSippAccountingPeriod = EtmsSippAccountingPeriod(
+  private val period: EtmpSippAccountingPeriod = EtmpSippAccountingPeriod(
     accPeriodStart = sampleDate,
     accPeriodEnd = sampleDate
   )

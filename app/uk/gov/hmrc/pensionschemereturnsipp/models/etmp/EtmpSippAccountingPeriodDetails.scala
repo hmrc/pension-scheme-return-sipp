@@ -22,15 +22,15 @@ import java.time.LocalDate
 
 case class EtmpSippAccountingPeriodDetails(
   version: Option[String],
-  accountingPeriods: List[EtmsSippAccountingPeriod]
+  accountingPeriods: List[EtmpSippAccountingPeriod]
 )
 
-case class EtmsSippAccountingPeriod(
+case class EtmpSippAccountingPeriod(
   accPeriodStart: LocalDate,
   accPeriodEnd: LocalDate
 )
 
 object EtmpSippAccountingPeriodDetails {
-  implicit val accountingPeriodFormat: OFormat[EtmsSippAccountingPeriod] = Json.format[EtmsSippAccountingPeriod]
+  implicit val accountingPeriodFormat: OFormat[EtmpSippAccountingPeriod] = Json.format[EtmpSippAccountingPeriod]
   implicit val format: OFormat[EtmpSippAccountingPeriodDetails] = Json.format[EtmpSippAccountingPeriodDetails]
 }

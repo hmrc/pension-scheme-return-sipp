@@ -22,17 +22,11 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  AssetsFromConnectedPartyRequest,
-  LandOrConnectedPropertyRequest,
-  OutstandingLoansRequest
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, EtmpSippAccountingPeriodDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, LandOrConnectedPropertyRequest, OutstandingLoansRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
-  AssetsFromConnectedPartyTransformer,
-  LandConnectedPartyTransformer
-}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{AccountingPeriodOps, AssetsFromConnectedPartyTransformer, LandConnectedPartyTransformer, ReportDetailsOps}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -59,7 +53,7 @@ class SippPsrSubmissionService @Inject()(
     )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[List[EtmpMemberAndTransactions]]] =
       psrConnector
         .getSippPsr(landOrConnectedProperty.reportDetails.pstr, None, None, None)
-        .map { //TODO: not sure about the other parameters to the getSippPsr request
+        .map {
           case Some(existingEtmpData) =>
             for {
               landOrPropertyTxs <- landOrConnectedProperty.transactions.transactionDetails
@@ -72,12 +66,16 @@ class SippPsrSubmissionService @Inject()(
               .map(details => landConnectedPartyTransformer.merge(details, List.empty))
         }
 
-    constructMembersAndTransactions(landOrConnectedProperty).flatMap(
-      maybeLandOrPropertyMembersAndTxs =>
-        //TODO: implement code to construct the whole ETMP request where 'maybeLandOrPropertyMembersAndTxs' can be added
-        psrConnector
-          .submitSippPsr(landOrConnectedProperty.reportDetails.pstr, ???)
-    )
+    constructMembersAndTransactions(landOrConnectedProperty).flatMap { maybeLandOrPropertyMembersAndTxs =>
+      val etmpRequest = SippPsrSubmissionEtmpRequest(
+        reportDetails = landOrConnectedProperty.reportDetails.toEtmp,
+        accountingPeriodDetails = None,
+        memberAndTransactions = maybeLandOrPropertyMembersAndTxs,
+        psrDeclaration = None
+      )
+      psrConnector
+        .submitSippPsr(landOrConnectedProperty.reportDetails.pstr, etmpRequest)
+    }
   }
 
   //TODO implement along with above

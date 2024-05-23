@@ -22,7 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
-  EtmsSippAccountingPeriod
+  EtmpSippAccountingPeriod
 }
 
 case class SippPsrSubmissionEtmpResponse(
@@ -33,12 +33,12 @@ case class SippPsrSubmissionEtmpResponse(
 
 object SippPsrSubmissionEtmpResponse {
 
-  private implicit val accountingPeriodReads: Reads[EtmsSippAccountingPeriod] = Json.reads[EtmsSippAccountingPeriod]
+  private implicit val accountingPeriodReads: Reads[EtmpSippAccountingPeriod] = Json.reads[EtmpSippAccountingPeriod]
 
   implicit val accountingPeriodDetailsReads: Reads[EtmpSippAccountingPeriodDetails] = {
     (JsPath \ "version")
       .readNullable[String]
-      .and((JsPath \ "accountingPeriods").read[List[EtmsSippAccountingPeriod]])(EtmpSippAccountingPeriodDetails.apply _)
+      .and((JsPath \ "accountingPeriods").read[List[EtmpSippAccountingPeriod]])(EtmpSippAccountingPeriodDetails.apply _)
   }
 
   implicit val reads: Reads[SippPsrSubmissionEtmpResponse] = Json.reads[SippPsrSubmissionEtmpResponse]
