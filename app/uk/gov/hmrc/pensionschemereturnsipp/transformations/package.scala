@@ -23,6 +23,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   SharesCompanyDetails,
   AddressDetails => ApiAddressDetails
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesCompanyDetail}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
 
@@ -45,7 +46,7 @@ package object transformations {
       status = report.status,
       periodStart = report.periodStart,
       periodEnd = report.periodEnd,
-      memberTransactions = "", // TODO: check what this field represents and if it should be here at all
+      memberTransactions = YesNo.Yes,
       schemeName = report.schemeName,
       psrVersion = report.psrVersion
     )

@@ -22,12 +22,20 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, EtmpSippAccountingPeriodDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, LandOrConnectedPropertyRequest, OutstandingLoansRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AssetsFromConnectedPartyRequest,
+  LandOrConnectedPropertyRequest,
+  OutstandingLoansRequest
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{AccountingPeriodOps, AssetsFromConnectedPartyTransformer, LandConnectedPartyTransformer, ReportDetailsOps}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
+  AssetsFromConnectedPartyTransformer,
+  LandConnectedPartyTransformer,
+  ReportDetailsOps
+}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 

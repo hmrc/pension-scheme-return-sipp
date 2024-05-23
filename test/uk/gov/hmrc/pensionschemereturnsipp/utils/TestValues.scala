@@ -20,9 +20,9 @@ import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
+  EtmpSippAccountingPeriod,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
-  EtmpSippAccountingPeriod,
   MemberDetails,
   SippLandArmsLength,
   SippLandConnectedParty,
