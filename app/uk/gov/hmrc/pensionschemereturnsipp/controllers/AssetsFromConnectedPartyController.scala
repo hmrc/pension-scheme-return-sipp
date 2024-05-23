@@ -46,7 +46,8 @@ class AssetsFromConnectedPartyController @Inject()(
     sippPsrSubmissionService
       .submitAssetsFromConnectedParty(assetsFromConnectedPartySubmission)
       .map { response =>
-        logger.debug(s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}")
+        logger
+          .debug(s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}")
         NoContent
       }
   }

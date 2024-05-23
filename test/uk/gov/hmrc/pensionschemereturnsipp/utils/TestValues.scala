@@ -19,7 +19,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  Compiled,
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriodDetails,
   EtmpSippReportDetails,
@@ -36,7 +35,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
@@ -46,6 +45,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 
 import java.time.LocalDate
 
@@ -74,7 +74,7 @@ trait TestValues {
     "17836742CF",
     periodStart = LocalDate.of(2020, 12, 12),
     periodEnd = LocalDate.of(2021, 12, 12),
-    memberTransactions = "Yes"
+    memberTransactions = YesNo.Yes
   )
 
   val sampleSippPsrSubmission: SippPsrSubmission = SippPsrSubmission(
@@ -97,7 +97,7 @@ trait TestValues {
   )
 
   val sampleSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
-    reportDetails = EtmpSippReportDetails(None, Compiled, sampleToday, sampleToday, "Yes", None, None),
+    reportDetails = EtmpSippReportDetails(None, Compiled, sampleToday, sampleToday, YesNo.Yes, None, None),
     accountingPeriodDetails = None,
     memberAndTransactions = None,
     psrDeclaration = None
@@ -110,7 +110,7 @@ trait TestValues {
         Compiled,
         LocalDate.parse("2022-04-06"),
         LocalDate.parse("2023-04-05"),
-        "Yes",
+        YesNo.Yes,
         Some("PSR Scheme"),
         Some("001")
       ),

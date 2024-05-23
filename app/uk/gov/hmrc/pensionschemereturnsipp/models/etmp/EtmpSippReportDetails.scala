@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 import java.time.LocalDate
 
@@ -25,7 +26,7 @@ case class EtmpSippReportDetails(
   status: EtmpPsrStatus,
   periodStart: LocalDate,
   periodEnd: LocalDate,
-  memberTransactions: String,
+  memberTransactions: YesNo,
   schemeName: Option[String],
   psrVersion: Option[String]
 )

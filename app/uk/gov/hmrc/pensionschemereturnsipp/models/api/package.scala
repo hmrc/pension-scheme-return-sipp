@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.common
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import cats.data.NonEmptyList
+import play.api.libs.json.{Format, JsError, JsSuccess, Reads, Writes}
 
-sealed trait YesNo extends EnumEntry {
-  def boolean: Boolean = this == YesNo.Yes
-}
-
-object YesNo extends Enum[YesNo] with PlayJsonEnum[YesNo] {
-  case object Yes extends YesNo
-  case object No extends YesNo
-
-  def apply(yes: Boolean): YesNo = if (yes) Yes else No
-
-  val values = findValues
+package object api {
+  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
+    Reads.list[T].flatMapResult {
+      case Nil => JsError("The list is empty")
+      case head :: tail => JsSuccess(NonEmptyList(head, tail))
+    },
+    Writes.list[T].contramap(_.toList)
+  )
 }
