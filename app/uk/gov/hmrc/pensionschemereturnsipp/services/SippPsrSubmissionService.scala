@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
+import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.json._
@@ -58,27 +59,27 @@ class SippPsrSubmissionService @Inject()(
 
     def constructMembersAndTransactions(
       landOrConnectedProperty: LandOrConnectedPropertyRequest
-    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[List[EtmpMemberAndTransactions]]] =
+    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[List[EtmpMemberAndTransactions]] =
       psrConnector
         .getSippPsr(landOrConnectedProperty.reportDetails.pstr, None, None, None)
         .map {
           case Some(existingEtmpData) =>
-            for {
+            (for {
               landOrPropertyTxs <- landOrConnectedProperty.transactions.transactionDetails
               etmpTxs <- existingEtmpData.memberAndTransactions
             } yield {
               landConnectedPartyTransformer.merge(landOrPropertyTxs, etmpTxs)
-            }
+            }).toList.flatten
           case None =>
-            landOrConnectedProperty.transactions.transactionDetails
-              .map(details => landConnectedPartyTransformer.merge(details, List.empty))
+            landOrConnectedProperty.transactions.transactionDetails.toList
+              .flatMap(details => landConnectedPartyTransformer.merge(details, List.empty))
         }
 
-    constructMembersAndTransactions(landOrConnectedProperty).flatMap { maybeLandOrPropertyMembersAndTxs =>
+    constructMembersAndTransactions(landOrConnectedProperty).flatMap { landOrPropertyMembersAndTxs =>
       val etmpRequest = SippPsrSubmissionEtmpRequest(
         reportDetails = landOrConnectedProperty.reportDetails.toEtmp,
         accountingPeriodDetails = None,
-        memberAndTransactions = maybeLandOrPropertyMembersAndTxs,
+        memberAndTransactions = NonEmptyList.fromList(landOrPropertyMembersAndTxs),
         psrDeclaration = None
       )
       psrConnector

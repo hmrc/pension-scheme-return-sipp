@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests
 
+import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
@@ -27,10 +28,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 case class SippPsrSubmissionEtmpRequest(
   reportDetails: EtmpSippReportDetails,
   accountingPeriodDetails: Option[EtmpSippAccountingPeriodDetails],
-  memberAndTransactions: Option[List[EtmpMemberAndTransactions]],
+  memberAndTransactions: Option[NonEmptyList[EtmpMemberAndTransactions]],
   psrDeclaration: Option[EtmpSippPsrDeclaration]
 )
 
 object SippPsrSubmissionEtmpRequest {
+  import uk.gov.hmrc.pensionschemereturnsipp.models.api._
   implicit val format: Format[SippPsrSubmissionEtmpRequest] = Json.format[SippPsrSubmissionEtmpRequest]
 }

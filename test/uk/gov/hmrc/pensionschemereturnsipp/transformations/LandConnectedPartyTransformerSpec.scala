@@ -42,93 +42,14 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
   private val transformer: LandConnectedPartyTransformer = new LandConnectedPartyTransformer()
 
-  private val landArmsDataRow1 = TransactionDetails(
-    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
-    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
-    acquisitionDate = LocalDate.of(2020, 1, 1),
-    landOrPropertyinUK = YesNo.Yes,
-    addressDetails = AddressDetails(
-      addressLine1 = "addressLine1",
-      addressLine2 = Some("addressLine2"),
-      addressLine3 = None,
-      addressLine4 = None,
-      addressLine5 = None,
-      ukPostCode = None,
-      countryCode = "UK"
-    ),
-    registryDetails = RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
-    acquiredFromName = "acquiredFromName",
-    totalCost = 10,
-    independentValuation = YesNo.Yes,
-    jointlyHeld = YesNo.Yes,
-    noOfPersons = None,
-    residentialSchedule29A = YesNo.Yes,
-    isLeased = YesNo.Yes,
-    lesseeDetails = None,
-    totalIncomeOrReceipts = 10,
-    isPropertyDisposed = YesNo.Yes,
-    disposalDetails = None
-  )
-
-  private val etmpData = EtmpMemberAndTransactions(
-    status = SectionStatus.New,
-    version = None,
-    memberDetails = MemberDetails(
-      firstName = "firstName",
-      middleName = None,
-      lastName = "lastName",
-      nino = Some("nino"),
-      reasonNoNINO = None,
-      dateOfBirth = LocalDate.of(2020, 1, 1)
-    ),
-    landConnectedParty = Some(
-      SippLandConnectedParty(
-        1,
-        Some(
-          List(
-            SippLandConnectedParty.TransactionDetail(
-              LocalDate.of(2020, 1, 1),
-              YesNo.Yes,
-              EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
-              RegistryDetails(YesNo.No, None, None),
-              "acquiredFromName",
-              10.0,
-              YesNo.Yes,
-              YesNo.Yes,
-              None,
-              YesNo.Yes,
-              YesNo.Yes,
-              None,
-              None,
-              None,
-              None,
-              10.0,
-              YesNo.Yes,
-              None,
-              None,
-              None,
-              None,
-              None
-            )
-          )
-        )
-      )
-    ),
-    otherAssetsConnectedParty = None,
-    landArmsLength = None,
-    tangibleProperty = None,
-    loanOutstanding = None,
-    unquotedShares = None
-  )
-
   "merge" should {
     "update LandArms data for a single member when member match is found" in {
-      val testEtmpData = etmpData.copy(landConnectedParty = None)
+      val testEtmpData = etmpDataWithLandConnectedTx.copy(landConnectedParty = None)
 
-      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landConnectedTransaction), List(testEtmpData))
 
       result mustBe List(
-        etmpData.copy(
+        etmpDataWithLandConnectedTx.copy(
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
@@ -169,11 +90,11 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
     "replace LandArms data for a single member when member match is found" in {
 
-      val testLandArmsDataRow1 = landArmsDataRow1.copy(acquiredFromName = "test2")
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
+      val testLandArmsDataRow1 = landConnectedTransaction.copy(acquiredFromName = "test2")
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
-        etmpData.copy(
+        etmpDataWithLandConnectedTx.copy(
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
@@ -213,12 +134,12 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     }
 
     "add LandArms data with new member details for a single member when match is not found" in {
-      val testLandArmsDataRow1 = landArmsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
+      val testLandArmsDataRow1 = landConnectedTransaction.copy(nino = NinoType(Some("otherNino"), None))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
-        etmpData.copy(landConnectedParty = None),
-        etmpData.copy(
+        etmpDataWithLandConnectedTx.copy(landConnectedParty = None),
+        etmpDataWithLandConnectedTx.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
             middleName = None,
