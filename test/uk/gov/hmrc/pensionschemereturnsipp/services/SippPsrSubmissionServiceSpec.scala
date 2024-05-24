@@ -16,19 +16,22 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import org.mockito.ArgumentMatchers.any
+import cats.data.NonEmptyList
+import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedProperty, LandOrConnectedPropertyRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandConnectedPartyTransformer
 }
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
 
@@ -61,6 +64,65 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val fakeRequest = FakeRequest()
+
+  "submitLandOrConnectedProperty" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val response = HttpResponse(200, "OK")
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = LandOrConnectedPropertyRequest(
+        testReportDetails,
+        LandOrConnectedProperty(1, Some(NonEmptyList.one(landConnectedTransaction)))
+      )
+
+      whenReady(service.submitLandOrConnectedProperty(request)) { result: HttpResponse =>
+        result mustBe response
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), mockitoEq(etmpRequest))(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val response = HttpResponse(200, "OK")
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = LandOrConnectedPropertyRequest(
+        testReportDetails,
+        LandOrConnectedProperty(1, Some(NonEmptyList.one(landConnectedTransaction)))
+      )
+
+      whenReady(service.submitLandOrConnectedProperty(request)) { result: HttpResponse =>
+        result mustBe response
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), mockitoEq(etmpRequest))(any(), any())
+      }
+
+    }
+  }
 
   "getSippPsr" should {
     "return 200 without data when connector returns successfully" in {

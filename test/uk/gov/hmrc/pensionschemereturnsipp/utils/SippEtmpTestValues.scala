@@ -16,15 +16,19 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
+import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.ReportDetailsOps
 
 import java.time.LocalDate
 
@@ -59,17 +63,18 @@ trait SippEtmpTestValues {
     reasonNoNINO = Some("I have a Nino !!!!")
   )
 
-  protected val reportDetails: EtmpSippReportDetails = EtmpSippReportDetails(
-    pstr = None,
-    status = Compiled,
+  protected val testReportDetails: ReportDetails = ReportDetails(
+    pstr = "test",
+    status = EtmpPsrStatus.Compiled,
     periodStart = sampleDate,
     periodEnd = sampleDate,
-    memberTransactions = YesNo.Yes,
     schemeName = None,
     psrVersion = None
   )
 
-  private val period: EtmsSippAccountingPeriod = EtmsSippAccountingPeriod(
+  protected val reportDetails: EtmpSippReportDetails = testReportDetails.toEtmp
+
+  private val period: EtmpSippAccountingPeriod = EtmpSippAccountingPeriod(
     accPeriodStart = sampleDate,
     accPeriodEnd = sampleDate
   )
@@ -218,7 +223,7 @@ trait SippEtmpTestValues {
     noOfSharesHeld = Some(2)
   )
 
-  private val sippLandConnectedParty = SippLandConnectedParty(
+  protected val sippLandConnectedParty = SippLandConnectedParty(
     noOfTransactions = 1,
     transactionDetails = Some(List(sippLandConnectedPartyTransactionDetail))
   )
@@ -263,8 +268,87 @@ trait SippEtmpTestValues {
   val fullSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
     reportDetails = reportDetails,
     accountingPeriodDetails = Some(accountingPeriodDetails),
-    memberAndTransactions = Some(List(etmpSippMemberAndTransactions)),
+    memberAndTransactions = Some(NonEmptyList.one(etmpSippMemberAndTransactions)),
     psrDeclaration = None
+  )
+
+  val landConnectedTransaction: TransactionDetails = TransactionDetails(
+    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+    acquisitionDate = LocalDate.of(2020, 1, 1),
+    landOrPropertyinUK = YesNo.Yes,
+    addressDetails = AddressDetails(
+      addressLine1 = "addressLine1",
+      addressLine2 = Some("addressLine2"),
+      addressLine3 = None,
+      addressLine4 = None,
+      addressLine5 = None,
+      ukPostCode = None,
+      countryCode = "UK"
+    ),
+    registryDetails = RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
+    acquiredFromName = "acquiredFromName",
+    totalCost = 10,
+    independentValuation = YesNo.Yes,
+    jointlyHeld = YesNo.Yes,
+    noOfPersons = None,
+    residentialSchedule29A = YesNo.Yes,
+    isLeased = YesNo.Yes,
+    lesseeDetails = None,
+    totalIncomeOrReceipts = 10,
+    isPropertyDisposed = YesNo.Yes,
+    disposalDetails = None
+  )
+
+  val etmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
+    status = SectionStatus.New,
+    version = None,
+    memberDetails = MemberDetails(
+      firstName = "firstName",
+      middleName = None,
+      lastName = "lastName",
+      nino = Some("nino"),
+      reasonNoNINO = None,
+      dateOfBirth = LocalDate.of(2020, 1, 1)
+    ),
+    landConnectedParty = Some(
+      SippLandConnectedParty(
+        1,
+        Some(
+          List(
+            SippLandConnectedParty.TransactionDetail(
+              LocalDate.of(2020, 1, 1),
+              YesNo.Yes,
+              EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
+              RegistryDetails(YesNo.No, None, None),
+              "acquiredFromName",
+              10.0,
+              YesNo.Yes,
+              YesNo.Yes,
+              None,
+              YesNo.Yes,
+              YesNo.Yes,
+              None,
+              None,
+              None,
+              None,
+              10.0,
+              YesNo.Yes,
+              None,
+              None,
+              None,
+              None,
+              None
+            )
+          )
+        )
+      )
+    ),
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = None,
+    unquotedShares = None
   )
 
 }

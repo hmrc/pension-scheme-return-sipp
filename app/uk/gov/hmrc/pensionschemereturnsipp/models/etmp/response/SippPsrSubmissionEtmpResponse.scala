@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response
 
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
+  EtmpSippAccountingPeriod,
   EtmpSippAccountingPeriodDetails,
-  EtmpSippReportDetails,
-  EtmsSippAccountingPeriod
+  EtmpSippReportDetails
 }
 
 case class SippPsrSubmissionEtmpResponse(
@@ -33,13 +32,9 @@ case class SippPsrSubmissionEtmpResponse(
 
 object SippPsrSubmissionEtmpResponse {
 
-  private implicit val accountingPeriodReads: Reads[EtmsSippAccountingPeriod] = Json.reads[EtmsSippAccountingPeriod]
-
-  implicit val accountingPeriodDetailsReads: Reads[EtmpSippAccountingPeriodDetails] = {
-    (JsPath \ "version")
-      .readNullable[String]
-      .and((JsPath \ "accountingPeriods").read[List[EtmsSippAccountingPeriod]])(EtmpSippAccountingPeriodDetails.apply _)
-  }
+  implicit val accountingPeriodReads: Reads[EtmpSippAccountingPeriod] = Json.reads[EtmpSippAccountingPeriod]
+  implicit val accountingPeriodDetailsReads: Reads[EtmpSippAccountingPeriodDetails] =
+    Json.reads[EtmpSippAccountingPeriodDetails]
 
   implicit val reads: Reads[SippPsrSubmissionEtmpResponse] = Json.reads[SippPsrSubmissionEtmpResponse]
 }

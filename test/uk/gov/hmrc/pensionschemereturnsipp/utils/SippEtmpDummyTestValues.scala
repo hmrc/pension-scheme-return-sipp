@@ -16,9 +16,15 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
+import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, SectionStatus}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
+  MemberDetails,
   SippLandArmsLength,
   SippLandConnectedParty,
   SippLoanOutstanding,
@@ -27,6 +33,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   SippUnquotedShares
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
+
+import java.time.LocalDate
 
 trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 
@@ -109,7 +117,7 @@ trait SippEtmpDummyTestValues extends SippEtmpTestValues {
   val fullSippPsrSubmissionRequestLongV2: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
     reportDetails = reportDetails,
     accountingPeriodDetails = Some(accountingPeriodDetails),
-    memberAndTransactions = Some(membersAndTransactions),
+    memberAndTransactions = NonEmptyList.fromList(membersAndTransactions),
     psrDeclaration = None
   )
 
