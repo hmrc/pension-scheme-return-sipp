@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
+import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedParty
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
 
 import javax.inject.{Inject, Singleton}
@@ -27,66 +26,25 @@ import javax.inject.{Inject, Singleton}
 class AssetsFromConnectedPartyTransformer @Inject()() {
 
   def merge(
-    assetsFromConnectedParty: List[AssetsFromConnectedParty.TransactionDetails],
+    assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedParty.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
-  ): List[EtmpMemberAndTransactions] = {
-
-    val assetsFromConnectedPartyByMember =
-      assetsFromConnectedParty.groupBy(k => k.nameDOB.firstName -> k.nameDOB.lastName -> k.nameDOB.dob -> k.nino.nino)
-
-    val etmpDataByMember = etmpData.groupBy(
-      k => k.memberDetails.firstName -> k.memberDetails.lastName -> k.memberDetails.dateOfBirth -> k.memberDetails.nino
-    )
-
-    val updatedEtmpDataByMember = etmpDataByMember.flatMap {
-      case (memberKey, etmpTxsByMember) =>
-        val assetsFromConnectedPartyToUpdate = assetsFromConnectedPartyByMember
-          .get(memberKey)
-          .map { landArmsTxs =>
-            landArmsTxs.map(transformSingle)
-          }
-
-        etmpTxsByMember.map(
-          etmpTx =>
-            etmpTx.copy(
-              otherAssetsConnectedParty = assetsFromConnectedPartyToUpdate.map(
-                otherAssetTrx => SippOtherAssetsConnectedParty(otherAssetTrx.length, Some(otherAssetTrx))
-              )
+  ): List[EtmpMemberAndTransactions] =
+    EtmpMemberAndTransactionsUpdater
+      .merge[AssetsFromConnectedParty.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
+        assetsFromConnectedParty,
+        etmpData,
+        transformSingle,
+        (maybeTransactions, etmpMemberAndTransactions) =>
+          etmpMemberAndTransactions.copy(
+            otherAssetsConnectedParty = maybeTransactions.map(
+              transactions => SippOtherAssetsConnectedParty(transactions.length, Some(transactions.toList))
             )
-        )
-    }.toList
-
-    val newMembers = assetsFromConnectedPartyByMember.keySet.diff(etmpDataByMember.keySet)
-
-    val newEtmpDataByMember =
-      newMembers.toList.flatMap(memberKey => assetsFromConnectedPartyByMember.get(memberKey)).flatMap(transform)
-
-    updatedEtmpDataByMember ++ newEtmpDataByMember
-  }
-
-  def transform(list: List[api.AssetsFromConnectedParty.TransactionDetails]): List[EtmpMemberAndTransactions] =
-    list
-      .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
-      .map {
-        case ((nameDoB, nino), transactions) =>
-          val otherAssets = SippOtherAssetsConnectedParty(transactions.length, Some(transactions).filter(_.nonEmpty))
-          EtmpMemberAndTransactions(
-            status = SectionStatus.New,
-            version = None,
-            memberDetails = toMemberDetails(nameDoB, nino),
-            landConnectedParty = None,
-            otherAssetsConnectedParty = Some(otherAssets),
-            landArmsLength = None,
-            tangibleProperty = None,
-            loanOutstanding = None,
-            unquotedShares = None
           )
-      }
-      .toList
+      )
 
   private def transformSingle(
-    property: api.AssetsFromConnectedParty.TransactionDetails
-  ): etmp.SippOtherAssetsConnectedParty.TransactionDetail =
+    property: AssetsFromConnectedParty.TransactionDetails
+  ): SippOtherAssetsConnectedParty.TransactionDetail =
     SippOtherAssetsConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,

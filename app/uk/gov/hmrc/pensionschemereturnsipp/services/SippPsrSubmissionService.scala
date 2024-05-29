@@ -105,31 +105,41 @@ class SippPsrSubmissionService @Inject()(
 
   def submitAssetsFromConnectedParty(
     assetsFromConnectedParty: AssetsFromConnectedPartyRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] = {
 
     def constructMembersAndTransactions(
       assetsFromConnectedParty: AssetsFromConnectedPartyRequest
     )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext) =
       psrConnector
-        .getSippPsr(assetsFromConnectedParty.reportDetails.pstr, None, None, None)
+        .getSippPsr(
+          assetsFromConnectedParty.reportDetails.pstr,
+          None, // TODO -> What the hack that FB number which non-sipp is using!?
+          Some(assetsFromConnectedParty.reportDetails.periodStart.toString),
+          Some(assetsFromConnectedParty.reportDetails.periodStart.toString)
+        )
         .map {
           case Some(existingEtmpData) =>
-            for {
+            (for {
               assetsFromConnectedPartyTxs <- assetsFromConnectedParty.transactions.transactionDetails
               etmpTxs <- existingEtmpData.memberAndTransactions
             } yield {
-              assetsFromConnectedPartyTransformer.merge(assetsFromConnectedPartyTxs.toList, etmpTxs)
-            }
+              assetsFromConnectedPartyTransformer.merge(assetsFromConnectedPartyTxs, etmpTxs)
+            }).toList.flatten
           case None =>
-            assetsFromConnectedParty.transactions.transactionDetails
-              .map(details => assetsFromConnectedPartyTransformer.transform(details.toList))
+            assetsFromConnectedParty.transactions.transactionDetails.toList
+              .flatMap(details => assetsFromConnectedPartyTransformer.merge(details, List.empty))
         }
 
-    constructMembersAndTransactions(assetsFromConnectedParty).flatMap(
-      maybeAssetsFromConnectedPartyMembersAndTxs =>
-        psrConnector
-          .submitSippPsr(assetsFromConnectedParty.reportDetails.pstr, ???)
-    )
+    constructMembersAndTransactions(assetsFromConnectedParty).flatMap { assetsFromConnectedPartyAndTx =>
+      val etmpRequest = SippPsrSubmissionEtmpRequest(
+        reportDetails = assetsFromConnectedParty.reportDetails.toEtmp,
+        accountingPeriodDetails = None,
+        memberAndTransactions = NonEmptyList.fromList(assetsFromConnectedPartyAndTx),
+        psrDeclaration = None
+      )
+      psrConnector
+        .submitSippPsr(assetsFromConnectedParty.reportDetails.pstr, etmpRequest)
+    }
   }
 
   def submitSippPsr(
