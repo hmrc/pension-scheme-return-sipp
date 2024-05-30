@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedParty
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
 
@@ -27,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 class AssetsFromConnectedPartyTransformer @Inject()() {
 
   def merge(
-    assetsFromConnectedParty: List[AssetsFromConnectedParty.TransactionDetails],
+    assetsFromConnectedParty: List[api.AssetsFromConnectedPartyRequest.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] = {
 
@@ -64,7 +64,7 @@ class AssetsFromConnectedPartyTransformer @Inject()() {
     updatedEtmpDataByMember ++ newEtmpDataByMember
   }
 
-  def transform(list: List[api.AssetsFromConnectedParty.TransactionDetails]): List[EtmpMemberAndTransactions] =
+  def transform(list: List[api.AssetsFromConnectedPartyRequest.TransactionDetails]): List[EtmpMemberAndTransactions] =
     list
       .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
       .map {
@@ -85,7 +85,7 @@ class AssetsFromConnectedPartyTransformer @Inject()() {
       .toList
 
   private def transformSingle(
-    property: api.AssetsFromConnectedParty.TransactionDetails
+    property: api.AssetsFromConnectedPartyRequest.TransactionDetails
   ): etmp.SippOtherAssetsConnectedParty.TransactionDetail =
     SippOtherAssetsConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,

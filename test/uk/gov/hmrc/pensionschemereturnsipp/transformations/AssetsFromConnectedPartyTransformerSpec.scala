@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedParty
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedParty.TransactionDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpSippSharesCompanyDetail, SectionStatus}
@@ -34,7 +33,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
   private val transformer: AssetsFromConnectedPartyTransformer = new AssetsFromConnectedPartyTransformer()
 
-  val assetsFromConnectedPartyTx = TransactionDetails(
+  val assetsFromConnectedPartyTx = AssetsFromConnectedPartyRequest.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -284,10 +283,10 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     )
   }
 
-  lazy val sipp: TransactionDetails = {
+  lazy val sipp: AssetsFromConnectedPartyRequest.TransactionDetails = {
     import sippOtherAssetsConnectedPartyTransactionDetail._
 
-    AssetsFromConnectedParty.TransactionDetails(
+    AssetsFromConnectedPartyRequest.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,

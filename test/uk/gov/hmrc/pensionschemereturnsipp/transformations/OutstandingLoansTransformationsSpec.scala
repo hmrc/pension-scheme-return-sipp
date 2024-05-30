@@ -17,14 +17,14 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 import Arbitraries.outstandingLoanArbitrary
 
 class OutstandingLoansTransformationsSpec extends BaseSpec with ScalaCheckDrivenPropertyChecks {
   "transforming" should {
     "be isomorphic" in {
-      forAll { (transactionDetail: OutstandingLoan.TransactionDetail) =>
+      forAll { (transactionDetail: OutstandingLoansRequest.TransactionDetail) =>
         val nameDOB = transactionDetail.nameDOB
         val nino = transactionDetail.nino
 

@@ -16,13 +16,41 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
+import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType, SharesCompanyDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+
+import java.time.LocalDate
 
 case class AssetsFromConnectedPartyRequest(
   reportDetails: ReportDetails,
-  transactions: AssetsFromConnectedParty
+  transactions: Option[NonEmptyList[AssetsFromConnectedPartyRequest.TransactionDetails]]
 )
 
 object AssetsFromConnectedPartyRequest {
+
+  case class TransactionDetails(
+    nameDOB: NameDOB,
+    nino: NinoType,
+    acquisitionDate: LocalDate,
+    assetDescription: String,
+    acquisitionOfShares: YesNo,
+    shareCompanyDetails: Option[SharesCompanyDetails],
+    acquiredFromName: String,
+    totalCost: Double,
+    independentValuation: YesNo,
+    tangibleSchedule29A: YesNo,
+    totalIncomeOrReceipts: Double,
+    isPropertyDisposed: YesNo,
+    disposalDetails: Option[DisposalDetails],
+    disposalOfShares: YesNo,
+    noOfSharesHeld: Option[Int]
+  )
+
+  object TransactionDetails {
+    implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
+  }
+
   implicit val format: OFormat[AssetsFromConnectedPartyRequest] = Json.format[AssetsFromConnectedPartyRequest]
 }

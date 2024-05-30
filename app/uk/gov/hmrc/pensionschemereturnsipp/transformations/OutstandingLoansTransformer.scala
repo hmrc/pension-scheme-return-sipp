@@ -17,23 +17,24 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest.TransactionDetail.TransformationOps
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLoanOutstanding}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan.TransactionDetail.TransformationOps
 
 object OutstandingLoansTransformer {
   def merge(
-    updates: NonEmptyList[OutstandingLoan.TransactionDetail],
+    updates: NonEmptyList[OutstandingLoansRequest.TransactionDetail],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
-    EtmpMemberAndTransactionsUpdater.merge[OutstandingLoan.TransactionDetail, SippLoanOutstanding.TransactionDetail](
-      updates,
-      etmpData,
-      _.toEtmp,
-      (maybeTransactions, etmpMemberAndTransactions) =>
-        etmpMemberAndTransactions.copy(
-          loanOutstanding =
-            maybeTransactions.map(transactions => SippLoanOutstanding(transactions.length, Some(transactions.toList)))
-        )
-    )
+    EtmpMemberAndTransactionsUpdater
+      .merge[OutstandingLoansRequest.TransactionDetail, SippLoanOutstanding.TransactionDetail](
+        updates,
+        etmpData,
+        _.toEtmp,
+        (maybeTransactions, etmpMemberAndTransactions) =>
+          etmpMemberAndTransactions.copy(
+            loanOutstanding =
+              maybeTransactions.map(transactions => SippLoanOutstanding(transactions.length, Some(transactions.toList)))
+          )
+      )
 }

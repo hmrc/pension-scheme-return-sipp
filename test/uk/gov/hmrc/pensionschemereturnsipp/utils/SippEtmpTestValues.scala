@@ -17,8 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
@@ -272,33 +271,35 @@ trait SippEtmpTestValues {
     psrDeclaration = None
   )
 
-  val landConnectedTransaction: TransactionDetails = TransactionDetails(
-    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
-    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
-    acquisitionDate = LocalDate.of(2020, 1, 1),
-    landOrPropertyinUK = YesNo.Yes,
-    addressDetails = AddressDetails(
-      addressLine1 = "addressLine1",
-      addressLine2 = Some("addressLine2"),
-      addressLine3 = None,
-      addressLine4 = None,
-      addressLine5 = None,
-      ukPostCode = None,
-      countryCode = "UK"
-    ),
-    registryDetails = RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
-    acquiredFromName = "acquiredFromName",
-    totalCost = 10,
-    independentValuation = YesNo.Yes,
-    jointlyHeld = YesNo.Yes,
-    noOfPersons = None,
-    residentialSchedule29A = YesNo.Yes,
-    isLeased = YesNo.Yes,
-    lesseeDetails = None,
-    totalIncomeOrReceipts = 10,
-    isPropertyDisposed = YesNo.Yes,
-    disposalDetails = None
-  )
+  val landConnectedTransaction: LandOrConnectedPropertyRequest.TransactionDetails =
+    LandOrConnectedPropertyRequest.TransactionDetails(
+      nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+      nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+      acquisitionDate = LocalDate.of(2020, 1, 1),
+      landOrPropertyinUK = YesNo.Yes,
+      addressDetails = AddressDetails(
+        addressLine1 = "addressLine1",
+        addressLine2 = Some("addressLine2"),
+        addressLine3 = None,
+        addressLine4 = None,
+        addressLine5 = None,
+        ukPostCode = None,
+        countryCode = "UK"
+      ),
+      registryDetails =
+        RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
+      acquiredFromName = "acquiredFromName",
+      totalCost = 10,
+      independentValuation = YesNo.Yes,
+      jointlyHeld = YesNo.Yes,
+      noOfPersons = None,
+      residentialSchedule29A = YesNo.Yes,
+      isLeased = YesNo.Yes,
+      lesseeDetails = None,
+      totalIncomeOrReceipts = 10,
+      isPropertyDisposed = YesNo.Yes,
+      disposalDetails = None
+    )
 
   val etmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
     status = SectionStatus.New,
