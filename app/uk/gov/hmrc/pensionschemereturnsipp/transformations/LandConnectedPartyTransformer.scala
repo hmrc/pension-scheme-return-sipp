@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandConnectedParty}
 
 import javax.inject.{Inject, Singleton}
@@ -25,11 +25,11 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class LandConnectedPartyTransformer @Inject() {
   def merge(
-    landConnectedPartyData: NonEmptyList[LandOrConnectedProperty.TransactionDetails],
+    landConnectedPartyData: NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[LandOrConnectedProperty.TransactionDetails, SippLandConnectedParty.TransactionDetail](
+      .merge[LandOrConnectedPropertyRequest.TransactionDetails, SippLandConnectedParty.TransactionDetail](
         landConnectedPartyData,
         etmpData,
         transformSingle,
@@ -42,7 +42,7 @@ class LandConnectedPartyTransformer @Inject() {
       )
 
   private def transformSingle(
-    property: LandOrConnectedProperty.TransactionDetails
+    property: LandOrConnectedPropertyRequest.TransactionDetails
   ): SippLandConnectedParty.TransactionDetail =
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,

@@ -18,22 +18,11 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedProperty.TransactionDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  AddressDetails,
-  DisposalDetails,
-  LesseeDetails,
-  NameDOB,
-  NinoType
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, SectionStatus}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  MemberDetails,
-  SippLandConnectedParty
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
 import java.time.LocalDate
@@ -153,10 +142,10 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     }
   }
 
-  val sipp: TransactionDetails = {
+  val sipp: LandOrConnectedPropertyRequest.TransactionDetails = {
     import sippLandConnectedPartyTransactionDetail._
 
-    LandOrConnectedProperty.TransactionDetails(
+    LandOrConnectedPropertyRequest.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,

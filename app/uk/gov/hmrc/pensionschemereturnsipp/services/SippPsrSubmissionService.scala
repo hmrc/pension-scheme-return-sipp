@@ -58,20 +58,20 @@ class SippPsrSubmissionService @Inject()(
   )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] = {
 
     def constructMembersAndTransactions(
-      landOrConnectedProperty: LandOrConnectedPropertyRequest
+      connectedPropertyRequest: LandOrConnectedPropertyRequest
     )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[List[EtmpMemberAndTransactions]] =
       psrConnector
-        .getSippPsr(landOrConnectedProperty.reportDetails.pstr, None, None, None)
+        .getSippPsr(connectedPropertyRequest.reportDetails.pstr, None, None, None)
         .map {
           case Some(existingEtmpData) =>
             (for {
-              landOrPropertyTxs <- landOrConnectedProperty.transactions.transactionDetails
+              landOrPropertyTxs <- connectedPropertyRequest.transactions
               etmpTxs <- existingEtmpData.memberAndTransactions
             } yield {
               landConnectedPartyTransformer.merge(landOrPropertyTxs, etmpTxs)
             }).toList.flatten
           case None =>
-            landOrConnectedProperty.transactions.transactionDetails.toList
+            connectedPropertyRequest.transactions.toList
               .flatMap(details => landConnectedPartyTransformer.merge(details, List.empty))
         }
 
@@ -115,13 +115,13 @@ class SippPsrSubmissionService @Inject()(
         .map {
           case Some(existingEtmpData) =>
             for {
-              assetsFromConnectedPartyTxs <- assetsFromConnectedParty.transactions.transactionDetails
+              assetsFromConnectedPartyTxs <- assetsFromConnectedParty.transactions
               etmpTxs <- existingEtmpData.memberAndTransactions
             } yield {
               assetsFromConnectedPartyTransformer.merge(assetsFromConnectedPartyTxs.toList, etmpTxs)
             }
           case None =>
-            assetsFromConnectedParty.transactions.transactionDetails
+            assetsFromConnectedParty.transactions
               .map(details => assetsFromConnectedPartyTransformer.transform(details.toList))
         }
 

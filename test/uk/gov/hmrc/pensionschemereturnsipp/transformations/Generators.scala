@@ -17,7 +17,8 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import org.scalacheck.Gen
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoan
+import uk.gov.hmrc.pensionschemereturnsipp.models.api
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
@@ -42,7 +43,7 @@ object Generators {
     dob <- localDate
   } yield NameDOB(firstName, lastName, dob)
 
-  val outstandingLoanGenerator: Gen[OutstandingLoan.TransactionDetail] =
+  val outstandingLoanGenerator: Gen[api.OutstandingLoansRequest.TransactionDetail] =
     for {
       nameDOB <- genNameDOB
       nino <- ninoType
@@ -57,7 +58,7 @@ object Generators {
       interestPayments <- amount()
       arrearsOutstandingPrYears <- yesNo
       outstandingYearEndAmount <- amount()
-    } yield OutstandingLoan.TransactionDetail(
+    } yield OutstandingLoansRequest.TransactionDetail(
       nameDOB,
       nino,
       loanRecipientName,

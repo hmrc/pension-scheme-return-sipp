@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedProperty, LandOrConnectedPropertyRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
@@ -82,7 +82,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       val request = LandOrConnectedPropertyRequest(
         testReportDetails,
-        LandOrConnectedProperty(1, Some(NonEmptyList.one(landConnectedTransaction)))
+        Some(NonEmptyList.one(landConnectedTransaction))
       )
 
       whenReady(service.submitLandOrConnectedProperty(request)) { result: HttpResponse =>
@@ -111,7 +111,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       val request = LandOrConnectedPropertyRequest(
         testReportDetails,
-        LandOrConnectedProperty(1, Some(NonEmptyList.one(landConnectedTransaction)))
+        Some(NonEmptyList.one(landConnectedTransaction))
       )
 
       whenReady(service.submitLandOrConnectedProperty(request)) { result: HttpResponse =>
