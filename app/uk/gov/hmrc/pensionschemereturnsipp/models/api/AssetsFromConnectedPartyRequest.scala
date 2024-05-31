@@ -46,7 +46,7 @@ object AssetsFromConnectedPartyRequest {
     disposalDetails: Option[DisposalDetails],
     disposalOfShares: YesNo,
     noOfSharesHeld: Option[Int]
-  )
+  ) extends MemberKey
 
   object TransactionDetails {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
