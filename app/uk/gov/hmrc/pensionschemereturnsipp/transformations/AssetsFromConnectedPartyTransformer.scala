@@ -19,8 +19,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
-
 import javax.inject.{Inject, Singleton}
 
 @Singleton
