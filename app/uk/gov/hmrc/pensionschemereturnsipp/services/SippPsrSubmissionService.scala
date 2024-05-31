@@ -20,13 +20,13 @@ import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyRequest,
   LandOrConnectedPropertyRequest,
-  OutstandingLoansRequest
+  OutstandingLoansRequest,
+  ReportDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -34,8 +34,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidation
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
+  LandArmsLengthTransformer,
   LandConnectedPartyTransformer,
-  ReportDetailsOps
+  OutstandingLoansTransformer,
+  ReportDetailsOps,
+  Transformer
 }
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -49,88 +52,69 @@ class SippPsrSubmissionService @Inject()(
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
   sippPsrFromEtmp: SippPsrFromEtmp,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
+  armsLengthTransformer: LandArmsLengthTransformer,
+  outstandingLoansTransformer: OutstandingLoansTransformer,
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer
 )(implicit ec: ExecutionContext)
     extends Logging {
 
   def submitLandOrConnectedProperty(
-    landOrConnectedProperty: LandOrConnectedPropertyRequest
-  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] = {
+    request: LandOrConnectedPropertyRequest
+  )(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, landConnectedPartyTransformer)
 
-    def constructMembersAndTransactions(
-      connectedPropertyRequest: LandOrConnectedPropertyRequest
-    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[List[EtmpMemberAndTransactions]] =
-      psrConnector
-        .getSippPsr(connectedPropertyRequest.reportDetails.pstr, None, None, None)
-        .map {
-          case Some(existingEtmpData) =>
-            (for {
-              landOrPropertyTxs <- connectedPropertyRequest.transactions
-              etmpTxs <- existingEtmpData.memberAndTransactions
-            } yield {
-              landConnectedPartyTransformer.merge(landOrPropertyTxs, etmpTxs)
-            }).toList.flatten
-          case None =>
-            connectedPropertyRequest.transactions.toList
-              .flatMap(details => landConnectedPartyTransformer.merge(details, List.empty))
-        }
-
-    constructMembersAndTransactions(landOrConnectedProperty).flatMap { landOrPropertyMembersAndTxs =>
-      val etmpRequest = SippPsrSubmissionEtmpRequest(
-        reportDetails = landOrConnectedProperty.reportDetails.toEtmp,
-        accountingPeriodDetails = None,
-        memberAndTransactions = NonEmptyList.fromList(landOrPropertyMembersAndTxs),
-        psrDeclaration = None
-      )
-      psrConnector
-        .submitSippPsr(landOrConnectedProperty.reportDetails.pstr, etmpRequest)
-    }
-  }
-
-  //TODO implement along with above
   def submitOutstandingLoans(
-    outstandingLoansRequest: OutstandingLoansRequest
-  )(implicit headerCarrier: HeaderCarrier, request: RequestHeader): Future[HttpResponse] =
-    Future.successful(
-      HttpResponse.apply(
-        status = 201,
-        json = JsObject.empty,
-        headers = Map.empty
-      )
-    )
+    request: OutstandingLoansRequest
+  )(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, outstandingLoansTransformer)
 
-  //TODO implement along with above
-  def submitLandArmsLength(request: LandOrConnectedPropertyRequest): Future[Option[List[EtmpMemberAndTransactions]]] =
-    Future.successful(None)
+  def submitLandArmsLength(
+    request: LandOrConnectedPropertyRequest
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, armsLengthTransformer)
 
   def submitAssetsFromConnectedParty(
-    assetsFromConnectedParty: AssetsFromConnectedPartyRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    request: AssetsFromConnectedPartyRequest
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, assetsFromConnectedPartyTransformer)
 
-    def constructMembersAndTransactions(
-      assetsFromConnectedParty: AssetsFromConnectedPartyRequest
-    )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext) =
-      psrConnector
-        .getSippPsr(assetsFromConnectedParty.reportDetails.pstr, None, None, None)
-        .map {
-          case Some(existingEtmpData) =>
-            for {
-              assetsFromConnectedPartyTxs <- assetsFromConnectedParty.transactions
-              etmpTxs <- existingEtmpData.memberAndTransactions
-            } yield {
-              assetsFromConnectedPartyTransformer.merge(assetsFromConnectedPartyTxs.toList, etmpTxs)
-            }
-          case None =>
-            assetsFromConnectedParty.transactions
-              .map(details => assetsFromConnectedPartyTransformer.transform(details.toList))
-        }
+  private def submitJourney[A](
+    reportDetails: ReportDetails,
+    transactions: Option[NonEmptyList[A]],
+    transformer: Transformer[A]
+  )(
+    implicit hc: HeaderCarrier
+  ): Future[HttpResponse] =
+    mergeWithExistingEtmpData(reportDetails, transactions, transformer)
+      .flatMap { etmpDataAfterMerge =>
+        val request = SippPsrSubmissionEtmpRequest(
+          reportDetails = reportDetails.toEtmp,
+          accountingPeriodDetails = None,
+          memberAndTransactions = NonEmptyList.fromList(etmpDataAfterMerge),
+          psrDeclaration = None
+        )
+        psrConnector.submitSippPsr(reportDetails.pstr, request)
+      }
 
-    constructMembersAndTransactions(assetsFromConnectedParty).flatMap(
-      maybeAssetsFromConnectedPartyMembersAndTxs =>
-        psrConnector
-          .submitSippPsr(assetsFromConnectedParty.reportDetails.pstr, ???)
-    )
-  }
+  private def mergeWithExistingEtmpData[A](
+    reportDetails: ReportDetails,
+    transactions: Option[NonEmptyList[A]],
+    transformer: Transformer[A]
+  )(
+    implicit hc: HeaderCarrier
+  ): Future[List[EtmpMemberAndTransactions]] =
+    psrConnector
+      .getSippPsr(reportDetails.pstr, None, None, None)
+      .map {
+        case Some(existingEtmpData) =>
+          val merged = for {
+            txs <- transactions
+            etmpTxs <- existingEtmpData.memberAndTransactions
+          } yield transformer.merge(txs, etmpTxs)
+          merged.toList.flatten
+        case None =>
+          transactions.toList.flatMap(txs => transformer.merge(txs, Nil))
+      }
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission

@@ -16,77 +16,36 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
+import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AssetsFromConnectedPartyTransformer @Inject()() {
+class AssetsFromConnectedPartyTransformer @Inject()
+    extends Transformer[AssetsFromConnectedPartyRequest.TransactionDetails] {
 
   def merge(
-    assetsFromConnectedParty: List[api.AssetsFromConnectedPartyRequest.TransactionDetails],
+    assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedPartyRequest.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
-  ): List[EtmpMemberAndTransactions] = {
-
-    val assetsFromConnectedPartyByMember =
-      assetsFromConnectedParty.groupBy(k => k.nameDOB.firstName -> k.nameDOB.lastName -> k.nameDOB.dob -> k.nino.nino)
-
-    val etmpDataByMember = etmpData.groupBy(
-      k => k.memberDetails.firstName -> k.memberDetails.lastName -> k.memberDetails.dateOfBirth -> k.memberDetails.nino
-    )
-
-    val updatedEtmpDataByMember = etmpDataByMember.flatMap {
-      case (memberKey, etmpTxsByMember) =>
-        val assetsFromConnectedPartyToUpdate = assetsFromConnectedPartyByMember
-          .get(memberKey)
-          .map { landArmsTxs =>
-            landArmsTxs.map(transformSingle)
-          }
-
-        etmpTxsByMember.map(
-          etmpTx =>
-            etmpTx.copy(
-              otherAssetsConnectedParty = assetsFromConnectedPartyToUpdate.map(
-                otherAssetTrx => SippOtherAssetsConnectedParty(otherAssetTrx.length, Some(otherAssetTrx))
-              )
+  ): List[EtmpMemberAndTransactions] =
+    EtmpMemberAndTransactionsUpdater
+      .merge[AssetsFromConnectedPartyRequest.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
+        assetsFromConnectedParty,
+        etmpData,
+        transformSingle,
+        (maybeTransactions, etmpMemberAndTransactions) =>
+          etmpMemberAndTransactions.copy(
+            otherAssetsConnectedParty = maybeTransactions.map(
+              transactions => SippOtherAssetsConnectedParty(transactions.length, Some(transactions.toList))
             )
-        )
-    }.toList
-
-    val newMembers = assetsFromConnectedPartyByMember.keySet.diff(etmpDataByMember.keySet)
-
-    val newEtmpDataByMember =
-      newMembers.toList.flatMap(memberKey => assetsFromConnectedPartyByMember.get(memberKey)).flatMap(transform)
-
-    updatedEtmpDataByMember ++ newEtmpDataByMember
-  }
-
-  def transform(list: List[api.AssetsFromConnectedPartyRequest.TransactionDetails]): List[EtmpMemberAndTransactions] =
-    list
-      .groupMap(p => p.nameDOB -> p.nino)(transformSingle)
-      .map {
-        case ((nameDoB, nino), transactions) =>
-          val otherAssets = SippOtherAssetsConnectedParty(transactions.length, Some(transactions).filter(_.nonEmpty))
-          EtmpMemberAndTransactions(
-            status = SectionStatus.New,
-            version = None,
-            memberDetails = toMemberDetails(nameDoB, nino),
-            landConnectedParty = None,
-            otherAssetsConnectedParty = Some(otherAssets),
-            landArmsLength = None,
-            tangibleProperty = None,
-            loanOutstanding = None,
-            unquotedShares = None
           )
-      }
-      .toList
+      )
 
   private def transformSingle(
-    property: api.AssetsFromConnectedPartyRequest.TransactionDetails
-  ): etmp.SippOtherAssetsConnectedParty.TransactionDetail =
+    property: AssetsFromConnectedPartyRequest.TransactionDetails
+  ): SippOtherAssetsConnectedParty.TransactionDetail =
     SippOtherAssetsConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,
