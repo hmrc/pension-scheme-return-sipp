@@ -1,0 +1,132 @@
+meta {
+  name: Put - AssetsConnectedParty
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/assets-from-connected-party
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "12345678",
+      "status": "Submitted",
+      "periodStart": "2023-01-01",
+      "periodEnd": "2023-12-31",
+      "schemeName": "Sample Scheme Name",
+      "psrVersion": "1.0"
+    },
+    "transactions": {
+      "noOfTransactions": 3,
+      "transactionDetails": [
+        {
+          "nameDOB": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "dob": "1980-01-01"
+          },
+          "nino": {
+            "nino": "AB123456C",
+            "reasonNoNino": null
+          },
+          "acquisitionDate": "2023-05-15",
+          "assetDescription": "Real Estate",
+          "acquisitionOfShares": "No",
+          "shareCompanyDetails": null,
+          "acquiredFromName": "Jane Smith",
+          "totalCost": 250000.00,
+          "independentValuation": "Yes",
+          "tangibleSchedule29A": "No",
+          "totalIncomeOrReceipts": 5000.00,
+          "isPropertyDisposed": "Yes",
+          "disposalDetails": {
+            "disposedPropertyProceedsAmt": 300000.00,
+            "namesOfPurchasers": "Buyer Inc.",
+            "anyPurchaserConnected": "No",
+            "independentValuationDisposal": "Yes",
+            "propertyFullyDisposed": "Yes"
+          },
+          "disposalOfShares": "No",
+          "noOfSharesHeld": null
+        },
+        {
+          "nameDOB": {
+            "firstName": "Alice",
+            "lastName": "Johnson",
+            "dob": "1975-03-22"
+          },
+          "nino": {
+            "nino": null,
+            "reasonNoNino": "Not applicable"
+          },
+          "acquisitionDate": "2023-07-10",
+          "assetDescription": "Company Shares",
+          "acquisitionOfShares": "Yes",
+          "shareCompanyDetails": {
+            "companySharesName": "Tech Corp",
+            "companySharesCRN": "123456789",
+            "reasonNoCRN": null,
+            "sharesClass": "A",
+            "noOfShares": 100
+          },
+          "acquiredFromName": "Bob Brown",
+          "totalCost": 50000.00,
+          "independentValuation": "No",
+          "tangibleSchedule29A": "Yes",
+          "totalIncomeOrReceipts": 2000.00,
+          "isPropertyDisposed": "No",
+          "disposalDetails": null,
+          "disposalOfShares": "No",
+          "noOfSharesHeld": 100
+        },
+        {
+          "nameDOB": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "dob": "1980-01-01"
+          },
+          "nino": {
+            "nino": "AB123456C",
+            "reasonNoNino": null
+          },
+          "acquisitionDate": "2023-07-10",
+          "assetDescription": "Company Shares",
+          "acquisitionOfShares": "Yes",
+          "shareCompanyDetails": {
+            "companySharesName": "Tech Corp",
+            "companySharesCRN": "123456789",
+            "reasonNoCRN": null,
+            "sharesClass": "A",
+            "noOfShares": 100
+          },
+          "acquiredFromName": "Bob Brown",
+          "totalCost": 50000.00,
+          "independentValuation": "No",
+          "tangibleSchedule29A": "Yes",
+          "totalIncomeOrReceipts": 2000.00,
+          "isPropertyDisposed": "No",
+          "disposalDetails": null,
+          "disposalOfShares": "No",
+          "noOfSharesHeld": 100
+        }
+      ]
+    }
+  }
+  
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}
