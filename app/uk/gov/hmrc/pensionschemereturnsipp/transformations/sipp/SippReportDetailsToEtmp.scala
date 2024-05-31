@@ -20,10 +20,9 @@ import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.pensionschemereturnsipp.models.SippReportDetailsSubmission
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippReportDetails
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.Transformer
 
 @Singleton()
-class SippReportDetailsToEtmp @Inject()() extends Transformer {
+class SippReportDetailsToEtmp @Inject() {
 
   def transform(sippReportDetailsSubmission: SippReportDetailsSubmission): EtmpSippReportDetails =
     EtmpSippReportDetails(

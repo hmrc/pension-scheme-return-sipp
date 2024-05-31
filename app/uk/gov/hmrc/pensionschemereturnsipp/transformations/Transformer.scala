@@ -16,4 +16,9 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
-trait Transformer
+import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
+
+trait Transformer[T] {
+  def merge(updates: NonEmptyList[T], etmp: List[EtmpMemberAndTransactions]): List[EtmpMemberAndTransactions]
+}

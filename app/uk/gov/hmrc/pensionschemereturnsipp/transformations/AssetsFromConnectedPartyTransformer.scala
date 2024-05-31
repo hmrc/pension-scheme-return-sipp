@@ -19,12 +19,11 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{api, etmp}
-
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AssetsFromConnectedPartyTransformer @Inject()() {
+class AssetsFromConnectedPartyTransformer @Inject()
+    extends Transformer[AssetsFromConnectedPartyRequest.TransactionDetails] {
 
   def merge(
     assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedPartyRequest.TransactionDetails],
@@ -44,8 +43,8 @@ class AssetsFromConnectedPartyTransformer @Inject()() {
       )
 
   private def transformSingle(
-    property: api.AssetsFromConnectedPartyRequest.TransactionDetails
-  ): etmp.SippOtherAssetsConnectedParty.TransactionDetail =
+    property: AssetsFromConnectedPartyRequest.TransactionDetails
+  ): SippOtherAssetsConnectedParty.TransactionDetail =
     SippOtherAssetsConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,

@@ -23,7 +23,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransaction
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class LandArmsLengthTransformer @Inject()() {
+class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedPropertyRequest.TransactionDetails] {
   def merge(
     landArmsData: NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]

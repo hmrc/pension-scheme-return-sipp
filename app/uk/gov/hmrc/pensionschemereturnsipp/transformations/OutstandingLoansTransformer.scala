@@ -21,7 +21,10 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest.TransactionDetail.TransformationOps
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLoanOutstanding}
 
-object OutstandingLoansTransformer {
+import javax.inject.{Inject, Singleton}
+
+@Singleton
+class OutstandingLoansTransformer @Inject() extends Transformer[OutstandingLoansRequest.TransactionDetail] {
   def merge(
     updates: NonEmptyList[OutstandingLoansRequest.TransactionDetail],
     etmpData: List[EtmpMemberAndTransactions]
