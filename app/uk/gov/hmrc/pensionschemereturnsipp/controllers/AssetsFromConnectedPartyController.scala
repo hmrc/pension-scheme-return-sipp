@@ -40,7 +40,7 @@ class AssetsFromConnectedPartyController @Inject()(
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
     val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
-    logger.debug(
+    logger.info(
       s"Submitting AssetsFromConnectedParty PSR details - Incoming payload: $assetsFromConnectedPartySubmission"
     )
     sippPsrSubmissionService

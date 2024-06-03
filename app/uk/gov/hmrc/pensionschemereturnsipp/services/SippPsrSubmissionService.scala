@@ -43,6 +43,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
@@ -104,7 +105,7 @@ class SippPsrSubmissionService @Inject()(
     implicit hc: HeaderCarrier
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
-      .getSippPsr(reportDetails.pstr, None, None, None)
+      .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("1.0"))
       .map {
         case Some(existingEtmpData) =>
           val merged = for {
