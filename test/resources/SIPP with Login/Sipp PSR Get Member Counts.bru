@@ -1,0 +1,28 @@
+meta {
+  name: Sipp PSR Get Member Counts
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{pension-scheme-return-sipp}}/psr/24000001IN/member-count?periodStartDate=2024-06-03&psrVersion=001&journey=interestInLandOrProperty
+  body: none
+  auth: bearer
+}
+
+query {
+  periodStartDate: 2024-06-03
+  psrVersion: 001
+  journey: interestInLandOrProperty
+  ~fbNumber: 123
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}
