@@ -26,7 +26,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyRequest,
   LandOrConnectedPropertyRequest,
   OutstandingLoansRequest,
-  ReportDetails
+  ReportDetails,
+  TangibleMoveablePropertyRequest
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -38,6 +39,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   LandConnectedPartyTransformer,
   OutstandingLoansTransformer,
   ReportDetailsOps,
+  TangibleMoveablePropertyTransformer,
   Transformer
 }
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
@@ -54,7 +56,8 @@ class SippPsrSubmissionService @Inject()(
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
-  assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer
+  assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer,
+  tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -77,6 +80,11 @@ class SippPsrSubmissionService @Inject()(
     request: AssetsFromConnectedPartyRequest
   )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, assetsFromConnectedPartyTransformer)
+
+  def submitTangibleMoveableProperty(
+    request: TangibleMoveablePropertyRequest
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, tangibleMovablePropertyTransformer)
 
   private def submitJourney[A](
     reportDetails: ReportDetails,
@@ -104,7 +112,7 @@ class SippPsrSubmissionService @Inject()(
     implicit hc: HeaderCarrier
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
-      .getSippPsr(reportDetails.pstr, None, None, None)
+      .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("1.0"))
       .map {
         case Some(existingEtmpData) =>
           val merged = for {
