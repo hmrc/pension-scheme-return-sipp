@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectedOrUnconnectedType, YesNo}
 
-sealed trait ConnectedOrUnconnectedType extends EnumEntry
-object ConnectedOrUnconnectedType
-    extends Enum[ConnectedOrUnconnectedType]
-    with PlayJsonEnum[ConnectedOrUnconnectedType] {
+case class UnquotedShareDisposalDetail(
+  totalAmount: Double,
+  nameOfPurchaser: String,
+  purchaserConnectedParty: ConnectedOrUnconnectedType,
+  independentValuationDisposal: YesNo
+)
 
-  case object Connected extends ConnectedOrUnconnectedType
-  case object Unconnected extends ConnectedOrUnconnectedType
-
-  override def values: IndexedSeq[ConnectedOrUnconnectedType] = findValues
+object UnquotedShareDisposalDetail {
+  implicit val format: OFormat[UnquotedShareDisposalDetail] = Json.format[UnquotedShareDisposalDetail]
 }

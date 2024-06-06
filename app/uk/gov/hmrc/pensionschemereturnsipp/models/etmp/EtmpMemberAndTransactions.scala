@@ -231,7 +231,7 @@ object SippUnquotedShares {
     noOfSharesSold: Option[Int],
     totalDividendsIncome: Double,
     sharesDisposed: YesNo,
-    sharesDisposalDetails: EtmpSippSharesDisposalDetails,
+    sharesDisposalDetails: Option[EtmpSippSharesDisposalDetails],
     noOfSharesHeld: Option[Int]
   )
 

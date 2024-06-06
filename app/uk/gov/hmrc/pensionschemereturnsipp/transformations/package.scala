@@ -21,10 +21,15 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   NameDOB,
   NinoType,
   SharesCompanyDetails,
+  UnquotedShareDisposalDetail,
   AddressDetails => ApiAddressDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesCompanyDetail}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
+  EtmpAddress,
+  EtmpSippSharesCompanyDetail,
+  EtmpSippSharesDisposalDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
 
 package object transformations {
@@ -59,6 +64,14 @@ package object transformations {
       reasonNoCRN = companyDetails.reasonNoCRN,
       sharesClass = companyDetails.sharesClass,
       noOfShares = companyDetails.noOfShares
+    )
+
+  def toEtmp(shareDetails: UnquotedShareDisposalDetail): EtmpSippSharesDisposalDetails =
+    EtmpSippSharesDisposalDetails(
+      disposedShareAmount = shareDetails.totalAmount,
+      disposalConnectedParty = shareDetails.purchaserConnectedParty,
+      purchaserName = shareDetails.nameOfPurchaser,
+      independentValutionDisposal = shareDetails.independentValuationDisposal
     )
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =

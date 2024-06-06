@@ -218,7 +218,7 @@ trait SippEtmpTestValues {
     noOfSharesSold = Some(3),
     totalDividendsIncome = 2000.2,
     sharesDisposed = Yes,
-    sharesDisposalDetails = sippSharesDisposalDetails,
+    sharesDisposalDetails = Some(sippSharesDisposalDetails),
     noOfSharesHeld = Some(2)
   )
 
