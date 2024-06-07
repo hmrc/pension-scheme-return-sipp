@@ -27,7 +27,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   LandOrConnectedPropertyRequest,
   OutstandingLoansRequest,
   ReportDetails,
-  TangibleMoveablePropertyRequest
+  TangibleMoveablePropertyRequest,
+  UnquotedShareRequest
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -40,7 +41,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   OutstandingLoansTransformer,
   ReportDetailsOps,
   TangibleMoveablePropertyTransformer,
-  Transformer
+  Transformer,
+  UnquotedSharesTransformer
 }
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -57,6 +59,7 @@ class SippPsrSubmissionService @Inject()(
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer,
+  unquotedSharesTransformer: UnquotedSharesTransformer,
   tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer
 )(implicit ec: ExecutionContext)
     extends Logging {
@@ -85,6 +88,11 @@ class SippPsrSubmissionService @Inject()(
     request: TangibleMoveablePropertyRequest
   )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, tangibleMovablePropertyTransformer)
+
+  def submitUnquotedShares(
+    request: UnquotedShareRequest
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    submitJourney(request.reportDetails, request.transactions, unquotedSharesTransformer)
 
   private def submitJourney[A](
     reportDetails: ReportDetails,

@@ -8,3 +8,4 @@ PUT   /psr/outstanding-loans            uk.gov.hmrc.pensionschemereturnsipp.cont
 PUT   /psr/land-arms-length             uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.put
 PUT   /psr/assets-from-connected-party  uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put
 PUT   /psr/tangible-moveable-property   uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.put
+PUT   /psr/unquoted-shares              uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.put

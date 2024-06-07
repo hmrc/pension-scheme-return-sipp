@@ -33,7 +33,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   LandArmsLengthTransformer,
   LandConnectedPartyTransformer,
   OutstandingLoansTransformer,
-  TangibleMoveablePropertyTransformer
+  TangibleMoveablePropertyTransformer,
+  UnquotedSharesTransformer
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
@@ -58,6 +59,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockArmsLengthTransformer = mock[LandArmsLengthTransformer]
   private val mockOutstandingLoansTransformer = mock[OutstandingLoansTransformer]
   private val mockAssetsFromConnectedPartyTransformer = mock[AssetsFromConnectedPartyTransformer]
+  private val mockUnquotedSharesTransformer = mock[UnquotedSharesTransformer]
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
@@ -69,6 +71,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
     mockAssetsFromConnectedPartyTransformer,
+    mockUnquotedSharesTransformer,
     mockTangibleMovablePropertyTransformer
   )
 

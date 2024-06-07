@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
@@ -218,7 +218,7 @@ trait SippEtmpTestValues {
     noOfSharesSold = Some(3),
     totalDividendsIncome = 2000.2,
     sharesDisposed = Yes,
-    sharesDisposalDetails = sippSharesDisposalDetails,
+    sharesDisposalDetails = Some(sippSharesDisposalDetails),
     noOfSharesHeld = Some(2)
   )
 

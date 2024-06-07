@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-case class EtmpSippSharesDisposalDetails(
-  disposedShareAmount: Double,
-  disposalConnectedParty: EtmpConnectedOrUnconnectedType,
-  purchaserName: String,
-  independentValutionDisposal: YesNo
-)
+sealed abstract class EtmpConnectedOrUnconnectedType(override val entryName: String) extends EnumEntry
 
-object EtmpSippSharesDisposalDetails {
-  implicit val format: OFormat[EtmpSippSharesDisposalDetails] = Json.format[EtmpSippSharesDisposalDetails]
+object EtmpConnectedOrUnconnectedType
+    extends Enum[EtmpConnectedOrUnconnectedType]
+    with PlayJsonEnum[EtmpConnectedOrUnconnectedType] {
+
+  case object Connected extends EtmpConnectedOrUnconnectedType("01")
+  case object Unconnected extends EtmpConnectedOrUnconnectedType("02")
+
+  val values = findValues
 }

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
-case class EtmpSippSharesDisposalDetails(
-  disposedShareAmount: Double,
-  disposalConnectedParty: EtmpConnectedOrUnconnectedType,
-  purchaserName: String,
-  independentValutionDisposal: YesNo
+case class UnquotedShareTransactionDetail(
+  totalCost: Double,
+  independentValuation: YesNo,
+  noOfIndependentValuationSharesSold: Option[Int],
+  totalDividendsIncome: Double
 )
 
-object EtmpSippSharesDisposalDetails {
-  implicit val format: OFormat[EtmpSippSharesDisposalDetails] = Json.format[EtmpSippSharesDisposalDetails]
+object UnquotedShareTransactionDetail {
+  implicit val formatUnquotedShareTransactionDetail: OFormat[UnquotedShareTransactionDetail] =
+    Json.format[UnquotedShareTransactionDetail]
 }
