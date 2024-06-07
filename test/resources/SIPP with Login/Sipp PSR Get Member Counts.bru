@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{pension-scheme-return-sipp}}/psr/24000001IN/member-count?periodStartDate=2024-06-03&psrVersion=001&journey=interestInLandOrProperty
+  url: {{pension-scheme-return-sipp}}/psr/24000001IN/member-count?periodStartDate=2024-06-03&psrVersion=001&journey=assetFromConnectedParty
   body: none
   auth: bearer
 }
@@ -13,7 +13,7 @@ get {
 query {
   periodStartDate: 2024-06-03
   psrVersion: 001
-  journey: interestInLandOrProperty
+  journey: assetFromConnectedParty
   ~fbNumber: 123
 }
 
