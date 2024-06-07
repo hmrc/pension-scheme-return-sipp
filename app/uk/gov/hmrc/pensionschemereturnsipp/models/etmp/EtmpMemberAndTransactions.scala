@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 
 import java.time.LocalDate
@@ -160,7 +160,7 @@ object SippTangibleProperty {
     acquiredFromName: String,
     independentValution: YesNo,
     totalIncomeOrReceipts: Double,
-    costOrMarket: EtmpSippCostOrMarketType,
+    costOrMarket: CostOrMarketType,
     costMarketValue: Double,
     isPropertyDisposed: YesNo,
     disposedPropertyProceedsAmt: Option[Double],

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed abstract class EtmpSippCostOrMarketType(override val entryName: String) extends EnumEntry
+sealed abstract class CostOrMarketType(override val entryName: String) extends EnumEntry
 
-object EtmpSippCostOrMarketType extends Enum[EtmpSippCostOrMarketType] with PlayJsonEnum[EtmpSippCostOrMarketType] {
-  case object Market extends EtmpSippCostOrMarketType("Market Value")
-  case object Cost extends EtmpSippCostOrMarketType("Cost Value")
+object CostOrMarketType extends Enum[CostOrMarketType] with PlayJsonEnum[CostOrMarketType] {
 
-  override def values = findValues
+  case object CostValue extends CostOrMarketType("Cost Value")
+  case object MarketValue extends CostOrMarketType("Market Value")
+
+  val values = findValues
 }

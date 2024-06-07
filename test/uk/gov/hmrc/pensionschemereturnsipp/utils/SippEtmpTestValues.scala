@@ -20,10 +20,10 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -186,7 +186,7 @@ trait SippEtmpTestValues {
     acquiredFromName = "TestLongName TestLongSurname",
     independentValution = Yes,
     totalIncomeOrReceipts = 9999999.99,
-    costOrMarket = Cost,
+    costOrMarket = CostValue,
     costMarketValue = 9999999.99,
     isPropertyDisposed = Yes,
     disposedPropertyProceedsAmt = Some(999999.99),
