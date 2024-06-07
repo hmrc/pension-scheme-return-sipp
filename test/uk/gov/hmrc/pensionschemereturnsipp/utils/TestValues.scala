@@ -17,35 +17,23 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import com.networknt.schema.ValidationMessage
-import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  EtmpSippAccountingPeriod,
-  EtmpSippAccountingPeriodDetails,
-  EtmpSippReportDetails,
-  MemberDetails,
-  SippLandArmsLength,
-  SippLandConnectedParty,
-  SippLoanOutstanding,
-  SippOtherAssetsConnectedParty,
-  SippTangibleProperty,
-  SippUnquotedShares
-}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippCostOrMarketType.Cost
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
   EtmpAddress,
   EtmpSippSharesCompanyDetail,
   EtmpSippSharesDisposalDetails
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
+import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
 

@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._

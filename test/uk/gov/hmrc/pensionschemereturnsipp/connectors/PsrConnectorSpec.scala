@@ -999,7 +999,7 @@ object PsrConnectorSpec {
       |            },
       |            "dateOfLoan": "2023-03-14",
       |            "amountOfLoan": 999.99,
-      |            "loanConnectedParty": "Connected",
+      |            "loanConnectedParty": "01",
       |            "repayDate": "2023-03-14",
       |            "interestRate": 10,
       |            "loanSecurity": "No",
@@ -1033,7 +1033,7 @@ object PsrConnectorSpec {
       |            "sharesDisposed": "Yes",
       |            "sharesDisposalDetails": {
       |              "disposedShareAmount": 9999.99,
-      |              "disposalConnectedParty": "Connected",
+      |              "disposalConnectedParty": "01",
       |              "purchaserName": "Dave SS",
       |              "independentValutionDisposal": "No"
       |            }
