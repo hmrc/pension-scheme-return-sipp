@@ -24,9 +24,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   UnquotedShareDisposalDetail,
   AddressDetails => ApiAddressDetails
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
   EtmpAddress,
+  EtmpConnectedOrUnconnectedType,
   EtmpSippSharesCompanyDetail,
   EtmpSippSharesDisposalDetails
 }
@@ -69,7 +71,9 @@ package object transformations {
   def toEtmp(shareDetails: UnquotedShareDisposalDetail): EtmpSippSharesDisposalDetails =
     EtmpSippSharesDisposalDetails(
       disposedShareAmount = shareDetails.totalAmount,
-      disposalConnectedParty = shareDetails.purchaserConnectedParty,
+      disposalConnectedParty =
+        if (shareDetails.purchaserConnectedParty == Connected) EtmpConnectedOrUnconnectedType.Connected
+        else EtmpConnectedOrUnconnectedType.Unconnected,
       purchaserName = shareDetails.nameOfPurchaser,
       independentValutionDisposal = shareDetails.independentValuationDisposal
     )
