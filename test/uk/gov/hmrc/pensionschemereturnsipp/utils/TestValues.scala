@@ -285,7 +285,7 @@ trait TestValues {
                       Some(10),
                       999.99,
                       Yes,
-                      Some(EtmpSippSharesDisposalDetails(9999.99, Connected, "Dave SS", No)),
+                      Some(EtmpSippSharesDisposalDetails(9999.99, YesNo.Yes, "Dave SS", No)),
                       None
                     )
                   )

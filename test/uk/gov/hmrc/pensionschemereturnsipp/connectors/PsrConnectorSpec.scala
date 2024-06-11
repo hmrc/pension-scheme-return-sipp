@@ -1033,7 +1033,7 @@ object PsrConnectorSpec {
       |            "sharesDisposed": "Yes",
       |            "sharesDisposalDetails": {
       |              "disposedShareAmount": 9999.99,
-      |              "disposalConnectedParty": "01",
+      |              "disposalConnectedParty": "Yes",
       |              "purchaserName": "Dave SS",
       |              "independentValutionDisposal": "No"
       |            }
