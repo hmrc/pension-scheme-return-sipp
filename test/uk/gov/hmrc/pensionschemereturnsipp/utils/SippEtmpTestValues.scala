@@ -102,7 +102,7 @@ trait SippEtmpTestValues {
 
   protected val sippSharesDisposalDetails: EtmpSippSharesDisposalDetails = EtmpSippSharesDisposalDetails(
     disposedShareAmount = 2123.22,
-    disposalConnectedParty = Connected,
+    disposalConnectedParty = YesNo.Yes,
     purchaserName = "Some Long Purchaser Name",
     independentValutionDisposal = Yes
   )

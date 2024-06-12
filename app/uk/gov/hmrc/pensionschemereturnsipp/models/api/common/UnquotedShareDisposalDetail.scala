@@ -18,12 +18,11 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType
 
 case class UnquotedShareDisposalDetail(
   totalAmount: Double,
   nameOfPurchaser: String,
-  purchaserConnectedParty: EtmpConnectedOrUnconnectedType,
+  purchaserConnectedParty: YesNo,
   independentValuationDisposal: YesNo
 )
 
