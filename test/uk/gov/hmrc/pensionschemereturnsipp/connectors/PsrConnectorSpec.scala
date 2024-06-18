@@ -20,16 +20,17 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.sampleSippPsrResponseAsJsonString
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class PsrConnectorSpec extends BaseConnectorSpec {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val rh: RequestHeader = FakeRequest()
 
   override lazy val applicationBuilder: GuiceApplicationBuilder =
     super.applicationBuilder.configure("microservice.services.if-hod.port" -> wireMockPort)

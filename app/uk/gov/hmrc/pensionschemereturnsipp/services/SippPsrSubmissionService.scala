@@ -20,6 +20,7 @@ import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.json._
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -66,32 +67,32 @@ class SippPsrSubmissionService @Inject()(
 
   def submitLandOrConnectedProperty(
     request: LandOrConnectedPropertyRequest
-  )(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, landConnectedPartyTransformer)
 
   def submitOutstandingLoans(
     request: OutstandingLoansRequest
-  )(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, outstandingLoansTransformer)
 
   def submitLandArmsLength(
     request: LandOrConnectedPropertyRequest
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, armsLengthTransformer)
 
   def submitAssetsFromConnectedParty(
     request: AssetsFromConnectedPartyRequest
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, assetsFromConnectedPartyTransformer)
 
   def submitTangibleMoveableProperty(
     request: TangibleMoveablePropertyRequest
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, tangibleMovablePropertyTransformer)
 
   def submitUnquotedShares(
     request: UnquotedShareRequest
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, unquotedSharesTransformer)
 
   private def submitJourney[A](
@@ -99,7 +100,8 @@ class SippPsrSubmissionService @Inject()(
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A]
   )(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    requestHeader: RequestHeader
   ): Future[HttpResponse] =
     mergeWithExistingEtmpData(reportDetails, transactions, transformer)
       .flatMap { etmpDataAfterMerge =>
@@ -117,7 +119,8 @@ class SippPsrSubmissionService @Inject()(
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A]
   )(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    requestHeader: RequestHeader
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
       .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("1.0"))
@@ -134,7 +137,7 @@ class SippPsrSubmissionService @Inject()(
 
   def submitSippPsr(
     sippPsrSubmission: SippPsrSubmission
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] = {
     val request = sippPsrSubmissionToEtmp.transform(sippPsrSubmission)
     val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, Json.toJson(request))
     if (validationResult.hasErrors) {
@@ -153,7 +156,7 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[SippPsrSubmission]] =
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[SippPsrSubmission]] =
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.map(sippPsrFromEtmp.transform))
