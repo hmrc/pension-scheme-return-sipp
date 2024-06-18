@@ -19,30 +19,37 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HeaderCarrier, _}
+import play.api.mvc.RequestHeader
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
+import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{GetPsrAuditEvent, PostPsrAuditEvent}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 
-class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
-    extends HttpErrorFunctions
+class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: AuditService)(
+  implicit ec: ExecutionContext
+) extends HttpErrorFunctions
     with HttpResponseHelper
     with Logging {
 
-  def submitSippPsr(
-    pstr: String,
-    request: SippPsrSubmissionEtmpRequest
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  import auditService.AuditOps
+
+  def submitSippPsr(pstr: String, request: SippPsrSubmissionEtmpRequest)(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[HttpResponse] = {
 
     val url: String = config.submitSippPsrUrl.format(pstr)
     logger.info(s"Submit SIPP PSR called URL: $url with payload: $request")
 
     http
       .POST(url, request, integrationFrameworkHeaders)
+      .auditLog(PostPsrAuditEvent(url, request))
       .map {
         case response if response.status == OK => response
         case response => handleErrorResponse("POST", url)(response)
@@ -54,7 +61,10 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[SippPsrSubmissionEtmpResponse]] = {
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[SippPsrSubmissionEtmpResponse]] = {
 
     val params = buildParams(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
     val url: String = config.getSippPsrUrl.format(params)
@@ -62,16 +72,19 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
 
     logger.info(logMessage)
 
-    http.GET[HttpResponse](url, headers = integrationFrameworkHeaders).map { response =>
-      response.status match {
-        case OK =>
-          Some(response.json.as[SippPsrSubmissionEtmpResponse])
-        case NOT_FOUND =>
-          logger.warn(s"$logMessage and returned ${response.status}")
-          None
-        case _ => handleErrorResponse("GET", url)(response)
+    http
+      .GET[HttpResponse](url, headers = integrationFrameworkHeaders)
+      .auditLog(GetPsrAuditEvent(url))
+      .map { response =>
+        response.status match {
+          case OK =>
+            Some(response.json.as[SippPsrSubmissionEtmpResponse])
+          case NOT_FOUND =>
+            logger.warn(s"$logMessage and returned ${response.status}")
+            None
+          case _ => handleErrorResponse("GET", url)(response)
+        }
       }
-    }
   }
 
   private def buildParams(
@@ -87,9 +100,10 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient)
       case _ => throw new BadRequestException("Missing url parameters")
     }
 
-  private def getCorrelationId: String = randomUUID.toString
+  private def getCorrelationId(implicit requestHeader: RequestHeader): String =
+    requestHeader.headers.get("CorrelationId").getOrElse(randomUUID.toString)
 
-  private def integrationFrameworkHeaders: Seq[(String, String)] =
+  private def integrationFrameworkHeaders(implicit requestHeader: RequestHeader): Seq[(String, String)] =
     Seq(
       "Environment" -> config.integrationFrameworkEnvironment,
       "Authorization" -> config.integrationFrameworkAuthorization,
