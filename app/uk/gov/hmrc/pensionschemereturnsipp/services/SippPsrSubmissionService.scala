@@ -123,7 +123,7 @@ class SippPsrSubmissionService @Inject()(
     requestHeader: RequestHeader
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
-      .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("1.0"))
+      .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("001"))
       .map {
         case Some(existingEtmpData) =>
           val merged = for {
