@@ -72,6 +72,10 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
 
     logger.info(logMessage)
 
+    def isNotFound(response: HttpResponse) =
+      response.status == NOT_FOUND ||
+        (response.status == UNPROCESSABLE_ENTITY && response.body.contains("PSR_NOT_FOUND"))
+
     http
       .GET[HttpResponse](url, headers = integrationFrameworkHeaders)
       .auditLog(GetPsrAuditEvent(url))
@@ -79,7 +83,7 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
         response.status match {
           case OK =>
             Some(response.json.as[SippPsrSubmissionEtmpResponse])
-          case NOT_FOUND =>
+          case _ if isNotFound(response) =>
             logger.warn(s"$logMessage and returned ${response.status}")
             None
           case _ => handleErrorResponse("GET", url)(response)
