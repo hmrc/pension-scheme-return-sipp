@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
+import cats.implicits.catsSyntaxOptionId
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status.{BAD_REQUEST, OK}
@@ -23,9 +24,24 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.sampleSippPsrResponseAsJsonString
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.{
+  samplePsrVersionsResponse,
+  samplePsrVersionsResponseAsJsonString,
+  sampleSippPsrResponseAsJsonString
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  OrganisationOrPartnershipDetails,
+  PsaDetails,
+  PsaOrganisationOrPartnershipDetails,
+  PsrVersionsResponse,
+  ReportStatus,
+  ReportSubmitterDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+
+import java.time.{LocalDate, ZonedDateTime}
+import java.time.format.DateTimeFormatter
 
 class PsrConnectorSpec extends BaseConnectorSpec {
 
@@ -140,6 +156,30 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
       thrown.responseCode mustBe BAD_REQUEST
       thrown.message mustEqual "Missing url parameters"
+    }
+  }
+
+  "getPsrVersions" should {
+    val pstr = "testPstr"
+    val date = LocalDate.now()
+    val url = s"/pension-online/reports/$pstr/SIPP/versions?startDate=${date.format(DateTimeFormatter.ISO_DATE)}"
+
+    "return the list when an existing data is requested" in {
+      stubGet(url, ok(samplePsrVersionsResponseAsJsonString))
+      connector.getPsrVersions(pstr, date).futureValue mustEqual samplePsrVersionsResponse
+      WireMock.verify(getRequestedFor(urlEqualTo(url)))
+    }
+
+    "return empty list when no data found" in {
+      stubGet(url, notFound())
+      connector.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty
+      WireMock.verify(getRequestedFor(urlEqualTo(url)))
+    }
+
+    "handle error correctly in case of an ETMP exception" in {
+      stubGet(url, serviceUnavailable())
+      intercept[UpstreamErrorResponse] { await(connector.getPsrVersions(pstr, date)) }
+      WireMock.verify(getRequestedFor(urlEqualTo(url)))
     }
   }
 }
@@ -1054,4 +1094,40 @@ object PsrConnectorSpec {
       |  }
       |}
       |""".stripMargin
+
+  val samplePsrVersionsResponseAsJsonString = """[
+                                    |  {
+                                    |    "reportFormBundleNumber": "123456789012",
+                                    |    "reportVersion": 1,
+                                    |    "reportStatus": "Compiled",
+                                    |    "compilationOrSubmissionDate": "2019-11-17T09:30:47Z",
+                                    |    "reportSubmitterDetails": {
+                                    |      "reportSubmittedBy": "PSP",
+                                    |      "organisationOrPartnershipDetails": {
+                                    |        "organisationOrPartnershipName": "ABC Limited"
+                                    |      }
+                                    |    },
+                                    |    "psaDetails": {
+                                    |      "psaOrganisationOrPartnershipDetails": {
+                                    |        "organisationOrPartnershipName": "XYZ Limited"
+                                    |      }
+                                    |    }
+                                    |  }
+                                    |]
+                                    |""".stripMargin
+
+  val samplePsrVersionsResponse = Seq(
+    PsrVersionsResponse(
+      reportFormBundleNumber = "123456789012",
+      reportVersion = 1,
+      reportStatus = ReportStatus.Compiled,
+      compilationOrSubmissionDate = ZonedDateTime.parse("2019-11-17T09:30:47Z"),
+      reportSubmitterDetails = ReportSubmitterDetails(
+        "PSP",
+        OrganisationOrPartnershipDetails("ABC Limited").some,
+        None
+      ).some,
+      psaDetails = PsaDetails(PsaOrganisationOrPartnershipDetails("XYZ Limited").some, None).some
+    )
+  )
 }

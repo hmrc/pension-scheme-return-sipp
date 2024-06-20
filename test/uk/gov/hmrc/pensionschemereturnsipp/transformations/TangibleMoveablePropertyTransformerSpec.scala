@@ -17,17 +17,12 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, TangibleMoveablePropertyRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpSippSharesCompanyDetail, SectionStatus}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  MemberDetails,
-  SippOtherAssetsConnectedParty,
-  SippTangibleProperty
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
 import java.time.LocalDate

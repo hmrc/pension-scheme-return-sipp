@@ -17,10 +17,10 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.audit
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditType.{GetPSR, GetPSRVersions, PostPSR}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
-trait AuditEvent {
-  val auditType: AuditType
+sealed abstract class AuditEvent(val auditType: AuditType) {
   val url: String
   val requestPayload: Option[String]
   val additionalDetails: Map[String, String] = Map.empty
@@ -32,23 +32,25 @@ trait AuditEvent {
 }
 
 object AuditEvent {
-  case class GetPsrAuditEvent(override val url: String) extends AuditEvent {
-    override val auditType: AuditType = AuditType.GetPSR
+  trait GetEvent { this: AuditEvent =>
     override val requestPayload: Option[String] = None
   }
 
-  case class PostPsrAuditEvent(override val url: String, request: SippPsrSubmissionEtmpRequest) extends AuditEvent {
-    override val auditType: AuditType = AuditType.PostPSR
+  case class GetPsrAuditEvent(override val url: String) extends AuditEvent(GetPSR) with GetEvent
+
+  case class PostPsrAuditEvent(override val url: String, request: SippPsrSubmissionEtmpRequest)
+      extends AuditEvent(PostPSR) {
     override val requestPayload: Option[String] = Some(Json.prettyPrint(Json.toJson(request)))
   }
+
+  case class GetPsrVersionsAuditEvent(override val url: String) extends AuditEvent(GetPSRVersions) with GetEvent
 
   case class AuditEventWithResult(
     event: AuditEvent,
     httpResponseCode: Option[Int],
     responsePayload: Option[String],
     error: Option[Throwable] = None
-  ) extends AuditEvent {
-    override val auditType: AuditType = event.auditType
+  ) extends AuditEvent(event.auditType) {
     override val url: String = event.url
     override val requestPayload: Option[String] = event.requestPayload
 

@@ -22,14 +22,22 @@ import play.api.http.Status._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{GetPsrAuditEvent, PostPsrAuditEvent}
+import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{
+  GetPsrAuditEvent,
+  GetPsrVersionsAuditEvent,
+  PostPsrAuditEvent
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: AuditService)(
   implicit ec: ExecutionContext
@@ -84,6 +92,25 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
             None
           case _ => handleErrorResponse("GET", url)(response)
         }
+      }
+  }
+
+  def getPsrVersions(
+    pstr: String,
+    startDate: LocalDate
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] = {
+    val startDateStr = startDate.format(DateTimeFormatter.ISO_DATE)
+    val url = config.getPsrVersionsUrl.format(pstr)
+    http
+      .GET[HttpResponse](url, queryParams = Seq("startDate" -> startDateStr), integrationFrameworkHeaders)
+      .auditLog(GetPsrVersionsAuditEvent(url))
+      .flatMap {
+        case response if response.status == 200 =>
+          Future.fromTry(Try(response.json.as[Seq[PsrVersionsResponse]]))
+        case response if response.status == 404 =>
+          Future.successful(Seq.empty)
+        case response =>
+          handleErrorResponse("GET", url)(response)
       }
   }
 

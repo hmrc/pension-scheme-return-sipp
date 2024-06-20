@@ -31,6 +31,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   TangibleMoveablePropertyRequest,
   UnquotedShareRequest
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
@@ -48,6 +49,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
@@ -161,4 +163,9 @@ class SippPsrSubmissionService @Inject()(
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.map(sippPsrFromEtmp.transform))
 
+  def getPsrVersions(
+    pstr: String,
+    startDate: LocalDate
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] =
+    psrConnector.getPsrVersions(pstr, startDate)
 }

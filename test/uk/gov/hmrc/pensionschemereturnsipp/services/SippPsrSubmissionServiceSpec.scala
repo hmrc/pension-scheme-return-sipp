@@ -21,6 +21,7 @@ import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
@@ -39,6 +40,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -76,7 +78,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  private implicit val fakeRequest = FakeRequest()
+  private implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   "submitLandOrConnectedProperty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
@@ -237,4 +239,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
   }
 
+  "getPsrVersions" should {
+    "successfully return the expected versions" in {
+      val pstr = "testpstr"
+      val date = LocalDate.now()
+      when(mockPsrConnector.getPsrVersions(pstr, date)).thenReturn(Future.successful(Seq.empty))
+      service.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty
+    }
+  }
 }

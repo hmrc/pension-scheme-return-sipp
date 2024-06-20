@@ -36,6 +36,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
     .getOptional[String](path = "microservice.services.if-hod.authorizationToken")
     .getOrElse("local")
 
-  val submitSippPsrUrl: String = s"$ifURL${config.get[String](path = "serviceUrls.submit-sipp-psr")}"
-  val getSippPsrUrl: String = s"$ifURL${config.get[String](path = "serviceUrls.get-sipp-psr")}"
+  val submitSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.submit-sipp-psr")}"
+  val getSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-sipp-psr")}"
+  val getPsrVersionsUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-psr-versions")}"
 }
