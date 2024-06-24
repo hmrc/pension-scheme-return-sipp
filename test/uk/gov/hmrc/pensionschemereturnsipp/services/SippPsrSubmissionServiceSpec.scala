@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApiModel, LandOrConnectedPropertyRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{

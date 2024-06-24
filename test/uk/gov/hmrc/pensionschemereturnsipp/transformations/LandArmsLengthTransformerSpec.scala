@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
@@ -32,7 +32,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
   private val transformer: LandArmsLengthTransformer = new LandArmsLengthTransformer()
 
-  val landArmsDataRow1 = LandOrConnectedPropertyRequest.TransactionDetails(
+  val landArmsDataRow1 = LandOrConnectedPropertyApiModel.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -57,7 +57,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     lesseeDetails = None,
     totalIncomeOrReceipts = 10,
     isPropertyDisposed = YesNo.Yes,
-    disposalDetails = None
+    disposalDetails = None,
+    transactionCount = None
   )
 
   val etmpData = EtmpMemberAndTransactions(
@@ -225,7 +226,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
   lazy val sipp = {
     import sippLandArmsLengthTransactionDetail._
-    LandOrConnectedPropertyRequest.TransactionDetails(
+    LandOrConnectedPropertyApiModel.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
@@ -270,7 +271,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
           independentValutionDisposal.get,
           propertyFullyDisposed.get
         )
-      }
+      },
+      transactionCount = None
     )
   }
 

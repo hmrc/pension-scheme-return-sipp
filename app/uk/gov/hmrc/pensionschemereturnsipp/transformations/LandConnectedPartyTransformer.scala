@@ -17,19 +17,27 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandConnectedParty}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, LesseeDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
+  MemberDetails,
+  SippLandConnectedParty
+}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class LandConnectedPartyTransformer @Inject() extends Transformer[LandOrConnectedPropertyRequest.TransactionDetails] {
+class LandConnectedPartyTransformer @Inject()
+    extends Transformer[api.LandOrConnectedPropertyApiModel.TransactionDetails] {
+
   def merge(
-    landConnectedPartyData: NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails],
+    landConnectedPartyData: NonEmptyList[LandOrConnectedPropertyApiModel.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[LandOrConnectedPropertyRequest.TransactionDetails, SippLandConnectedParty.TransactionDetail](
+      .merge[LandOrConnectedPropertyApiModel.TransactionDetails, SippLandConnectedParty.TransactionDetail](
         landConnectedPartyData,
         etmpData,
         transformSingle,
@@ -42,7 +50,7 @@ class LandConnectedPartyTransformer @Inject() extends Transformer[LandOrConnecte
       )
 
   private def transformSingle(
-    property: LandOrConnectedPropertyRequest.TransactionDetails
+    property: LandOrConnectedPropertyApiModel.TransactionDetails
   ): SippLandConnectedParty.TransactionDetail =
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
@@ -67,5 +75,56 @@ class LandConnectedPartyTransformer @Inject() extends Transformer[LandOrConnecte
       anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
       independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
+    )
+
+  def transformBack(
+    member: MemberDetails,
+    transactionCount: Int,
+    landConnectedParty: SippLandConnectedParty.TransactionDetail
+  ): LandOrConnectedPropertyApiModel.TransactionDetails =
+    LandOrConnectedPropertyApiModel.TransactionDetails(
+      nameDOB = toNameDOB(member),
+      nino = toNinoType(member),
+      acquisitionDate = landConnectedParty.acquisitionDate,
+      landOrPropertyinUK = landConnectedParty.landOrPropertyInUK,
+      addressDetails = landConnectedParty.addressDetails.fromEtmp,
+      registryDetails = landConnectedParty.registryDetails,
+      acquiredFromName = landConnectedParty.acquiredFromName,
+      totalCost = landConnectedParty.totalCost,
+      independentValuation = landConnectedParty.independentValution,
+      jointlyHeld = landConnectedParty.jointlyHeld,
+      noOfPersons = landConnectedParty.noOfPersonsIfJointlyHeld,
+      residentialSchedule29A = landConnectedParty.residentialSchedule29A,
+      isLeased = landConnectedParty.isLeased,
+      lesseeDetails =
+        for {
+          count <- landConnectedParty.noOfPersonsForLessees
+          isAnyConnected <- landConnectedParty.anyOfLesseesConnected
+          leaseGrantedDate <- landConnectedParty.leaseGrantedDate
+          annualLeaseAmount <- landConnectedParty.annualLeaseAmount
+        } yield LesseeDetails(
+          Some(count),
+          landConnectedParty.purchaserNamesIfDisposed,
+          isAnyConnected,
+          leaseGrantedDate,
+          annualLeaseAmount
+        ),
+      totalIncomeOrReceipts = landConnectedParty.totalIncomeOrReceipts,
+      isPropertyDisposed = landConnectedParty.isPropertyDisposed,
+      disposalDetails =
+        for {
+          disposedPropertyProceedsAmt <- landConnectedParty.disposedPropertyProceedsAmt
+          purchaserNamesIfDisposed <- landConnectedParty.purchaserNamesIfDisposed
+          anyOfPurchaserConnected <- landConnectedParty.anyOfPurchaserConnected
+          independentValuationDisposal <- landConnectedParty.independentValutionDisposal
+          propertyFullyDisposed <- landConnectedParty.propertyFullyDisposed
+        } yield DisposalDetails(
+          disposedPropertyProceedsAmt,
+          purchaserNamesIfDisposed,
+          anyOfPurchaserConnected,
+          independentValuationDisposal,
+          propertyFullyDisposed
+        ),
+      transactionCount = Some(transactionCount)
     )
 }

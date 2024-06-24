@@ -17,19 +17,21 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLandArmsLength}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, LesseeDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedPropertyRequest.TransactionDetails] {
+class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedPropertyApiModel.TransactionDetails] {
   def merge(
-    landArmsData: NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails],
+    landArmsData: NonEmptyList[LandOrConnectedPropertyApiModel.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[LandOrConnectedPropertyRequest.TransactionDetails, SippLandArmsLength.TransactionDetail](
+      .merge[LandOrConnectedPropertyApiModel.TransactionDetails, SippLandArmsLength.TransactionDetail](
         landArmsData,
         etmpData,
         transformSingle,
@@ -41,7 +43,7 @@ class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedP
       )
 
   private def transformSingle(
-    property: LandOrConnectedPropertyRequest.TransactionDetails
+    property: LandOrConnectedPropertyApiModel.TransactionDetails
   ): SippLandArmsLength.TransactionDetail =
     SippLandArmsLength.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
@@ -66,5 +68,56 @@ class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedP
       anyOfPurchaserConnected = property.disposalDetails.map(d => d.anyPurchaserConnected),
       independentValutionDisposal = property.disposalDetails.map(d => d.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed)
+    )
+
+  def transformBack(
+    member: MemberDetails,
+    transactionCount: Int,
+    armsLength: etmp.SippLandArmsLength.TransactionDetail
+  ): LandOrConnectedPropertyApiModel.TransactionDetails =
+    LandOrConnectedPropertyApiModel.TransactionDetails(
+      nameDOB = toNameDOB(member),
+      nino = toNinoType(member),
+      acquisitionDate = armsLength.acquisitionDate,
+      landOrPropertyinUK = armsLength.landOrPropertyinUK,
+      addressDetails = armsLength.addressDetails.fromEtmp,
+      registryDetails = armsLength.registryDetails,
+      acquiredFromName = armsLength.acquiredFromName,
+      totalCost = armsLength.totalCost,
+      independentValuation = armsLength.independentValution,
+      jointlyHeld = armsLength.jointlyHeld,
+      noOfPersons = armsLength.noOfPersonsIfJointlyHeld,
+      residentialSchedule29A = armsLength.residentialSchedule29A,
+      isLeased = armsLength.isLeased,
+      lesseeDetails =
+        for {
+          count <- armsLength.noOfPersonsForLessees
+          isAnyConnected <- armsLength.anyOfLesseesConnected
+          leaseGrantedDate <- armsLength.lesseesGrantedAt
+          annualLeaseAmount <- armsLength.annualLeaseAmount
+        } yield LesseeDetails(
+          Some(count),
+          armsLength.purchaserNamesIfDisposed,
+          isAnyConnected,
+          leaseGrantedDate,
+          annualLeaseAmount
+        ),
+      totalIncomeOrReceipts = armsLength.totalIncomeOrReceipts,
+      isPropertyDisposed = armsLength.isPropertyDisposed,
+      disposalDetails =
+        for {
+          disposedPropertyProceedsAmt <- armsLength.disposedPropertyProceedsAmt
+          purchaserNamesIfDisposed <- armsLength.purchaserNamesIfDisposed
+          anyOfPurchaserConnected <- armsLength.anyOfPurchaserConnected
+          independentValuationDisposal <- armsLength.independentValutionDisposal
+          propertyFullyDisposed <- armsLength.propertyFullyDisposed
+        } yield DisposalDetails(
+          disposedPropertyProceedsAmt,
+          purchaserNamesIfDisposed,
+          anyOfPurchaserConnected,
+          independentValuationDisposal,
+          propertyFullyDisposed
+        ),
+      transactionCount = Some(transactionCount)
     )
 }

@@ -25,7 +25,9 @@ import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, Header
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyRequest,
+  LandOrConnectedPropertyApiModel,
   LandOrConnectedPropertyRequest,
+  LandOrConnectedPropertyResponse,
   OutstandingLoansRequest,
   ReportDetails,
   TangibleMoveablePropertyRequest,
@@ -72,6 +74,36 @@ class SippPsrSubmissionService @Inject()(
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, landConnectedPartyTransformer)
 
+  def getLandOrConnectedProperty(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[LandOrConnectedPropertyResponse]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map {
+        case Some(existingEtmpData) =>
+          existingEtmpData.memberAndTransactions.map { members =>
+            val transactionDetailsList: List[LandOrConnectedPropertyApiModel.TransactionDetails] = members
+              .flatMap { member =>
+                member.landConnectedParty.toList.flatMap { landConnectedParty =>
+                  landConnectedParty.transactionDetails.getOrElse(List.empty).map { transaction =>
+                    landConnectedPartyTransformer
+                      .transformBack(member.memberDetails, landConnectedParty.noOfTransactions, transaction)
+                  }
+                }
+              }
+
+            LandOrConnectedPropertyResponse(transactionDetailsList)
+          }
+        case None =>
+          None
+      }
+
   def submitOutstandingLoans(
     request: OutstandingLoansRequest
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
@@ -81,6 +113,35 @@ class SippPsrSubmissionService @Inject()(
     request: LandOrConnectedPropertyRequest
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, armsLengthTransformer)
+
+  def getLandArmsLength(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[LandOrConnectedPropertyResponse]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map {
+        case Some(existingEtmpData) =>
+          existingEtmpData.memberAndTransactions.map { members =>
+            val transactionDetailsList: List[LandOrConnectedPropertyApiModel.TransactionDetails] = members
+              .flatMap { member =>
+                member.landArmsLength.toList.flatMap { armsLength =>
+                  armsLength.transactionDetails.getOrElse(List.empty).map { transaction =>
+                    armsLengthTransformer.transformBack(member.memberDetails, armsLength.noOfTransactions, transaction)
+                  }
+                }
+              }
+
+            LandOrConnectedPropertyResponse(transactionDetailsList)
+          }
+        case None =>
+          None
+      }
 
   def submitAssetsFromConnectedParty(
     request: AssetsFromConnectedPartyRequest

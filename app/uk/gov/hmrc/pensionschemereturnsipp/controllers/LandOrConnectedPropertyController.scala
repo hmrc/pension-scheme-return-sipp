@@ -17,9 +17,12 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
+import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -30,12 +33,14 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class LandOrConnectedPropertyController @Inject()(
   cc: ControllerComponents,
-  sippPsrSubmissionService: SippPsrSubmissionService
+  sippPsrSubmissionService: SippPsrSubmissionService,
+  val authConnector: AuthConnector
 )(
   implicit ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
+    with PsrAuth
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
@@ -51,6 +56,27 @@ class LandOrConnectedPropertyController @Inject()(
         )
         NoContent
       }
+  }
+
+  def get(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR for LandOrConnectedProperty - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService
+        .getLandOrConnectedProperty(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+        .map {
+          case Some(data) =>
+            Ok(Json.toJson(data))
+          case _ =>
+            NoContent
+        }
+    }
   }
 
 }

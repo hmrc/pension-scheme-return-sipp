@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApiModel, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
@@ -271,8 +271,8 @@ trait SippEtmpTestValues {
     psrDeclaration = None
   )
 
-  val landConnectedTransaction: LandOrConnectedPropertyRequest.TransactionDetails =
-    LandOrConnectedPropertyRequest.TransactionDetails(
+  val landConnectedTransaction: LandOrConnectedPropertyApiModel.TransactionDetails =
+    LandOrConnectedPropertyApiModel.TransactionDetails(
       nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
       nino = NinoType(nino = Some("nino"), reasonNoNino = None),
       acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -298,7 +298,8 @@ trait SippEtmpTestValues {
       lesseeDetails = None,
       totalIncomeOrReceipts = 10,
       isPropertyDisposed = YesNo.Yes,
-      disposalDetails = None
+      disposalDetails = None,
+      transactionCount = None
     )
 
   val etmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(

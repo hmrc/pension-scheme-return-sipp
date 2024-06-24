@@ -45,6 +45,18 @@ package object transformations {
     )
   }
 
+  implicit class AddressEtmpOps(val address: EtmpAddress) extends AnyVal {
+    def fromEtmp: ApiAddressDetails = ApiAddressDetails(
+      addressLine1 = address.addressLine1,
+      addressLine2 = Some(address.addressLine2),
+      addressLine3 = address.addressLine3,
+      addressLine4 = address.addressLine4,
+      addressLine5 = address.addressLine5,
+      ukPostCode = address.ukPostCode,
+      countryCode = address.countryCode
+    )
+  }
+
   implicit class ReportDetailsOps(val report: ReportDetails) extends AnyVal {
     def toEtmp = EtmpSippReportDetails(
       pstr = Some(report.pstr),
@@ -82,5 +94,18 @@ package object transformations {
       nino.nino,
       nino.reasonNoNino,
       nameDoB.dob
+    )
+
+  def toNameDOB(memberDetails: MemberDetails): NameDOB =
+    NameDOB(
+      memberDetails.firstName,
+      memberDetails.lastName,
+      memberDetails.dateOfBirth
+    )
+
+  def toNinoType(memberDetails: MemberDetails): NinoType =
+    NinoType(
+      memberDetails.nino,
+      memberDetails.reasonNoNINO
     )
 }

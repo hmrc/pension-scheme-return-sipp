@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
@@ -142,10 +142,10 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     }
   }
 
-  val sipp: LandOrConnectedPropertyRequest.TransactionDetails = {
+  val sipp: LandOrConnectedPropertyApiModel.TransactionDetails = {
     import sippLandConnectedPartyTransactionDetail._
 
-    LandOrConnectedPropertyRequest.TransactionDetails(
+    LandOrConnectedPropertyApiModel.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
@@ -190,7 +190,8 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
           independentValutionDisposal.get,
           propertyFullyDisposed.get
         )
-      }
+      },
+      transactionCount = None
     )
   }
 }

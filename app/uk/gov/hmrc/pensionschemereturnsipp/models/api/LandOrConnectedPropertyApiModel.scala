@@ -18,23 +18,21 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  AddressDetails,
-  DisposalDetails,
-  LesseeDetails,
-  NameDOB,
-  NinoType
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 
 import java.time.LocalDate
 
 case class LandOrConnectedPropertyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails]]
+  transactions: Option[NonEmptyList[LandOrConnectedPropertyApiModel.TransactionDetails]]
 )
 
-object LandOrConnectedPropertyRequest {
+case class LandOrConnectedPropertyResponse(
+  transactions: List[LandOrConnectedPropertyApiModel.TransactionDetails]
+)
+
+object LandOrConnectedPropertyApiModel {
   case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
@@ -52,12 +50,14 @@ object LandOrConnectedPropertyRequest {
     lesseeDetails: Option[LesseeDetails],
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
-    disposalDetails: Option[DisposalDetails]
+    disposalDetails: Option[DisposalDetails],
+    transactionCount: Option[Int]
   ) extends MemberKey
 
   object TransactionDetails {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
 
-  implicit val format: OFormat[LandOrConnectedPropertyRequest] = Json.format[LandOrConnectedPropertyRequest]
+  implicit val formatReq: OFormat[LandOrConnectedPropertyRequest] = Json.format[LandOrConnectedPropertyRequest]
+  implicit val formatRes: OFormat[LandOrConnectedPropertyResponse] = Json.format[LandOrConnectedPropertyResponse]
 }
