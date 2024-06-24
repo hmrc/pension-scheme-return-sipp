@@ -25,10 +25,14 @@ import java.time.LocalDate
 
 case class AssetsFromConnectedPartyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[AssetsFromConnectedPartyRequest.TransactionDetails]]
+  transactions: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]]
 )
 
-object AssetsFromConnectedPartyRequest {
+case class AssetsFromConnectedPartyResponse(
+  transactions: List[AssetsFromConnectedPartyApi.TransactionDetails]
+)
+
+object AssetsFromConnectedPartyApi {
 
   case class TransactionDetails(
     nameDOB: NameDOB,
@@ -52,5 +56,6 @@ object AssetsFromConnectedPartyRequest {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
 
-  implicit val format: OFormat[AssetsFromConnectedPartyRequest] = Json.format[AssetsFromConnectedPartyRequest]
+  implicit val formatRes: OFormat[AssetsFromConnectedPartyResponse] = Json.format[AssetsFromConnectedPartyResponse]
+  implicit val formatReq: OFormat[AssetsFromConnectedPartyRequest] = Json.format[AssetsFromConnectedPartyRequest]
 }

@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

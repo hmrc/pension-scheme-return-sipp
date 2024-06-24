@@ -25,14 +25,14 @@ import java.time.LocalDate
 
 case class LandOrConnectedPropertyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[LandOrConnectedPropertyApiModel.TransactionDetails]]
+  transactions: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]]
 )
 
 case class LandOrConnectedPropertyResponse(
-  transactions: List[LandOrConnectedPropertyApiModel.TransactionDetails]
+  transactions: List[LandOrConnectedPropertyApi.TransactionDetails]
 )
 
-object LandOrConnectedPropertyApiModel {
+object LandOrConnectedPropertyApi {
   case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,

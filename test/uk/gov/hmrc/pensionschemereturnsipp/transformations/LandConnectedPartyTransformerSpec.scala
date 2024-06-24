@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
@@ -142,10 +142,33 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     }
   }
 
-  val sipp: LandOrConnectedPropertyApiModel.TransactionDetails = {
+  "transformToResponse" should {
+    "return correct response" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions)
+      )
+
+      result.transactions.length mustBe 1
+      result.transactions.head.transactionCount mustBe Some(1)
+      result.transactions.head.nino.nino mustBe sippMemberDetails.nino
+      result.transactions.head.nameDOB.firstName mustBe sippMemberDetails.firstName
+      result.transactions.head.nameDOB.lastName mustBe sippMemberDetails.lastName
+
+    }
+
+    "return no transaction if related not exist" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions.copy(landConnectedParty = None))
+      )
+
+      result.transactions.length mustBe 0
+    }
+  }
+
+  val sipp: LandOrConnectedPropertyApi.TransactionDetails = {
     import sippLandConnectedPartyTransactionDetail._
 
-    LandOrConnectedPropertyApiModel.TransactionDetails(
+    LandOrConnectedPropertyApi.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
@@ -31,7 +31,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
   private val transformer: TangibleMoveablePropertyTransformer = new TangibleMoveablePropertyTransformer()
 
-  val tanbigleTx = TangibleMoveablePropertyRequest.TransactionDetails(
+  val tanbigleTx = TangibleMoveablePropertyApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),

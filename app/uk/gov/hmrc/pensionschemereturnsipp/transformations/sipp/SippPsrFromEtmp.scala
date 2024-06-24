@@ -17,11 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import com.google.inject.{Inject, Singleton}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 
 @Singleton()
-class SippPsrFromEtmp @Inject() {
+class SippPsrFromEtmp @Inject()() {
 
   def transform(sippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse): SippPsrSubmission = {
     val reportDetails = sippPsrSubmissionEtmpResponse.reportDetails

@@ -17,21 +17,22 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApiModel
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, LesseeDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, LandOrConnectedPropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedPropertyApiModel.TransactionDetails] {
+class LandArmsLengthTransformer @Inject()()
+    extends Transformer[LandOrConnectedPropertyApi.TransactionDetails, LandOrConnectedPropertyResponse] {
   def merge(
-    landArmsData: NonEmptyList[LandOrConnectedPropertyApiModel.TransactionDetails],
+    landArmsData: NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[LandOrConnectedPropertyApiModel.TransactionDetails, SippLandArmsLength.TransactionDetail](
+      .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandArmsLength.TransactionDetail](
         landArmsData,
         etmpData,
         transformSingle,
@@ -43,7 +44,7 @@ class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedP
       )
 
   private def transformSingle(
-    property: LandOrConnectedPropertyApiModel.TransactionDetails
+    property: LandOrConnectedPropertyApi.TransactionDetails
   ): SippLandArmsLength.TransactionDetail =
     SippLandArmsLength.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
@@ -70,12 +71,29 @@ class LandArmsLengthTransformer @Inject()() extends Transformer[LandOrConnectedP
       propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed)
     )
 
-  def transformBack(
+  def transformToResponse(
+    memberAndTransactions: List[EtmpMemberAndTransactions]
+  ): LandOrConnectedPropertyResponse =
+    LandOrConnectedPropertyResponse(
+      memberAndTransactions.flatMap { memberAndTransaction =>
+        val member = memberAndTransaction.memberDetails
+        memberAndTransaction.landArmsLength
+          .map(
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(armsLength => transformTransactionDetails(member, transaction.noOfTransactions, armsLength))
+          )
+          .getOrElse(List.empty)
+      }
+    )
+
+  private def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
     armsLength: etmp.SippLandArmsLength.TransactionDetail
-  ): LandOrConnectedPropertyApiModel.TransactionDetails =
-    LandOrConnectedPropertyApiModel.TransactionDetails(
+  ): LandOrConnectedPropertyApi.TransactionDetails =
+    LandOrConnectedPropertyApi.TransactionDetails(
       nameDOB = toNameDOB(member),
       nino = toNinoType(member),
       acquisitionDate = armsLength.acquisitionDate,

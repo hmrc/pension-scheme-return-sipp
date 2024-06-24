@@ -25,10 +25,14 @@ import java.time.LocalDate
 
 case class TangibleMoveablePropertyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[TangibleMoveablePropertyRequest.TransactionDetails]]
+  transactions: Option[NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails]]
 )
 
-object TangibleMoveablePropertyRequest {
+case class TangibleMoveablePropertyResponse(
+  transactions: List[TangibleMoveablePropertyApi.TransactionDetails]
+)
+
+object TangibleMoveablePropertyApi {
 
   case class TransactionDetails(
     nameDOB: NameDOB,
@@ -49,5 +53,6 @@ object TangibleMoveablePropertyRequest {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
 
-  implicit val format: OFormat[TangibleMoveablePropertyRequest] = Json.format[TangibleMoveablePropertyRequest]
+  implicit val formatRes: OFormat[TangibleMoveablePropertyResponse] = Json.format[TangibleMoveablePropertyResponse]
+  implicit val formatReq: OFormat[TangibleMoveablePropertyRequest] = Json.format[TangibleMoveablePropertyRequest]
 }

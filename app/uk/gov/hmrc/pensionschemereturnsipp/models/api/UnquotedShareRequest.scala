@@ -29,10 +29,14 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 case class UnquotedShareRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[UnquotedShareRequest.TransactionDetail]]
+  transactions: Option[NonEmptyList[UnquotedShareApi.TransactionDetail]]
 )
 
-object UnquotedShareRequest {
+case class UnquotedShareResponse(
+  transactions: List[UnquotedShareApi.TransactionDetail]
+)
+
+object UnquotedShareApi {
 
   case class TransactionDetail(
     row: Int,
@@ -47,5 +51,6 @@ object UnquotedShareRequest {
   ) extends MemberKey
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
-  implicit val formatUnquotedShare: OFormat[UnquotedShareRequest] = Json.format[UnquotedShareRequest]
+  implicit val formatRes: OFormat[UnquotedShareResponse] = Json.format[UnquotedShareResponse]
+  implicit val formatReq: OFormat[UnquotedShareRequest] = Json.format[UnquotedShareRequest]
 }
