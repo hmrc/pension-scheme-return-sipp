@@ -19,25 +19,23 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status._
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{GetPsrAuditEvent, PostPsrAuditEvent}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 
-class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: AuditService)(
+class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
   implicit ec: ExecutionContext
 ) extends HttpErrorFunctions
     with HttpResponseHelper
     with Logging {
-
-  import auditService.AuditOps
 
   def submitSippPsr(pstr: String, request: SippPsrSubmissionEtmpRequest)(
     implicit headerCarrier: HeaderCarrier,
@@ -49,11 +47,11 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
 
     http
       .POST(url, request, integrationFrameworkHeaders)
-      .auditLog(PostPsrAuditEvent(url, request))
       .map {
         case response if response.status == OK => response
         case response => handleErrorResponse("POST", url)(response)
       }
+      .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, Json.toJson(request)))
   }
 
   def getSippPsr(
@@ -78,7 +76,6 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
 
     http
       .GET[HttpResponse](url, headers = integrationFrameworkHeaders)
-      .auditLog(GetPsrAuditEvent(url))
       .map { response =>
         response.status match {
           case OK =>
@@ -89,6 +86,7 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
           case _ => handleErrorResponse("GET", url)(response)
         }
       }
+      .andThen(apiAuditUtil.firePsrGetAuditEvent(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
   }
 
   private def buildParams(
