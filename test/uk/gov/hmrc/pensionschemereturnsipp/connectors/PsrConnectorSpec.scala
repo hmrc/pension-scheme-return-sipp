@@ -162,7 +162,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
   "getPsrVersions" should {
     val pstr = "testPstr"
     val date = LocalDate.now()
-    val url = s"/pension-online/reports/$pstr/SIPP/versions?startDate=${date.format(DateTimeFormatter.ISO_DATE)}"
+    val url = s"/pension-online/reports/$pstr/PSR/versions?startDate=${date.format(DateTimeFormatter.ISO_DATE)}"
 
     "return the list when an existing data is requested" in {
       stubGet(url, ok(samplePsrVersionsResponseAsJsonString))
