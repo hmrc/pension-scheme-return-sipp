@@ -14,3 +14,5 @@ PUT         /psr/outstanding-loans                       uk.gov.hmrc.pensionsche
 PUT         /psr/assets-from-connected-party             uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put
 PUT         /psr/tangible-moveable-property              uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.put
 PUT         /psr/unquoted-shares                         uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.put
+
+GET         /psr/versions/:pstr                          uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrVersions(pstr: String, startDate: String)
