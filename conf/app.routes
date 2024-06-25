@@ -6,7 +6,6 @@ GET         /psr/sipp/:pstr                              uk.gov.hmrc.pensionsche
 PUT         /psr/land-or-connected-property              uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
 GET         /psr/land-or-connected-property/:pstr        uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-
 PUT         /psr/land-arms-length                        uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.put
 GET         /psr/land-arms-length/:pstr                  uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
