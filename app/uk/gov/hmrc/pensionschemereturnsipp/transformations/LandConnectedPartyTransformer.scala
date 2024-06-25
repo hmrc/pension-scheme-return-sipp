@@ -94,7 +94,7 @@ class LandConnectedPartyTransformer @Inject()
       }
     )
 
-  def transformTransactionDetails(
+  private def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
     landConnectedParty: SippLandConnectedParty.TransactionDetail
