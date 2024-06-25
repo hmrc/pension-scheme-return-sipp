@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriod,
@@ -32,9 +32,9 @@ case class SippPsrSubmissionEtmpResponse(
 
 object SippPsrSubmissionEtmpResponse {
 
-  implicit val accountingPeriodReads: Reads[EtmpSippAccountingPeriod] = Json.reads[EtmpSippAccountingPeriod]
-  implicit val accountingPeriodDetailsReads: Reads[EtmpSippAccountingPeriodDetails] =
-    Json.reads[EtmpSippAccountingPeriodDetails]
+  implicit val accountingPeriodFormat: Format[EtmpSippAccountingPeriod] = Json.format[EtmpSippAccountingPeriod]
+  implicit val accountingPeriodDetailsFormat: Format[EtmpSippAccountingPeriodDetails] =
+    Json.format[EtmpSippAccountingPeriodDetails]
 
-  implicit val reads: Reads[SippPsrSubmissionEtmpResponse] = Json.reads[SippPsrSubmissionEtmpResponse]
+  implicit val format: Format[SippPsrSubmissionEtmpResponse] = Json.format[SippPsrSubmissionEtmpResponse]
 }
