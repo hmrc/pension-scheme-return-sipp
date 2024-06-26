@@ -27,10 +27,14 @@ import java.time.LocalDate
 
 case class OutstandingLoansRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[OutstandingLoansRequest.TransactionDetail]]
+  transactions: Option[NonEmptyList[OutstandingLoansApi.TransactionDetail]]
 )
 
-object OutstandingLoansRequest {
+case class OutstandingLoansResponse(
+  transactions: List[OutstandingLoansApi.TransactionDetail]
+)
+
+object OutstandingLoansApi {
 
   case class TransactionDetail(
     nameDOB: NameDOB,
@@ -71,5 +75,6 @@ object OutstandingLoansRequest {
     }
   }
 
-  implicit val format: OFormat[OutstandingLoansRequest] = Json.format[OutstandingLoansRequest]
+  implicit val formatRes: OFormat[OutstandingLoansResponse] = Json.format[OutstandingLoansResponse]
+  implicit val formatReq: OFormat[OutstandingLoansRequest] = Json.format[OutstandingLoansRequest]
 }

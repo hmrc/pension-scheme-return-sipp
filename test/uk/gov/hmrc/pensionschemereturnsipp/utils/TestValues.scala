@@ -36,6 +36,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
+import scala.annotation.unused
 
 trait TestValues {
 
@@ -70,6 +71,7 @@ trait TestValues {
   )
 
   // SIPP - ETMP
+  @unused
   private val sampleEtmpAccountingPeriodDetails: EtmpSippAccountingPeriodDetails = EtmpSippAccountingPeriodDetails(
     version = Some("002"),
     accountingPeriods = List(

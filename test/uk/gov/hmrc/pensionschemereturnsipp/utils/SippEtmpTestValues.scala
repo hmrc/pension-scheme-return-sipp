@@ -17,19 +17,20 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.ReportDetailsOps
 
 import java.time.LocalDate
+import scala.annotation.unused
 
 trait SippEtmpTestValues {
   val sampleDate: LocalDate = LocalDate.of(2023, 10, 19)
@@ -50,12 +51,14 @@ trait SippEtmpTestValues {
     noRegistryRefReason = Some("I have a registry and I have entered my registry reference")
   )
 
+  @unused
   private val sippJointPropertyDetail1: EtmpSippJointPropertyDetail = EtmpSippJointPropertyDetail(
     personName = "AnotherLongName Surname",
     nino = Some("QQ123456A"),
     reasonNoNINO = Some("I have a Nino!")
   )
 
+  @unused
   private val sippJointPropertyDetail2: EtmpSippJointPropertyDetail = EtmpSippJointPropertyDetail(
     personName = "Another AgainLongName Surname",
     nino = Some("QQ123457A"),
@@ -252,7 +255,7 @@ trait SippEtmpTestValues {
     transactionDetails = Some(List(sippUnquotedSharesTransactionalDetail))
   )
 
-  private val etmpSippMemberAndTransactions: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
+  protected val etmpSippMemberAndTransactions: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
     version = None,
     status = New,
     memberDetails = sippMemberDetails,
@@ -264,15 +267,15 @@ trait SippEtmpTestValues {
     unquotedShares = Some(sippUnquotedShares)
   )
 
-  val fullSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
+  protected val fullSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
     reportDetails = reportDetails,
     accountingPeriodDetails = Some(accountingPeriodDetails),
     memberAndTransactions = Some(NonEmptyList.one(etmpSippMemberAndTransactions)),
     psrDeclaration = None
   )
 
-  val landConnectedTransaction: LandOrConnectedPropertyRequest.TransactionDetails =
-    LandOrConnectedPropertyRequest.TransactionDetails(
+  protected val landConnectedTransaction: LandOrConnectedPropertyApi.TransactionDetails =
+    LandOrConnectedPropertyApi.TransactionDetails(
       nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
       nino = NinoType(nino = Some("nino"), reasonNoNino = None),
       acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -298,7 +301,8 @@ trait SippEtmpTestValues {
       lesseeDetails = None,
       totalIncomeOrReceipts = 10,
       isPropertyDisposed = YesNo.Yes,
-      disposalDetails = None
+      disposalDetails = None,
+      transactionCount = None
     )
 
   val etmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(

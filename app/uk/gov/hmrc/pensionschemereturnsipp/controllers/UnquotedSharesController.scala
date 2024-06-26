@@ -20,6 +20,7 @@ import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import uk.gov.hmrc.http.HttpErrorFunctions
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
