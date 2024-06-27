@@ -12,6 +12,8 @@ GET         /psr/land-arms-length/:pstr                  uk.gov.hmrc.pensionsche
 PUT         /psr/outstanding-loans                       uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.put
 PUT         /psr/assets-from-connected-party             uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put
 PUT         /psr/tangible-moveable-property              uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.put
+
 PUT         /psr/unquoted-shares                         uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.put
+GET         /psr/unquoted-shares/:pstr                   uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
 GET         /psr/versions/:pstr                          uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrVersions(pstr: String, startDate: String)
