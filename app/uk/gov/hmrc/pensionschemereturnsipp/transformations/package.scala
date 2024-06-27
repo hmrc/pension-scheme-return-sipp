@@ -57,6 +57,17 @@ package object transformations {
     )
   }
 
+  implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
+    def toApi = ReportDetails(
+      pstr = report.pstr.getOrElse(throw new IllegalArgumentException("pstr was missing in the ETMP response")), // todo check with ETMP why it's not mandatory
+      status = report.status,
+      periodStart = report.periodStart,
+      periodEnd = report.periodEnd,
+      schemeName = report.schemeName,
+      psrVersion = report.psrVersion
+    )
+  }
+
   implicit class ReportDetailsOps(val report: ReportDetails) extends AnyVal {
     def toEtmp = EtmpSippReportDetails(
       pstr = Some(report.pstr),

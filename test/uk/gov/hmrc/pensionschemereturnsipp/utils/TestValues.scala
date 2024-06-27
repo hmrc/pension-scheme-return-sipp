@@ -19,6 +19,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
@@ -33,7 +35,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
 import scala.annotation.unused
@@ -68,6 +69,23 @@ trait TestValues {
 
   val sampleSippPsrSubmission: SippPsrSubmission = SippPsrSubmission(
     sampleSippReportDetailsSubmission
+  )
+
+  val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
+    details = ReportDetails(
+      pstr = "test",
+      status = EtmpPsrStatus.Submitted,
+      periodStart = LocalDate.of(2020, 12, 12),
+      periodEnd = LocalDate.of(2020, 12, 12),
+      schemeName = None,
+      psrVersion = None
+    ),
+    landConnectedParty = None,
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = None,
+    unquotedShares = None
   )
 
   // SIPP - ETMP
