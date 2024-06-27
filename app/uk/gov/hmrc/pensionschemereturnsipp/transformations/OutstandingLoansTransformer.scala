@@ -47,13 +47,14 @@ class OutstandingLoansTransformer @Inject()
   ): OutstandingLoansResponse =
     OutstandingLoansResponse(
       memberAndTransactions.flatMap { memberAndTransaction =>
-        val member = memberAndTransaction.memberDetails
+        //val member = memberAndTransaction.memberDetails
         memberAndTransaction.loanOutstanding
           .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(loans => transformTransactionDetails(member, transaction.noOfTransactions, loans))
+            _ =>
+//              transaction.transactionDetails
+//                .getOrElse(List.empty)
+//                .map(loans => transformTransactionDetails(member, transaction.noOfTransactions, loans))
+              None //TODO: Implement me!!!
           )
           .getOrElse(List.empty)
       }

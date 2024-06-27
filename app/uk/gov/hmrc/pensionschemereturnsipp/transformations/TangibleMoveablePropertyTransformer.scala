@@ -69,13 +69,14 @@ class TangibleMoveablePropertyTransformer @Inject()
   ): TangibleMoveablePropertyResponse =
     TangibleMoveablePropertyResponse(
       memberAndTransactions.flatMap { memberAndTransaction =>
-        val member = memberAndTransaction.memberDetails
+        //val member = memberAndTransaction.memberDetails
         memberAndTransaction.tangibleProperty
           .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(tangible => transformTransactionDetails(member, transaction.noOfTransactions, tangible))
+            _ =>
+//              transaction.transactionDetails
+//                .getOrElse(List.empty)
+//                .map(tangible => transformTransactionDetails(member, transaction.noOfTransactions, tangible))
+              None //TODO: Implement me!!!
           )
           .getOrElse(List.empty)
       }
