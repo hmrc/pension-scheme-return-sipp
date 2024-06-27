@@ -19,17 +19,21 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status._
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{GetPsrAuditEvent, PostPsrAuditEvent}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
   implicit ec: ExecutionContext
@@ -97,7 +101,6 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
     val url = config.getPsrVersionsUrl.format(pstr)
     http
       .GET[HttpResponse](url, queryParams = Seq("startDate" -> startDateStr), integrationFrameworkHeaders)
-      .auditLog(GetPsrVersionsAuditEvent(url))
       .flatMap {
         case response if response.status == 200 =>
           Future.fromTry(Try(response.json.as[Seq[PsrVersionsResponse]]))
