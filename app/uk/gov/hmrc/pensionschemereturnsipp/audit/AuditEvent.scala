@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.audit
+package uk.gov.hmrc.pensionschemereturnsipp.audit
 
-import enumeratum.{Enum, EnumEntry}
+import play.api.libs.json.JsObject
 
-sealed abstract class AuditType extends EnumEntry
+trait AuditEvent {
+  def auditType: String
 
-object AuditType extends Enum[AuditType] {
-  case object GetPSR extends AuditType
-  case object PostPSR extends AuditType
-  case object GetPSRVersions extends AuditType
-
-  override def values: IndexedSeq[AuditType] = findValues
+  def details: JsObject
 }

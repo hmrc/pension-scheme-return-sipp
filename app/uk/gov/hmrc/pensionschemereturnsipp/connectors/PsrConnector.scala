@@ -22,30 +22,20 @@ import play.api.http.Status._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{
-  GetPsrAuditEvent,
-  GetPsrVersionsAuditEvent,
-  PostPsrAuditEvent
-}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.{GetPsrAuditEvent, PostPsrAuditEvent}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
-class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: AuditService)(
+class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
   implicit ec: ExecutionContext
 ) extends HttpErrorFunctions
     with HttpResponseHelper
     with Logging {
-
-  import auditService.AuditOps
 
   def submitSippPsr(pstr: String, request: SippPsrSubmissionEtmpRequest)(
     implicit headerCarrier: HeaderCarrier,
@@ -57,11 +47,11 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
 
     http
       .POST(url, request, integrationFrameworkHeaders)
-      .auditLog(PostPsrAuditEvent(url, request))
       .map {
         case response if response.status == OK => response
         case response => handleErrorResponse("POST", url)(response)
       }
+      .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, Json.toJson(request)))
   }
 
   def getSippPsr(
@@ -80,19 +70,23 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, auditService: 
 
     logger.info(logMessage)
 
+    def isNotFound(response: HttpResponse) =
+      response.status == NOT_FOUND ||
+        (response.status == UNPROCESSABLE_ENTITY && response.body.contains("PSR_NOT_FOUND"))
+
     http
       .GET[HttpResponse](url, headers = integrationFrameworkHeaders)
-      .auditLog(GetPsrAuditEvent(url))
       .map { response =>
         response.status match {
           case OK =>
             Some(response.json.as[SippPsrSubmissionEtmpResponse])
-          case NOT_FOUND =>
+          case _ if isNotFound(response) =>
             logger.warn(s"$logMessage and returned ${response.status}")
             None
           case _ => handleErrorResponse("GET", url)(response)
         }
       }
+      .andThen(apiAuditUtil.firePsrGetAuditEvent(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
   }
 
   def getPsrVersions(

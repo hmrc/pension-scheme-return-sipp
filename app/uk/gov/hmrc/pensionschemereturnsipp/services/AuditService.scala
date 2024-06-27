@@ -16,50 +16,53 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import com.google.inject.{ImplementedBy, Inject}
+import play.api.Logging
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.audit.AuditEvent
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent
-import uk.gov.hmrc.pensionschemereturnsipp.models.audit.AuditEvent.AuditEventWithResult
-import uk.gov.hmrc.play.audit.AuditExtensions.{auditHeaderCarrier, AuditHeaderCarrier}
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.audit.AuditExtensions._
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
+import scala.util.{Failure, Success}
 
-@Singleton
-class AuditService @Inject()(config: AppConfig, connector: AuditConnector)(implicit ec: ExecutionContext) {
-  private def sendEvent(event: AuditEvent)(implicit rh: RequestHeader): Future[Unit] =
-    connector
-      .sendEvent(
-        DataEvent(
-          auditSource = config.appName,
-          auditType = event.auditType.entryName,
-          tags = rh.toAuditTags(),
-          detail = event.details
-        )
-      )
-      .void
+@ImplementedBy(classOf[AuditServiceImpl])
+trait AuditService {
 
-  implicit class AuditOps(call: Future[HttpResponse]) {
-    def auditLog(event: AuditEvent)(implicit rh: RequestHeader): Future[HttpResponse] =
-      call
-        .flatMap { response =>
-          val eventWithResult = AuditEventWithResult(event, response.status.some, response.body.some.filter(_.nonEmpty))
-          sendEvent(eventWithResult) // async call
-          Future.successful(response)
-        }
-        .recoverWith { t: Throwable =>
-          sendEvent(AuditEventWithResult(event, None, None, t.some))
-          Future.failed(t)
-        }
-  }
+  def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit
+
+}
+
+class AuditServiceImpl @Inject()(config: AppConfig, connector: AuditConnector) extends AuditService with Logging {
 
   private implicit def toHc(request: RequestHeader): AuditHeaderCarrier =
-    auditHeaderCarrier(HeaderCarrierConverter.fromRequestAndSession(request, request.session))
+    auditHeaderCarrier(HeaderCarrierConverter.fromRequest(request))
 
+  def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit = {
+
+    logger.info(s"[AuditService][sendEvent] sending ${event.auditType}")
+
+    val result: Future[AuditResult] = connector.sendExtendedEvent(
+      ExtendedDataEvent(
+        auditSource = config.appName,
+        auditType = event.auditType,
+        tags = rh.toAuditTags(
+          transactionName = event.auditType,
+          path = rh.path
+        ),
+        detail = event.details
+      )
+    )
+
+    result.onComplete {
+      case Success(_) =>
+        logger.debug(s"[AuditService][sendEvent] successfully sent ${event.auditType}")
+      case Failure(e) =>
+        logger.error(s"[AuditService][sendEvent] failed to send event ${event.auditType}", e)
+    }
+  }
 }
