@@ -17,20 +17,22 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippUnquotedShares}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{UnquotedShareApi, UnquotedShareResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class UnquotedSharesTransformer @Inject() extends Transformer[UnquotedShareRequest.TransactionDetail] {
+class UnquotedSharesTransformer @Inject()
+    extends Transformer[UnquotedShareApi.TransactionDetail, UnquotedShareResponse] {
 
   def merge(
-    unquotedShares: NonEmptyList[UnquotedShareRequest.TransactionDetail],
+    unquotedShares: NonEmptyList[UnquotedShareApi.TransactionDetail],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[UnquotedShareRequest.TransactionDetail, SippUnquotedShares.TransactionDetail](
+      .merge[UnquotedShareApi.TransactionDetail, SippUnquotedShares.TransactionDetail](
         unquotedShares,
         etmpData,
         transformSingle,
@@ -43,7 +45,7 @@ class UnquotedSharesTransformer @Inject() extends Transformer[UnquotedShareReque
       )
 
   private def transformSingle(
-    details: UnquotedShareRequest.TransactionDetail
+    details: UnquotedShareApi.TransactionDetail
   ): SippUnquotedShares.TransactionDetail =
     SippUnquotedShares.TransactionDetail(
       sharesCompanyDetails = toEtmp(details.shareCompanyDetails),
@@ -56,4 +58,27 @@ class UnquotedSharesTransformer @Inject() extends Transformer[UnquotedShareReque
       sharesDisposalDetails = details.sharesDisposalDetails.map(toEtmp),
       noOfSharesHeld = Some(details.noOfSharesHeld)
     )
+
+  def transformToResponse(
+    memberAndTransactions: List[EtmpMemberAndTransactions]
+  ): UnquotedShareResponse =
+    UnquotedShareResponse(
+      memberAndTransactions.flatMap { memberAndTransaction =>
+        val member = memberAndTransaction.memberDetails
+        memberAndTransaction.unquotedShares
+          .map(
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(shares => transformTransactionDetails(member, transaction.noOfTransactions, shares))
+          )
+          .getOrElse(List.empty)
+      }
+    )
+
+  def transformTransactionDetails(
+    member: MemberDetails,
+    transactionCount: Int,
+    landConnectedParty: etmp.SippUnquotedShares.TransactionDetail
+  ): UnquotedShareApi.TransactionDetail = ???
 }

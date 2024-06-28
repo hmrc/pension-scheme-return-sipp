@@ -17,20 +17,21 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest.TransactionDetail.TransformationOps
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippLoanOutstanding}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{OutstandingLoansApi, OutstandingLoansResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class OutstandingLoansTransformer @Inject() extends Transformer[OutstandingLoansRequest.TransactionDetail] {
+class OutstandingLoansTransformer @Inject()
+    extends Transformer[OutstandingLoansApi.TransactionDetail, OutstandingLoansResponse] {
   def merge(
-    updates: NonEmptyList[OutstandingLoansRequest.TransactionDetail],
+    updates: NonEmptyList[OutstandingLoansApi.TransactionDetail],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[OutstandingLoansRequest.TransactionDetail, SippLoanOutstanding.TransactionDetail](
+      .merge[OutstandingLoansApi.TransactionDetail, SippLoanOutstanding.TransactionDetail](
         updates,
         etmpData,
         _.toEtmp,
@@ -40,4 +41,28 @@ class OutstandingLoansTransformer @Inject() extends Transformer[OutstandingLoans
               maybeTransactions.map(transactions => SippLoanOutstanding(transactions.length, Some(transactions.toList)))
           )
       )
+
+  def transformToResponse(
+    memberAndTransactions: List[EtmpMemberAndTransactions]
+  ): OutstandingLoansResponse =
+    OutstandingLoansResponse(
+      memberAndTransactions.flatMap { memberAndTransaction =>
+        val member = memberAndTransaction.memberDetails
+        memberAndTransaction.loanOutstanding
+          .map(
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(loans => transformTransactionDetails(member, transaction.noOfTransactions, loans))
+          )
+          .getOrElse(List.empty)
+      }
+    )
+
+  def transformTransactionDetails(
+    member: MemberDetails,
+    transactionCount: Int,
+    landConnectedParty: etmp.SippLoanOutstanding.TransactionDetail
+  ): OutstandingLoansApi.TransactionDetail =
+    ???
 }

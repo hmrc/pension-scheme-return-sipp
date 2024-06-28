@@ -18,46 +18,44 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  AddressDetails,
-  DisposalDetails,
-  LesseeDetails,
-  NameDOB,
-  NinoType
-}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType, SharesCompanyDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 import java.time.LocalDate
 
-case class LandOrConnectedPropertyRequest(
+case class AssetsFromConnectedPartyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[LandOrConnectedPropertyRequest.TransactionDetails]]
+  transactions: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]]
 )
 
-object LandOrConnectedPropertyRequest {
+case class AssetsFromConnectedPartyResponse(
+  transactions: List[AssetsFromConnectedPartyApi.TransactionDetails]
+)
+
+object AssetsFromConnectedPartyApi {
+
   case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
     acquisitionDate: LocalDate,
-    landOrPropertyinUK: YesNo,
-    addressDetails: AddressDetails,
-    registryDetails: RegistryDetails,
+    assetDescription: String,
+    acquisitionOfShares: YesNo,
+    shareCompanyDetails: Option[SharesCompanyDetails],
     acquiredFromName: String,
     totalCost: Double,
     independentValuation: YesNo,
-    jointlyHeld: YesNo,
-    noOfPersons: Option[Int],
-    residentialSchedule29A: YesNo,
-    isLeased: YesNo,
-    lesseeDetails: Option[LesseeDetails],
+    tangibleSchedule29A: YesNo,
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
-    disposalDetails: Option[DisposalDetails]
+    disposalDetails: Option[DisposalDetails],
+    disposalOfShares: YesNo,
+    noOfSharesHeld: Option[Int]
   ) extends MemberKey
 
   object TransactionDetails {
     implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
 
-  implicit val format: OFormat[LandOrConnectedPropertyRequest] = Json.format[LandOrConnectedPropertyRequest]
+  implicit val formatRes: OFormat[AssetsFromConnectedPartyResponse] = Json.format[AssetsFromConnectedPartyResponse]
+  implicit val formatReq: OFormat[AssetsFromConnectedPartyRequest] = Json.format[AssetsFromConnectedPartyRequest]
 }

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
@@ -197,8 +197,8 @@ object SippLoanOutstanding {
 
   object TransactionDetail {
     implicit class TransformationOps(val transactionDetail: TransactionDetail) extends AnyVal {
-      def toApi(nameDOB: NameDOB, nino: NinoType): OutstandingLoansRequest.TransactionDetail =
-        OutstandingLoansRequest.TransactionDetail(
+      def toApi(nameDOB: NameDOB, nino: NinoType): OutstandingLoansApi.TransactionDetail =
+        OutstandingLoansApi.TransactionDetail(
           nameDOB,
           nino,
           loanRecipientName = transactionDetail.loanRecipientName,

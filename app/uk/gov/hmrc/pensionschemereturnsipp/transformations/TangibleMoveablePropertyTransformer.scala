@@ -17,21 +17,22 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippTangibleProperty}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{TangibleMoveablePropertyApi, TangibleMoveablePropertyResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class TangibleMoveablePropertyTransformer @Inject()
-    extends Transformer[TangibleMoveablePropertyRequest.TransactionDetails] {
+    extends Transformer[TangibleMoveablePropertyApi.TransactionDetails, TangibleMoveablePropertyResponse] {
 
   def merge(
-    tangibleMovableProperties: NonEmptyList[TangibleMoveablePropertyRequest.TransactionDetails],
+    tangibleMovableProperties: NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[TangibleMoveablePropertyRequest.TransactionDetails, SippTangibleProperty.TransactionDetail](
+      .merge[TangibleMoveablePropertyApi.TransactionDetails, SippTangibleProperty.TransactionDetail](
         tangibleMovableProperties,
         etmpData,
         transformSingle,
@@ -44,7 +45,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       )
 
   private def transformSingle(
-    property: TangibleMoveablePropertyRequest.TransactionDetails
+    property: TangibleMoveablePropertyApi.TransactionDetails
   ): SippTangibleProperty.TransactionDetail =
     SippTangibleProperty.TransactionDetail(
       assetDescription = property.assetDescription,
@@ -62,4 +63,28 @@ class TangibleMoveablePropertyTransformer @Inject()
       independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
     )
+
+  def transformToResponse(
+    memberAndTransactions: List[EtmpMemberAndTransactions]
+  ): TangibleMoveablePropertyResponse =
+    TangibleMoveablePropertyResponse(
+      memberAndTransactions.flatMap { memberAndTransaction =>
+        val member = memberAndTransaction.memberDetails
+        memberAndTransaction.tangibleProperty
+          .map(
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(tangible => transformTransactionDetails(member, transaction.noOfTransactions, tangible))
+          )
+          .getOrElse(List.empty)
+      }
+    )
+
+  def transformTransactionDetails(
+    member: MemberDetails,
+    transactionCount: Int,
+    landConnectedParty: etmp.SippTangibleProperty.TransactionDetail
+  ): TangibleMoveablePropertyApi.TransactionDetails =
+    ???
 }

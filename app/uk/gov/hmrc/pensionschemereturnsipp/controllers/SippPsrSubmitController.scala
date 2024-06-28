@@ -26,8 +26,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.SippPsrSubmission
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton()
 class SippPsrSubmitController @Inject()(
@@ -71,6 +74,19 @@ class SippPsrSubmitController @Inject()(
       sippPsrSubmissionService.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
         case None => NotFound
         case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+      }
+    }
+  }
+
+  def getPsrVersions(pstr: String, startDateStr: String): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(s"Retrieving PSR versions with pstr $pstr and startDate $startDateStr")
+      Try(LocalDate.parse(startDateStr, DateTimeFormatter.ISO_DATE)) match {
+        case Success(startDate) =>
+          sippPsrSubmissionService.getPsrVersions(pstr, startDate).map(result => Ok(Json.toJson(result)))
+        case Failure(t) =>
+          logger.error(s"Retrieving PSR versions for $pstr failed because of invalid startDate $startDateStr", t)
+          Future.successful(BadRequest(s"Invalid startDate $startDateStr"))
       }
     }
   }

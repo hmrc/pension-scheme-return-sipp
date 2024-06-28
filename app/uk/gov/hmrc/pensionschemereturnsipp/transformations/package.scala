@@ -45,6 +45,29 @@ package object transformations {
     )
   }
 
+  implicit class AddressEtmpOps(val address: EtmpAddress) extends AnyVal {
+    def fromEtmp: ApiAddressDetails = ApiAddressDetails(
+      addressLine1 = address.addressLine1,
+      addressLine2 = Some(address.addressLine2),
+      addressLine3 = address.addressLine3,
+      addressLine4 = address.addressLine4,
+      addressLine5 = address.addressLine5,
+      ukPostCode = address.ukPostCode,
+      countryCode = address.countryCode
+    )
+  }
+
+  implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
+    def toApi = ReportDetails(
+      pstr = report.pstr.getOrElse(throw new IllegalArgumentException("pstr was missing in the ETMP response")), // todo check with ETMP why it's not mandatory
+      status = report.status,
+      periodStart = report.periodStart,
+      periodEnd = report.periodEnd,
+      schemeName = report.schemeName,
+      psrVersion = report.psrVersion
+    )
+  }
+
   implicit class ReportDetailsOps(val report: ReportDetails) extends AnyVal {
     def toEtmp = EtmpSippReportDetails(
       pstr = Some(report.pstr),
@@ -82,5 +105,18 @@ package object transformations {
       nino.nino,
       nino.reasonNoNino,
       nameDoB.dob
+    )
+
+  def toNameDOB(memberDetails: MemberDetails): NameDOB =
+    NameDOB(
+      memberDetails.firstName,
+      memberDetails.lastName,
+      memberDetails.dateOfBirth
+    )
+
+  def toNinoType(memberDetails: MemberDetails): NinoType =
+    NinoType(
+      memberDetails.nino,
+      memberDetails.reasonNoNINO
     )
 }

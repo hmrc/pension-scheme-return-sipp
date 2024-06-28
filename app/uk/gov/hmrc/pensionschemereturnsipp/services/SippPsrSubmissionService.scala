@@ -23,31 +23,17 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  AssetsFromConnectedPartyRequest,
-  LandOrConnectedPropertyRequest,
-  OutstandingLoansRequest,
-  ReportDetails,
-  TangibleMoveablePropertyRequest,
-  UnquotedShareRequest
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
-  AssetsFromConnectedPartyTransformer,
-  LandArmsLengthTransformer,
-  LandConnectedPartyTransformer,
-  OutstandingLoansTransformer,
-  ReportDetailsOps,
-  TangibleMoveablePropertyTransformer,
-  Transformer,
-  UnquotedSharesTransformer
-}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations._
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRSubmissionTransformer, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
@@ -55,7 +41,7 @@ class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
   jsonPayloadSchemaValidator: JSONSchemaValidator,
   sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
-  sippPsrFromEtmp: SippPsrFromEtmp,
+  psrSubmissionTransformer: PSRSubmissionTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
@@ -70,6 +56,17 @@ class SippPsrSubmissionService @Inject()(
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, landConnectedPartyTransformer)
 
+  def getLandOrConnectedProperty(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[LandOrConnectedPropertyResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, landConnectedPartyTransformer)
+
   def submitOutstandingLoans(
     request: OutstandingLoansRequest
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
@@ -80,25 +77,69 @@ class SippPsrSubmissionService @Inject()(
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, armsLengthTransformer)
 
+  def getLandArmsLength(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[LandOrConnectedPropertyResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, armsLengthTransformer)
+
   def submitAssetsFromConnectedParty(
     request: AssetsFromConnectedPartyRequest
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, assetsFromConnectedPartyTransformer)
+
+  def getAssetsFromConnectedParty(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[AssetsFromConnectedPartyResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, assetsFromConnectedPartyTransformer)
 
   def submitTangibleMoveableProperty(
     request: TangibleMoveablePropertyRequest
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, tangibleMovablePropertyTransformer)
 
+  def getTangibleMoveableProperty(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[TangibleMoveablePropertyResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, tangibleMovablePropertyTransformer)
+
   def submitUnquotedShares(
     request: UnquotedShareRequest
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, unquotedSharesTransformer)
 
-  private def submitJourney[A](
+  def getUnquotedShares(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[UnquotedShareResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, unquotedSharesTransformer)
+
+  private def submitJourney[A, V](
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
-    transformer: Transformer[A]
+    transformer: Transformer[A, V]
   )(
     implicit hc: HeaderCarrier,
     requestHeader: RequestHeader
@@ -114,10 +155,29 @@ class SippPsrSubmissionService @Inject()(
         psrConnector.submitSippPsr(reportDetails.pstr, request)
       }
 
-  private def mergeWithExistingEtmpData[A](
+  private def getJourney[A, V](
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    transformer: Transformer[A, V]
+  )(
+    implicit hc: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[V]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map {
+        case Some(existingEtmpData) =>
+          Some(transformer.transformToResponse(existingEtmpData.memberAndTransactions.getOrElse(List.empty)))
+        case None =>
+          None
+      }
+
+  private def mergeWithExistingEtmpData[A, V](
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
-    transformer: Transformer[A]
+    transformer: Transformer[A, V]
   )(
     implicit hc: HeaderCarrier,
     requestHeader: RequestHeader
@@ -156,9 +216,14 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[SippPsrSubmission]] =
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[PSRSubmissionResponse]] =
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(_.map(sippPsrFromEtmp.transform))
+      .map(_.map(psrSubmissionTransformer.transform))
 
+  def getPsrVersions(
+    pstr: String,
+    startDate: LocalDate
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] =
+    psrConnector.getPsrVersions(pstr, startDate)
 }

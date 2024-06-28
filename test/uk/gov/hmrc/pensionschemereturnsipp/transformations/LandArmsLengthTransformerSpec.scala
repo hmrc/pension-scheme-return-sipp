@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
@@ -32,7 +32,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
   private val transformer: LandArmsLengthTransformer = new LandArmsLengthTransformer()
 
-  val landArmsDataRow1 = LandOrConnectedPropertyRequest.TransactionDetails(
+  val landArmsDataRow1 = LandOrConnectedPropertyApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -57,7 +57,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     lesseeDetails = None,
     totalIncomeOrReceipts = 10,
     isPropertyDisposed = YesNo.Yes,
-    disposalDetails = None
+    disposalDetails = None,
+    transactionCount = None
   )
 
   val etmpData = EtmpMemberAndTransactions(
@@ -223,9 +224,32 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     }
   }
 
+  "transformToResponse" should {
+    "return correct response" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions)
+      )
+
+      result.transactions.length mustBe 1
+      result.transactions.head.transactionCount mustBe Some(1)
+      result.transactions.head.nino.nino mustBe sippMemberDetails.nino
+      result.transactions.head.nameDOB.firstName mustBe sippMemberDetails.firstName
+      result.transactions.head.nameDOB.lastName mustBe sippMemberDetails.lastName
+
+    }
+
+    "return no transaction if related not exist" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions.copy(landArmsLength = None))
+      )
+
+      result.transactions.length mustBe 0
+    }
+  }
+
   lazy val sipp = {
     import sippLandArmsLengthTransactionDetail._
-    LandOrConnectedPropertyRequest.TransactionDetails(
+    LandOrConnectedPropertyApi.TransactionDetails(
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
@@ -270,7 +294,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
           independentValutionDisposal.get,
           propertyFullyDisposed.get
         )
-      }
+      },
+      transactionCount = None
     )
   }
 

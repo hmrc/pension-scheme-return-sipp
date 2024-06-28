@@ -17,20 +17,25 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, SippOtherAssetsConnectedParty}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
+  MemberDetails,
+  SippOtherAssetsConnectedParty
+}
+
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AssetsFromConnectedPartyTransformer @Inject()
-    extends Transformer[AssetsFromConnectedPartyRequest.TransactionDetails] {
+    extends Transformer[AssetsFromConnectedPartyApi.TransactionDetails, AssetsFromConnectedPartyResponse] {
 
   def merge(
-    assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedPartyRequest.TransactionDetails],
+    assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[AssetsFromConnectedPartyRequest.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
+      .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
         assetsFromConnectedParty,
         etmpData,
         transformSingle,
@@ -43,7 +48,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
       )
 
   private def transformSingle(
-    property: AssetsFromConnectedPartyRequest.TransactionDetails
+    property: AssetsFromConnectedPartyApi.TransactionDetails
   ): SippOtherAssetsConnectedParty.TransactionDetail =
     SippOtherAssetsConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
@@ -64,4 +69,27 @@ class AssetsFromConnectedPartyTransformer @Inject()
       noOfSharesHeld = property.noOfSharesHeld,
       propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
     )
+
+  def transformToResponse(
+    memberAndTransactions: List[EtmpMemberAndTransactions]
+  ): AssetsFromConnectedPartyResponse =
+    AssetsFromConnectedPartyResponse(
+      memberAndTransactions.flatMap { memberAndTransaction =>
+        val member = memberAndTransaction.memberDetails
+        memberAndTransaction.otherAssetsConnectedParty
+          .map(
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(assets => transformTransactionDetails(member, transaction.noOfTransactions, assets))
+          )
+          .getOrElse(List.empty)
+      }
+    )
+
+  def transformTransactionDetails(
+    member: MemberDetails,
+    transactionCount: Int,
+    otherAssetsConnectedParty: SippOtherAssetsConnectedParty.TransactionDetail
+  ): AssetsFromConnectedPartyApi.TransactionDetails = ???
 }

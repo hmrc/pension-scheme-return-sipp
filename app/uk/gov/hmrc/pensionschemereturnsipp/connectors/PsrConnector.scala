@@ -24,12 +24,16 @@ import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
   implicit ec: ExecutionContext
@@ -87,6 +91,24 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
         }
       }
       .andThen(apiAuditUtil.firePsrGetAuditEvent(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
+  }
+
+  def getPsrVersions(
+    pstr: String,
+    startDate: LocalDate
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] = {
+    val startDateStr = startDate.format(DateTimeFormatter.ISO_DATE)
+    val url = config.getPsrVersionsUrl.format(pstr)
+    http
+      .GET[HttpResponse](url, queryParams = Seq("startDate" -> startDateStr), integrationFrameworkHeaders)
+      .flatMap {
+        case response if response.status == 200 =>
+          Future.fromTry(Try(response.json.as[Seq[PsrVersionsResponse]]))
+        case response if response.status == 404 =>
+          Future.successful(Seq.empty)
+        case response =>
+          handleErrorResponse("GET", url)(response)
+      }
   }
 
   private def buildParams(

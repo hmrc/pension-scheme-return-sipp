@@ -16,25 +16,53 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
-import play.api.libs.json.JsValue
-import play.api.mvc.Action
+import cats.implicits.toFunctorOps
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import cats.syntax.functor._
-import javax.inject.Inject
-import javax.inject.Singleton
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class LandArmsLengthController @Inject()(cc: ControllerComponents, service: SippPsrSubmissionService)(
+class LandArmsLengthController @Inject()(
+  cc: ControllerComponents,
+  service: SippPsrSubmissionService,
+  val authConnector: AuthConnector
+)(
   implicit ec: ExecutionContext
-) extends BackendController(cc) {
+) extends BackendController(cc)
+    with PsrAuth {
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
     val requestContent = request.body.as[LandOrConnectedPropertyRequest]
     service
       .submitLandArmsLength(requestContent)
       .as(NotImplemented)
+  }
+
+  def get(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR for LandArmsLength - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      service
+        .getLandArmsLength(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+        .map {
+          case Some(data) =>
+            Ok(Json.toJson(data))
+          case _ =>
+            NoContent
+        }
+    }
   }
 }

@@ -21,13 +21,14 @@ import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{SippPsrFromEtmp, SippPsrSubmissionToEtmp}
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeReturnValidationFailureException
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, PSRSubmissionResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRSubmissionTransformer, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -39,6 +40,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -54,7 +56,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockPsrConnector = mock[PsrConnector]
   private val mockJSONSchemaValidator = mock[JSONSchemaValidator]
   private val mockSippPsrSubmissionToEtmp = mock[SippPsrSubmissionToEtmp]
-  private val mockSippPsrFromEtmp = mock[SippPsrFromEtmp]
+  private val mockSippPsrFromEtmp = mock[PSRSubmissionTransformer]
   private val mockLandConnectedPartyTransformer = mock[LandConnectedPartyTransformer]
   private val mockArmsLengthTransformer = mock[LandArmsLengthTransformer]
   private val mockOutstandingLoansTransformer = mock[OutstandingLoansTransformer]
@@ -76,7 +78,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  private implicit val fakeRequest = FakeRequest()
+  private implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   "submitLandOrConnectedProperty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
@@ -142,7 +144,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
-      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[SippPsrSubmission] =>
+      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[PSRSubmissionResponse] =>
         result mustBe None
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
@@ -154,10 +156,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
-      when(mockSippPsrFromEtmp.transform(any())).thenReturn(sampleSippPsrSubmission)
+      when(mockSippPsrFromEtmp.transform(any())).thenReturn(samplePsrSubmission)
 
-      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[SippPsrSubmission] =>
-        result mustBe Some(sampleSippPsrSubmission)
+      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[PSRSubmissionResponse] =>
+        result mustBe Some(samplePsrSubmission)
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockSippPsrFromEtmp, times(1)).transform(any())
@@ -237,4 +239,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
   }
 
+  "getPsrVersions" should {
+    "successfully return the expected versions" in {
+      val pstr = "testpstr"
+      val date = LocalDate.now()
+      when(mockPsrConnector.getPsrVersions(pstr, date)).thenReturn(Future.successful(Seq.empty))
+      service.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty
+    }
+  }
 }

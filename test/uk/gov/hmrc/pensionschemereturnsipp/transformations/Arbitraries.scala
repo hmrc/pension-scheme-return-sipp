@@ -17,11 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import org.scalacheck.Arbitrary
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.Generators.outstandingLoanGenerator
 
 object Arbitraries {
-  implicit val outstandingLoanArbitrary: Arbitrary[OutstandingLoansRequest.TransactionDetail] = Arbitrary(
+  implicit val outstandingLoanArbitrary: Arbitrary[OutstandingLoansApi.TransactionDetail] = Arbitrary(
     outstandingLoanGenerator
   )
 }

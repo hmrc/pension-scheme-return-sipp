@@ -17,17 +17,12 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyRequest, TangibleMoveablePropertyRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpSippSharesCompanyDetail, SectionStatus}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  MemberDetails,
-  SippOtherAssetsConnectedParty,
-  SippTangibleProperty
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
 import java.time.LocalDate
@@ -35,21 +30,6 @@ import java.time.LocalDate
 class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
 
   private val transformer: TangibleMoveablePropertyTransformer = new TangibleMoveablePropertyTransformer()
-
-  val tanbigleTx = TangibleMoveablePropertyRequest.TransactionDetails(
-    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
-    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
-    acquisitionDate = LocalDate.of(2020, 1, 1),
-    assetDescription = "Asset Description",
-    acquiredFromName = "acquiredFromName",
-    totalCost = 20.0,
-    independentValuation = YesNo.Yes,
-    totalIncomeOrReceipts = 20.0,
-    costOrMarket = MarketValue,
-    costMarketValue = 20.0,
-    isPropertyDisposed = YesNo.No,
-    disposalDetails = None
-  )
 
   val etmpData = EtmpMemberAndTransactions(
     status = SectionStatus.New,
@@ -98,7 +78,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
     "put new member data if there is no previous data" in {
       val testEtmpData = etmpData.copy(otherAssetsConnectedParty = None)
 
-      val result = transformer.merge(NonEmptyList.of(tanbigleTx), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(sippTangibleApi), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -133,7 +113,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
     }
 
     "replace data for a single member when member match is found" in {
-      val updateValues = tanbigleTx.copy(
+      val updateValues = sippTangibleApi.copy(
         acquiredFromName = "test2"
       )
       val result = transformer.merge(NonEmptyList.of(updateValues), List(etmpData))
@@ -171,7 +151,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
     }
 
     "add data with new member details for a single member when match is not found" in {
-      val testData = tanbigleTx.copy(nino = NinoType(Some("otherNino"), None))
+      val testData = sippTangibleApi.copy(nino = NinoType(Some("otherNino"), None))
       val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
 
       result mustBe List(
