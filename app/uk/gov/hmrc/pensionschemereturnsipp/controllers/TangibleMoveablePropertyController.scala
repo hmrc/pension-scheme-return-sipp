@@ -17,9 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
+import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -31,12 +33,14 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class TangibleMoveablePropertyController @Inject()(
   cc: ControllerComponents,
-  sippPsrSubmissionService: SippPsrSubmissionService
+  service: SippPsrSubmissionService,
+  override val authConnector: AuthConnector
 )(
   implicit ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
+    with PsrAuth
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
@@ -44,13 +48,32 @@ class TangibleMoveablePropertyController @Inject()(
     logger.debug(
       s"Submitting TangibleMovableProperty PSR details - Incoming payload: $tangibleMoveablePropertySubmission"
     )
-    sippPsrSubmissionService
+    service
       .submitTangibleMoveableProperty(tangibleMoveablePropertySubmission)
       .map { response =>
         logger
           .debug(s"Submit TangibleMovableProperty PSR details - response: ${response.status}, body: ${response.body}")
         NoContent
       }
+  }
+
+  def get(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR for TangibleMovableProperty - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      service
+        .getTangibleMoveableProperty(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+        .map {
+          case Some(data) => Ok(Json.toJson(data))
+          case _ => NoContent
+        }
+    }
   }
 
 }
