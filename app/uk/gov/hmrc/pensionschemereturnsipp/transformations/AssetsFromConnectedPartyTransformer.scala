@@ -75,14 +75,13 @@ class AssetsFromConnectedPartyTransformer @Inject()
   ): AssetsFromConnectedPartyResponse =
     AssetsFromConnectedPartyResponse(
       memberAndTransactions.flatMap { memberAndTransaction =>
-        //val member = memberAndTransaction.memberDetails
+        val member = memberAndTransaction.memberDetails
         memberAndTransaction.otherAssetsConnectedParty
           .map(
-            _ =>
-              //transaction.transactionDetails
-              //                .getOrElse(List.empty)
-              //                .map(assets => transformTransactionDetails(member, transaction.noOfTransactions, assets))
-              None //TODO: Implement me!!!
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(assets => transformTransactionDetails(member, transaction.noOfTransactions, assets))
           )
           .getOrElse(List.empty)
       }

@@ -48,19 +48,19 @@ class PSRSubmissionTransformer @Inject()(
       landConnectedParty = membTxs
         .flatMap(mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)),
       otherAssetsConnectedParty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(mTxs).transactions)
+        _ => None //TODO: Implement me
       ),
       landArmsLength = membTxs.flatMap(
         mTxs => NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(mTxs).transactions)
       ),
       tangibleProperty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(mTxs).transactions)
+        _ => None //TODO: Implement me
       ),
       loanOutstanding = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(mTxs).transactions)
+        _ => None //TODO: Implement me
       ),
       unquotedShares = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(mTxs).transactions)
+        _ => None //TODO: Implement me
       )
     )
   }

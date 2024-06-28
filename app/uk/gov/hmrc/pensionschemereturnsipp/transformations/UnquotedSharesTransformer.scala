@@ -64,14 +64,13 @@ class UnquotedSharesTransformer @Inject()
   ): UnquotedShareResponse =
     UnquotedShareResponse(
       memberAndTransactions.flatMap { memberAndTransaction =>
-        //val member = memberAndTransaction.memberDetails
+        val member = memberAndTransaction.memberDetails
         memberAndTransaction.unquotedShares
           .map(
-            _ =>
-//              transaction.transactionDetails
-//                .getOrElse(List.empty)
-//                .map(shares => transformTransactionDetails(member, transaction.noOfTransactions, shares))
-              None //TODO: Implement me!!!
+            transaction =>
+              transaction.transactionDetails
+                .getOrElse(List.empty)
+                .map(shares => transformTransactionDetails(member, transaction.noOfTransactions, shares))
           )
           .getOrElse(List.empty)
       }

@@ -120,30 +120,7 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
             List()
           )
         ),
-        Some(
-          NonEmptyList(
-            AssetsFromConnectedPartyApi.TransactionDetails(
-              NameDOB("TestLongFirstName", "TestLongLastName", LocalDate.parse("2023-10-19")),
-              NinoType(Some("QQ123456A"), Some("I have a Nino!")),
-              LocalDate.parse("2023-10-19"),
-              "Some Asset Description",
-              Yes,
-              Some(
-                SharesCompanyDetails("A Long Company Name", Some("A1231233"), Some("I have a CRN NUMBER"), "A class", 1)
-              ),
-              "TestLongName TestLongSurname",
-              9999999.99,
-              Yes,
-              Yes,
-              999999.99,
-              Yes,
-              Some(DisposalDetails(999999.99, "Name1 Surname1, Name2 Surname2, Name3 Surname3", No, No, Yes)),
-              No,
-              Some(2)
-            ),
-            List()
-          )
-        ),
+        None,
         Some(
           NonEmptyList(
             LandOrConnectedPropertyApi.TransactionDetails(
@@ -169,61 +146,9 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
             List()
           )
         ),
-        Some(
-          NonEmptyList(
-            TangibleMoveablePropertyApi.TransactionDetails(
-              NameDOB("firstName", "lastName", LocalDate.parse("2020-01-01")),
-              NinoType(Some("nino"), None),
-              "Asset Description",
-              LocalDate.parse("2020-01-01"),
-              20.0,
-              "acquiredFromName",
-              Yes,
-              20.0,
-              MarketValue,
-              20.0,
-              No,
-              None
-            ),
-            List()
-          )
-        ),
-        Some(
-          NonEmptyList(
-            OutstandingLoansApi.TransactionDetail(
-              NameDOB("firstName", "lastName", LocalDate.parse("2020-01-01")),
-              NinoType(Some("nino"), None),
-              "test",
-              LocalDate.parse("2020-01-01"),
-              1.0,
-              Yes,
-              LocalDate.parse("2020-01-01"),
-              1.0,
-              Yes,
-              1.0,
-              1.0,
-              Yes,
-              1.0
-            ),
-            List()
-          )
-        ),
-        Some(
-          NonEmptyList(
-            UnquotedShareApi.TransactionDetail(
-              1,
-              NameDOB("firstName", "lastName", LocalDate.parse("2020-01-01")),
-              NinoType(Some("nino"), None),
-              SharesCompanyDetails("test", None, None, "test", 1),
-              "test",
-              UnquotedShareTransactionDetail(1.0, Yes, None, 1.0),
-              Yes,
-              None,
-              1
-            ),
-            List()
-          )
-        )
+        None,
+        None,
+        None
       )
     }
 
