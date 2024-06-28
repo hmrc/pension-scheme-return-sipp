@@ -132,7 +132,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(Some(sampleSippPsrSubmission)))
+        .thenReturn(Future.successful(Some(samplePsrSubmission)))
 
       val result = controller.getSippPsr("testPstr", Some("fbNumber"), None, None)(fakeRequest)
       status(result) mustBe Status.OK
