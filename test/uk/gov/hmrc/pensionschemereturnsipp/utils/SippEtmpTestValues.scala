@@ -17,9 +17,23 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{AddressDetails, NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, ReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
+  AddressDetails,
+  DisposalDetails,
+  NameDOB,
+  NinoType,
+  SharesCompanyDetails,
+  UnquotedShareTransactionDetail
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AssetsFromConnectedPartyApi,
+  LandOrConnectedPropertyApi,
+  OutstandingLoansApi,
+  ReportDetails,
+  TangibleMoveablePropertyApi,
+  UnquotedShareApi
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.{CostValue, MarketValue}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
@@ -354,6 +368,99 @@ trait SippEtmpTestValues {
     tangibleProperty = None,
     loanOutstanding = None,
     unquotedShares = None
+  )
+
+  lazy val sippAssetsFromConnectedPartyApi: AssetsFromConnectedPartyApi.TransactionDetails = {
+    import sippOtherAssetsConnectedPartyTransactionDetail._
+
+    AssetsFromConnectedPartyApi.TransactionDetails(
+      nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
+      nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
+      acquisitionDate = acquisitionDate,
+      assetDescription = assetDescription,
+      acquisitionOfShares = acquisitionOfShares,
+      shareCompanyDetails = sharesCompanyDetails.map(
+        details =>
+          SharesCompanyDetails(
+            details.companySharesName,
+            details.companySharesCRN,
+            details.reasonNoCRN,
+            details.sharesClass,
+            details.noOfShares
+          )
+      ),
+      acquiredFromName = acquiredFromName,
+      totalCost = totalCost,
+      independentValuation = independentValution,
+      tangibleSchedule29A = tangibleSchedule29A,
+      totalIncomeOrReceipts = totalIncomeOrReceipts,
+      isPropertyDisposed = YesNo(isPropertyDisposed.boolean),
+      disposalDetails = Option.when(isPropertyDisposed.boolean) {
+        DisposalDetails(
+          disposedPropertyProceedsAmt.get,
+          purchaserNamesIfDisposed.get,
+          YesNo(anyOfPurchaserConnected.get.boolean),
+          YesNo(independentValutionDisposal.get.boolean),
+          YesNo(propertyFullyDisposed.get.boolean)
+        )
+      },
+      disposalOfShares = disposalOfShares,
+      noOfSharesHeld = noOfSharesHeld
+    )
+  }
+
+  val sippTangibleApi = TangibleMoveablePropertyApi.TransactionDetails(
+    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+    acquisitionDate = LocalDate.of(2020, 1, 1),
+    assetDescription = "Asset Description",
+    acquiredFromName = "acquiredFromName",
+    totalCost = 20.0,
+    independentValuation = YesNo.Yes,
+    totalIncomeOrReceipts = 20.0,
+    costOrMarket = MarketValue,
+    costMarketValue = 20.0,
+    isPropertyDisposed = YesNo.No,
+    disposalDetails = None
+  )
+
+  val sippUnquotedShareApi = UnquotedShareApi.TransactionDetail(
+    row = 1,
+    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+    shareCompanyDetails = SharesCompanyDetails(
+      companySharesName = "test",
+      companySharesCRN = None,
+      reasonNoCRN = None,
+      sharesClass = "test",
+      noOfShares = 1
+    ),
+    acquiredFromName = "test",
+    transactionDetail = UnquotedShareTransactionDetail(
+      totalCost = 1.0,
+      independentValuation = YesNo.Yes,
+      noOfIndependentValuationSharesSold = None,
+      totalDividendsIncome = 1.00
+    ),
+    sharesDisposed = YesNo.Yes,
+    sharesDisposalDetails = None,
+    noOfSharesHeld = 1
+  )
+
+  val sippOutstandingLoansApi = OutstandingLoansApi.TransactionDetail(
+    nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+    nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+    loanRecipientName = "test",
+    dateOfLoan = LocalDate.of(2020, 1, 1),
+    amountOfLoan = 1,
+    loanConnectedParty = YesNo.Yes,
+    repayDate = LocalDate.of(2020, 1, 1),
+    interestRate = 1,
+    loanSecurity = YesNo.Yes,
+    capitalRepayments = 1,
+    interestPayments = 1,
+    arrearsOutstandingPrYears = YesNo.Yes,
+    outstandingYearEndAmount = 1
   )
 
 }

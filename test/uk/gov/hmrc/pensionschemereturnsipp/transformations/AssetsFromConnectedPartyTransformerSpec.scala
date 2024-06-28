@@ -268,43 +268,4 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
   }
 
-  lazy val sipp: AssetsFromConnectedPartyApi.TransactionDetails = {
-    import sippOtherAssetsConnectedPartyTransactionDetail._
-
-    AssetsFromConnectedPartyApi.TransactionDetails(
-      nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
-      nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
-      acquisitionDate = acquisitionDate,
-      assetDescription = assetDescription,
-      acquisitionOfShares = acquisitionOfShares,
-      shareCompanyDetails = sharesCompanyDetails.map(
-        details =>
-          SharesCompanyDetails(
-            details.companySharesName,
-            details.companySharesCRN,
-            details.reasonNoCRN,
-            details.sharesClass,
-            details.noOfShares
-          )
-      ),
-      acquiredFromName = acquiredFromName,
-      totalCost = totalCost,
-      independentValuation = independentValution,
-      tangibleSchedule29A = tangibleSchedule29A,
-      totalIncomeOrReceipts = totalIncomeOrReceipts,
-      isPropertyDisposed = YesNo(isPropertyDisposed.boolean),
-      disposalDetails = Option.when(isPropertyDisposed.boolean) {
-        DisposalDetails(
-          disposedPropertyProceedsAmt.get,
-          purchaserNamesIfDisposed.get,
-          YesNo(anyOfPurchaserConnected.get.boolean),
-          YesNo(independentValutionDisposal.get.boolean),
-          YesNo(propertyFullyDisposed.get.boolean)
-        )
-      },
-      disposalOfShares = disposalOfShares,
-      noOfSharesHeld = noOfSharesHeld
-    )
-  }
-
 }
