@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AccountingPeriod, AccountingPeriodDetails, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   NameDOB,
   NinoType,
@@ -25,7 +25,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpSippAccountingPeriodDetails,
+  EtmpSippReportDetails,
+  MemberDetails
+}
 
 package object transformations {
   implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
@@ -60,6 +64,13 @@ package object transformations {
       periodEnd = report.periodEnd,
       schemeName = report.schemeName,
       psrVersion = report.psrVersion
+    )
+  }
+
+  implicit class EtmpAccountingPeriodOps(val details: EtmpSippAccountingPeriodDetails) extends AnyVal {
+    def toApi: AccountingPeriodDetails = AccountingPeriodDetails(
+      version = details.version,
+      accountingPeriods = details.accountingPeriods.map(aP => AccountingPeriod(aP.accPeriodStart, aP.accPeriodEnd))
     )
   }
 

@@ -19,7 +19,12 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AccountingPeriod,
+  AccountingPeriodDetails,
+  PSRSubmissionResponse,
+  ReportDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
@@ -75,6 +80,10 @@ trait TestValues {
       periodEnd = LocalDate.of(2020, 12, 12),
       schemeName = None,
       psrVersion = None
+    ),
+    accountingPeriodDetails = AccountingPeriodDetails(
+      Some("1.0"),
+      List(AccountingPeriod(LocalDate.of(2020, 12, 12), LocalDate.of(2020, 12, 12)))
     ),
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
