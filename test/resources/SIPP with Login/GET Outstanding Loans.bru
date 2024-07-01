@@ -1,19 +1,19 @@
 meta {
-  name: Sipp PSR with periodStartDate-psrVersion
+  name: GET Outstanding Loans
   type: http
-  seq: 10
+  seq: 5
 }
 
 get {
-  url: {{pension-scheme-return-sipp}}/psr/sipp/24000001IN?periodStartDate=2021-04-06&psrVersion=001
+  url: {{pension-scheme-return-sipp}}/psr/outstanding-loans/24000001IN?periodStartDate=2021-04-06&psrVersion=456
   body: none
   auth: bearer
 }
 
 query {
   periodStartDate: 2021-04-06
-  psrVersion: 001
-  ~fbNumber: 123
+  psrVersion: 456
+  ~fbNumber: 000000021221
 }
 
 auth:bearer {

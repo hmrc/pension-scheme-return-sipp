@@ -18,8 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType, SharesCompanyDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, YesNo}
 
 import java.time.LocalDate
 
@@ -49,7 +49,8 @@ object AssetsFromConnectedPartyApi {
     isPropertyDisposed: YesNo,
     disposalDetails: Option[DisposalDetails],
     disposalOfShares: YesNo,
-    noOfSharesHeld: Option[Int]
+    noOfSharesHeld: Option[Int],
+    transactionCount: Option[Int]
   ) extends MemberKey
 
   object TransactionDetails {

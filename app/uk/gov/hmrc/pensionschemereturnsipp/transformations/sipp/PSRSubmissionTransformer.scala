@@ -45,22 +45,23 @@ class PSRSubmissionTransformer @Inject()(
 
     PSRSubmissionResponse(
       details = etmpResponse.reportDetails.toApi,
-      landConnectedParty = membTxs
-        .flatMap(mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)),
+      landConnectedParty = membTxs.flatMap(
+        mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)
+      ),
       otherAssetsConnectedParty = membTxs.flatMap(
-        _ => None //TODO: Implement me
+        mTxs => NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(mTxs).transactions)
       ),
       landArmsLength = membTxs.flatMap(
         mTxs => NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(mTxs).transactions)
       ),
       tangibleProperty = membTxs.flatMap(
-        _ => None //TODO: Implement me
+        mTxs => NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(mTxs).transactions)
       ),
       loanOutstanding = membTxs.flatMap(
-        _ => None //TODO: Implement me
+        mTxs => NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(mTxs).transactions)
       ),
       unquotedShares = membTxs.flatMap(
-        _ => None //TODO: Implement me
+        mTxs => NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(mTxs).transactions)
       )
     )
   }

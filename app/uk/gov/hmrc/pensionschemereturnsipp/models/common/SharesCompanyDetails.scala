@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EtmpSippSharesCompanyDetail(
+case class SharesCompanyDetails(
   companySharesName: String,
   companySharesCRN: Option[String],
   reasonNoCRN: Option[String],
@@ -26,6 +26,6 @@ case class EtmpSippSharesCompanyDetail(
   noOfShares: Int
 )
 
-object EtmpSippSharesCompanyDetail {
-  implicit val format: OFormat[EtmpSippSharesCompanyDetail] = Json.format[EtmpSippSharesCompanyDetail]
+object SharesCompanyDetails {
+  implicit val format: OFormat[SharesCompanyDetails] = Json.format[SharesCompanyDetails]
 }

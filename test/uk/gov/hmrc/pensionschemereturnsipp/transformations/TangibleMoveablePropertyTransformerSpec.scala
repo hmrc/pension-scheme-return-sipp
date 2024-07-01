@@ -17,7 +17,6 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo

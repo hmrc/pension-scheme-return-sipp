@@ -21,25 +21,23 @@ import play.api.libs.json._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   NameDOB,
   NinoType,
-  SharesCompanyDetails,
   UnquotedShareDisposalDetail,
   UnquotedShareTransactionDetail
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, YesNo}
 
 case class UnquotedShareRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[UnquotedShareApi.TransactionDetail]]
+  transactions: Option[NonEmptyList[UnquotedShareApi.TransactionDetails]]
 )
 
 case class UnquotedShareResponse(
-  transactions: List[UnquotedShareApi.TransactionDetail]
+  transactions: List[UnquotedShareApi.TransactionDetails]
 )
 
 object UnquotedShareApi {
 
-  case class TransactionDetail(
-    row: Int,
+  case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
     shareCompanyDetails: SharesCompanyDetails,
@@ -47,10 +45,14 @@ object UnquotedShareApi {
     transactionDetail: UnquotedShareTransactionDetail,
     sharesDisposed: YesNo,
     sharesDisposalDetails: Option[UnquotedShareDisposalDetail],
-    noOfSharesHeld: Int
+    noOfSharesHeld: Option[Int],
+    transactionCount: Option[Int]
   ) extends MemberKey
 
-  implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
+  object TransactionDetails {
+    implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
+  }
+
   implicit val formatRes: OFormat[UnquotedShareResponse] = Json.format[UnquotedShareResponse]
   implicit val formatReq: OFormat[UnquotedShareRequest] = Json.format[UnquotedShareRequest]
 }

@@ -17,9 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
+import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -31,12 +33,14 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class OutstandingLoansController @Inject()(
   cc: ControllerComponents,
-  sippPsrSubmissionService: SippPsrSubmissionService
+  service: SippPsrSubmissionService,
+  val authConnector: AuthConnector
 )(
   implicit ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
+    with PsrAuth
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
@@ -44,7 +48,7 @@ class OutstandingLoansController @Inject()(
     logger.debug(
       message = s"Submitting OutstandingLoan PSR details - Incoming payload: $outstandingLoansRequest"
     )
-    sippPsrSubmissionService
+    service
       .submitOutstandingLoans(outstandingLoansRequest)
       .map { response =>
         logger.debug(
@@ -54,4 +58,22 @@ class OutstandingLoansController @Inject()(
       }
   }
 
+  def get(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR for OutstandingLoans - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      service
+        .getOutstandingLoans(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+        .map {
+          case Some(data) => Ok(Json.toJson(data))
+          case _ => NoContent
+        }
+    }
+  }
 }

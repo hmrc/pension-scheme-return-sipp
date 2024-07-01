@@ -46,7 +46,8 @@ object TangibleMoveablePropertyApi {
     costOrMarket: CostOrMarketType,
     costMarketValue: Double,
     isPropertyDisposed: YesNo,
-    disposalDetails: Option[DisposalDetails]
+    disposalDetails: Option[DisposalDetails],
+    transactionCount: Option[Int]
   ) extends MemberKey
 
   object TransactionDetails {

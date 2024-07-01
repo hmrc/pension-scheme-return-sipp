@@ -25,8 +25,8 @@ case class PSRSubmissionResponse(
   otherAssetsConnectedParty: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]],
   landArmsLength: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],
   tangibleProperty: Option[NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails]],
-  loanOutstanding: Option[NonEmptyList[OutstandingLoansApi.TransactionDetail]],
-  unquotedShares: Option[NonEmptyList[UnquotedShareApi.TransactionDetail]]
+  loanOutstanding: Option[NonEmptyList[OutstandingLoansApi.TransactionDetails]],
+  unquotedShares: Option[NonEmptyList[UnquotedShareApi.TransactionDetails]]
 )
 
 object PSRSubmissionResponse {
