@@ -21,20 +21,15 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  AssetsFromConnectedPartyApi,
   AssetsFromConnectedPartyResponse,
   LandOrConnectedPropertyApi,
   LandOrConnectedPropertyResponse,
-  OutstandingLoansApi,
   OutstandingLoansResponse,
   PSRSubmissionResponse,
   ReportDetails,
-  TangibleMoveablePropertyApi,
   TangibleMoveablePropertyResponse,
-  UnquotedShareApi,
   UnquotedShareResponse
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled

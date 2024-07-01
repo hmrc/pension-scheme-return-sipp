@@ -22,7 +22,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   DisposalDetails,
   NameDOB,
   NinoType,
-  SharesCompanyDetails,
   UnquotedShareTransactionDetail
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -35,7 +34,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.{CostValue, MarketValue}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
@@ -405,7 +404,8 @@ trait SippEtmpTestValues {
         )
       },
       disposalOfShares = disposalOfShares,
-      noOfSharesHeld = noOfSharesHeld
+      noOfSharesHeld = noOfSharesHeld,
+      transactionCount = None
     )
   }
 
@@ -421,10 +421,11 @@ trait SippEtmpTestValues {
     costOrMarket = MarketValue,
     costMarketValue = 20.0,
     isPropertyDisposed = YesNo.No,
-    disposalDetails = None
+    disposalDetails = None,
+    transactionCount = None
   )
 
-  val sippUnquotedShareApi = UnquotedShareApi.TransactionDetail(
+  val sippUnquotedShareApi = UnquotedShareApi.TransactionDetails(
     row = 1,
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
@@ -444,10 +445,11 @@ trait SippEtmpTestValues {
     ),
     sharesDisposed = YesNo.Yes,
     sharesDisposalDetails = None,
-    noOfSharesHeld = 1
+    noOfSharesHeld = Some(1),
+    transactionCount = None
   )
 
-  val sippOutstandingLoansApi = OutstandingLoansApi.TransactionDetail(
+  val sippOutstandingLoansApi = OutstandingLoansApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     loanRecipientName = "test",
@@ -460,7 +462,8 @@ trait SippEtmpTestValues {
     capitalRepayments = 1,
     interestPayments = 1,
     arrearsOutstandingPrYears = YesNo.Yes,
-    outstandingYearEndAmount = 1
+    outstandingYearEndAmount = 1,
+    transactionCount = None
   )
 
 }
