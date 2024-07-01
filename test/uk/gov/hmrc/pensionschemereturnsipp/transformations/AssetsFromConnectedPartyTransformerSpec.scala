@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpSippSharesCompanyDetail, SectionStatus}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
@@ -124,7 +124,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquisitionOfShares = YesNo.Yes,
                     sharesCompanyDetails = Some(
-                      EtmpSippSharesCompanyDetail(
+                      SharesCompanyDetails(
                         companySharesName = "companySharesName",
                         companySharesCRN = Some("12345678"),
                         reasonNoCRN = None,
@@ -179,7 +179,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquisitionOfShares = YesNo.Yes,
                     sharesCompanyDetails = Some(
-                      EtmpSippSharesCompanyDetail(
+                      SharesCompanyDetails(
                         companySharesName = "testCompanySharesName2",
                         companySharesCRN = Some("12345678"),
                         reasonNoCRN = None,
@@ -235,7 +235,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquisitionOfShares = YesNo.Yes,
                     sharesCompanyDetails = Some(
-                      EtmpSippSharesCompanyDetail(
+                      SharesCompanyDetails(
                         companySharesName = "companySharesName",
                         companySharesCRN = Some("12345678"),
                         reasonNoCRN = None,

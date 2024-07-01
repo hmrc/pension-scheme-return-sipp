@@ -21,11 +21,10 @@ import play.api.libs.json._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
   NameDOB,
   NinoType,
-  SharesCompanyDetails,
   UnquotedShareDisposalDetail,
   UnquotedShareTransactionDetail
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, YesNo}
 
 case class UnquotedShareRequest(
   reportDetails: ReportDetails,

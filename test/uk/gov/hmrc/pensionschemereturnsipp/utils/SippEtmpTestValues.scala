@@ -109,7 +109,7 @@ trait SippEtmpTestValues {
     dateOfBirth = sampleDate
   )
 
-  private val sippSharesCompanyDetail: EtmpSippSharesCompanyDetail = EtmpSippSharesCompanyDetail(
+  private val sippSharesCompanyDetail: SharesCompanyDetails = SharesCompanyDetails(
     companySharesName = "A Long Company Name",
     companySharesCRN = Some("A1231233"),
     reasonNoCRN = Some("I have a CRN NUMBER"),

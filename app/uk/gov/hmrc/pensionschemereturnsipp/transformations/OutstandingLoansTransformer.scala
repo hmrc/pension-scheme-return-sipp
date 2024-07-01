@@ -17,8 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{OutstandingLoansApi, OutstandingLoansResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 
 import javax.inject.{Inject, Singleton}
@@ -62,7 +65,21 @@ class OutstandingLoansTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    landConnectedParty: etmp.SippLoanOutstanding.TransactionDetail
+    trx: etmp.SippLoanOutstanding.TransactionDetail
   ): OutstandingLoansApi.TransactionDetail =
-    ???
+    OutstandingLoansApi.TransactionDetail(
+      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
+      nino = NinoType(member.nino, member.reasonNoNINO),
+      loanRecipientName = trx.loanRecipientName,
+      dateOfLoan = trx.dateOfLoan,
+      amountOfLoan = trx.amountOfLoan,
+      loanConnectedParty = YesNo(trx.loanConnectedParty == Connected),
+      repayDate = trx.repayDate,
+      interestRate = trx.interestRate,
+      loanSecurity = trx.loanSecurity,
+      capitalRepayments = trx.capitalRepayments,
+      interestPayments = trx.interestPayments,
+      arrearsOutstandingPrYears = trx.arrearsOutstandingPrYears,
+      outstandingYearEndAmount = trx.outstandingYearEndAmount
+    )
 }

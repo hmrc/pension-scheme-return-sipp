@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{TangibleMoveablePropertyApi, TangibleMoveablePropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
@@ -84,7 +85,28 @@ class TangibleMoveablePropertyTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    landConnectedParty: etmp.SippTangibleProperty.TransactionDetail
+    trx: etmp.SippTangibleProperty.TransactionDetail
   ): TangibleMoveablePropertyApi.TransactionDetails =
-    ???
+    TangibleMoveablePropertyApi.TransactionDetails(
+      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
+      nino = NinoType(member.nino, member.reasonNoNINO),
+      assetDescription = trx.assetDescription,
+      acquisitionDate = trx.acquisitionDate,
+      totalCost = trx.totalCost,
+      acquiredFromName = trx.acquiredFromName,
+      independentValuation = trx.independentValution,
+      totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
+      costOrMarket = trx.costOrMarket,
+      costMarketValue = trx.costMarketValue,
+      isPropertyDisposed = trx.isPropertyDisposed,
+      disposalDetails = Option.when(trx.isPropertyDisposed.boolean)(
+        DisposalDetails(
+          disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
+          namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
+          anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
+          independentValuationDisposal = trx.independentValutionDisposal.get,
+          propertyFullyDisposed = trx.propertyFullyDisposed.get
+        )
+      )
+    )
 }

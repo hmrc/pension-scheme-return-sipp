@@ -17,6 +17,12 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
+  NameDOB,
+  NinoType,
+  UnquotedShareDisposalDetail,
+  UnquotedShareTransactionDetail
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{UnquotedShareApi, UnquotedShareResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
@@ -79,6 +85,23 @@ class UnquotedSharesTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    landConnectedParty: etmp.SippUnquotedShares.TransactionDetail
-  ): UnquotedShareApi.TransactionDetail = ???
+    trx: etmp.SippUnquotedShares.TransactionDetail
+  ): UnquotedShareApi.TransactionDetail =
+    UnquotedShareApi.TransactionDetail(
+      row = transactionCount,
+      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
+      nino = NinoType(member.nino, member.reasonNoNINO),
+      shareCompanyDetails = trx.sharesCompanyDetails,
+      acquiredFromName = trx.acquiredFromName,
+      transactionDetail = UnquotedShareTransactionDetail(
+        trx.totalCost,
+        trx.independentValution,
+        trx.noOfSharesSold,
+        trx.totalDividendsIncome
+      ),
+      sharesDisposed = trx.sharesDisposed,
+      sharesDisposalDetails = trx.sharesDisposalDetails
+        .map(d => UnquotedShareDisposalDetail(trx.sharesDisposalDetails.map(_.disposedShareAmount))),
+      noOfSharesHeld = trx.noOfSharesHeld
+    )
 }

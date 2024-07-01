@@ -19,7 +19,12 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  CostOrMarketType,
+  RegistryDetails,
+  SharesCompanyDetails,
+  YesNo
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 
 import java.time.LocalDate
@@ -94,7 +99,7 @@ object SippOtherAssetsConnectedParty {
     acquisitionDate: LocalDate,
     assetDescription: String,
     acquisitionOfShares: YesNo,
-    sharesCompanyDetails: Option[EtmpSippSharesCompanyDetail],
+    sharesCompanyDetails: Option[SharesCompanyDetails],
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo,
@@ -224,7 +229,7 @@ case class SippUnquotedShares(
 
 object SippUnquotedShares {
   case class TransactionDetail(
-    sharesCompanyDetails: EtmpSippSharesCompanyDetail,
+    sharesCompanyDetails: SharesCompanyDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValution: YesNo,
