@@ -88,7 +88,6 @@ class UnquotedSharesTransformer @Inject()
     trx: etmp.SippUnquotedShares.TransactionDetail
   ): UnquotedShareApi.TransactionDetails =
     UnquotedShareApi.TransactionDetails(
-      row = transactionCount,
       nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
       nino = NinoType(member.nino, member.reasonNoNINO),
       shareCompanyDetails = trx.sharesCompanyDetails,

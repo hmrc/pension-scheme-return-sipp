@@ -5,15 +5,15 @@ meta {
 }
 
 get {
-  url: {{pension-scheme-return-sipp}}/psr/land-or-connected-property/24000001IN?fbNumber=000000021221
+  url: {{pension-scheme-return-sipp}}/psr/land-or-connected-property/24000001IN?periodStartDate=2021-04-06&psrVersion=456
   body: none
   auth: bearer
 }
 
 query {
-  fbNumber: 000000021221
-  ~periodStartDate: 2021-04-06
-  ~psrVersion: 456
+  periodStartDate: 2021-04-06
+  psrVersion: 456
+  ~fbNumber: 000000021221
 }
 
 auth:bearer {

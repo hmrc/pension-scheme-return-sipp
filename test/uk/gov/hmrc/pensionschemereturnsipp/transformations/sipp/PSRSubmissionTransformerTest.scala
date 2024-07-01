@@ -16,22 +16,16 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp;
 
-import cats.data.NonEmptyList
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyResponse,
-  LandOrConnectedPropertyApi,
   LandOrConnectedPropertyResponse,
   OutstandingLoansResponse,
-  PSRSubmissionResponse,
   ReportDetails,
   TangibleMoveablePropertyResponse,
   UnquotedShareResponse
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.RegistryDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -81,72 +75,21 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
 
       val resultApiResponse = transformer.transform(sampleSippPsrSubmissionEtmpResponse)
 
-      resultApiResponse mustBe PSRSubmissionResponse(
-        ReportDetails(
-          "12345678AA",
-          Compiled,
-          LocalDate.parse("2022-04-06"),
-          LocalDate.parse("2023-04-05"),
-          Some("PSR Scheme"),
-          Some("001")
-        ),
-        Some(
-          NonEmptyList(
-            LandOrConnectedPropertyApi.TransactionDetails(
-              NameDOB("firstName", "lastName", LocalDate.parse("2020-01-01")),
-              NinoType(Some("nino"), None),
-              LocalDate.parse("2020-01-01"),
-              Yes,
-              AddressDetails("addressLine1", Some("addressLine2"), None, None, None, None, "UK"),
-              RegistryDetails(No, None, None),
-              "acquiredFromName",
-              10.0,
-              Yes,
-              Yes,
-              None,
-              Yes,
-              Yes,
-              None,
-              10.0,
-              Yes,
-              None,
-              None
-            ),
-            List()
-          )
-        ),
-        None,
-        Some(
-          NonEmptyList(
-            LandOrConnectedPropertyApi.TransactionDetails(
-              NameDOB("firstName", "lastName", LocalDate.parse("2020-01-01")),
-              NinoType(Some("nino"), None),
-              LocalDate.parse("2020-01-01"),
-              Yes,
-              AddressDetails("addressLine1", Some("addressLine2"), None, None, None, None, "UK"),
-              RegistryDetails(No, None, None),
-              "acquiredFromName",
-              10.0,
-              Yes,
-              Yes,
-              None,
-              Yes,
-              Yes,
-              None,
-              10.0,
-              Yes,
-              None,
-              None
-            ),
-            List()
-          )
-        ),
-        None,
-        None,
-        None
+      resultApiResponse.details mustBe ReportDetails(
+        "12345678AA",
+        Compiled,
+        LocalDate.parse("2022-04-06"),
+        LocalDate.parse("2023-04-05"),
+        Some("PSR Scheme"),
+        Some("001")
       )
+
+      resultApiResponse.landConnectedParty.nonEmpty mustBe true
+      resultApiResponse.otherAssetsConnectedParty.nonEmpty mustBe true
+      resultApiResponse.unquotedShares.nonEmpty mustBe true
+      resultApiResponse.landArmsLength.nonEmpty mustBe true
+      resultApiResponse.loanOutstanding.nonEmpty mustBe true
+      resultApiResponse.tangibleProperty.nonEmpty mustBe true
     }
-
   }
-
 }

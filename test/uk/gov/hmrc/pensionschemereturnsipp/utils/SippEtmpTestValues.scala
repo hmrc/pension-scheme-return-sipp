@@ -426,7 +426,6 @@ trait SippEtmpTestValues {
   )
 
   val sippUnquotedShareApi = UnquotedShareApi.TransactionDetails(
-    row = 1,
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     shareCompanyDetails = SharesCompanyDetails(
