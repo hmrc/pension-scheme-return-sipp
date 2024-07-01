@@ -63,6 +63,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockAssetsFromConnectedPartyTransformer = mock[AssetsFromConnectedPartyTransformer]
   private val mockUnquotedSharesTransformer = mock[UnquotedSharesTransformer]
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
+  private val mockEmailSubmissionService = mock[EmailSubmissionService]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
@@ -74,7 +75,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     mockOutstandingLoansTransformer,
     mockAssetsFromConnectedPartyTransformer,
     mockUnquotedSharesTransformer,
-    mockTangibleMovablePropertyTransformer
+    mockTangibleMovablePropertyTransformer,
+    mockEmailSubmissionService
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -176,8 +178,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(SchemaValidationResult(Set.empty))
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
+      when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
+        .thenReturn(Future.successful(Right()))
 
-      whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
+      whenReady(service.submitSippPsr(sampleSippPsrSubmission, samplePensionSchemeId)) { result: HttpResponse =>
         result mustEqual expectedResponse
 
         verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
@@ -194,8 +198,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(SchemaValidationResult(Set.empty))
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
+      when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
+        .thenReturn(Future.successful(Right()))
 
-      whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
+      whenReady(service.submitSippPsr(sampleSippPsrSubmission, samplePensionSchemeId)) { result: HttpResponse =>
         result mustEqual expectedResponse
 
         verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
@@ -210,7 +216,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(SchemaValidationResult(Set(validationMessage)))
 
       val thrown = intercept[PensionSchemeReturnValidationFailureException] {
-        await(service.submitSippPsr(sampleSippPsrSubmission))
+        await(service.submitSippPsr(sampleSippPsrSubmission, samplePensionSchemeId))
       }
       thrown.responseCode mustBe BAD_REQUEST
       thrown.message must include("Invalid payload when submitSippPsr :-\ncustomMessage")
@@ -228,7 +234,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(Future.failed(new BadRequestException("invalid-request")))
 
       val thrown = intercept[ExpectationFailedException] {
-        await(service.submitSippPsr(sampleSippPsrSubmission))
+        await(service.submitSippPsr(sampleSippPsrSubmission, samplePensionSchemeId))
       }
       thrown.responseCode mustBe EXPECTATION_FAILED
       thrown.message must include("Nothing to submit")

@@ -49,11 +49,11 @@ class SippPsrSubmitController @Inject()(
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
 
   def submitSippPsr: Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    authorisedAsPsrUser { context =>
       val sippPsrSubmission = requiredBody.as[SippPsrSubmission]
       logger.debug(s"Submitting SIPP PSR - $sippPsrSubmission")
       sippPsrSubmissionService
-        .submitSippPsr(sippPsrSubmission)
+        .submitSippPsr(sippPsrSubmission, context.psaPspId)
         .map { response =>
           logger.debug(s"Submit SIPP PSR - response: ${response.status}")
           NoContent

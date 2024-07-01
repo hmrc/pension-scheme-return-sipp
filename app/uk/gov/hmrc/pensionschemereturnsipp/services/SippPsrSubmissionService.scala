@@ -27,7 +27,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeReturnValidationFailureException, SippPsrSubmission}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{
+  PensionSchemeId,
+  PensionSchemeReturnValidationFailureException,
+  SippPsrSubmission
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRSubmissionTransformer, SippPsrSubmissionToEtmp}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
@@ -47,7 +51,8 @@ class SippPsrSubmissionService @Inject()(
   outstandingLoansTransformer: OutstandingLoansTransformer,
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer,
   unquotedSharesTransformer: UnquotedSharesTransformer,
-  tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer
+  tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer,
+  emailSubmissionService: EmailSubmissionService
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -196,7 +201,8 @@ class SippPsrSubmissionService @Inject()(
       }
 
   def submitSippPsr(
-    sippPsrSubmission: SippPsrSubmission
+    sippPsrSubmission: SippPsrSubmission,
+    pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] = {
     val request = sippPsrSubmissionToEtmp.transform(sippPsrSubmission)
     val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, Json.toJson(request))
@@ -205,11 +211,20 @@ class SippPsrSubmissionService @Inject()(
         s"Invalid payload when submitSippPsr :-\n${validationResult.toString}"
       )
     } else {
-      psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, request).recover {
-        case _: BadRequestException => throw new ExpectationFailedException("Nothing to submit")
-      }
+      for {
+        response <- psrSubmission(sippPsrSubmission, request)
+        _ <- emailSubmissionService.submitEmail(request, pensionSchemeId)
+      } yield response
     }
   }
+
+  private def psrSubmission(
+    sippPsrSubmission: SippPsrSubmission,
+    request: SippPsrSubmissionEtmpRequest
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
+    psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, request).recover {
+      case _: BadRequestException => throw new ExpectationFailedException("Nothing to submit")
+    }
 
   def getSippPsr(
     pstr: String,

@@ -19,6 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType, SharesCompanyDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -40,6 +41,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeId, SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
 import scala.annotation.unused
@@ -75,6 +77,9 @@ trait TestValues {
   val sampleSippPsrSubmission: SippPsrSubmission = SippPsrSubmission(
     sampleSippReportDetailsSubmission
   )
+
+  val samplePsaId: PsaId = PsaId("PSA")
+  val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
 
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
     details = ReportDetails(

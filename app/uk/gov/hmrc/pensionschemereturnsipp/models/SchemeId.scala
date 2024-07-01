@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.config
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+sealed abstract class SchemeId(val idType: String) {
+  val value: String
+}
 
-import java.time.{Clock, ZoneOffset}
+object SchemeId {
 
-class Module extends AbstractModule {
+  case class Srn(value: String) extends SchemeId("srn")
 
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector]).asEagerSingleton()
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+  object Srn {
+    val srnRegex = "^S[0-9]{10}$"
+
+    def apply(value: String): Option[Srn] =
+      if (value.matches(srnRegex)) Some(new Srn(value)) else None
   }
+
+  object asSrn {
+    def unapply(arg: String): Option[Srn] = Srn(arg)
+  }
+
+  case class Pstr(value: String) extends SchemeId("pstr")
 
 }

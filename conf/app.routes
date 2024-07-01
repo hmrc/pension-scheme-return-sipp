@@ -17,3 +17,5 @@ PUT         /psr/unquoted-shares                         uk.gov.hmrc.pensionsche
 GET         /psr/unquoted-shares/:pstr                   uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
 GET         /psr/versions/:pstr                          uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrVersions(pstr: String, startDate: String)
+
+POST  /psr//email-response/:submittedBy/:requestId/:email/:psaId/:pstr/       uk.gov.hmrc.pensionschemereturnsipp.controllers.EmailResponseController.sendAuditEvents(submittedBy: String, requestId: String, email: String, psaId: String, pstr: String)
