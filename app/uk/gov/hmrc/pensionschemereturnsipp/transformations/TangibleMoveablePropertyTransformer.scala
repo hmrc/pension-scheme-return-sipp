@@ -107,6 +107,7 @@ class TangibleMoveablePropertyTransformer @Inject()
           independentValuationDisposal = trx.independentValutionDisposal.get,
           propertyFullyDisposed = trx.propertyFullyDisposed.get
         )
-      )
+      ),
+      transactionCount = Some(transactionCount)
     )
 }

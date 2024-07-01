@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DisposalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
@@ -55,7 +55,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,
       acquisitionOfShares = property.acquisitionOfShares,
-      sharesCompanyDetails = property.shareCompanyDetails.map(details => toEtmp(details)),
+      sharesCompanyDetails = property.shareCompanyDetails,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
       independentValution = property.independentValuation,
@@ -94,8 +94,8 @@ class AssetsFromConnectedPartyTransformer @Inject()
     trx: SippOtherAssetsConnectedParty.TransactionDetail
   ): AssetsFromConnectedPartyApi.TransactionDetails =
     AssetsFromConnectedPartyApi.TransactionDetails(
-      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
-      nino = NinoType(member.nino, member.reasonNoNINO),
+      nameDOB = toNameDOB(member),
+      nino = toNinoType(member),
       acquisitionDate = trx.acquisitionDate,
       assetDescription = trx.assetDescription,
       acquisitionOfShares = trx.acquisitionOfShares,
@@ -115,7 +115,8 @@ class AssetsFromConnectedPartyTransformer @Inject()
           propertyFullyDisposed = trx.propertyFullyDisposed.get
         )
       ),
-      disposalOfShares = ???,
-      noOfSharesHeld = ???
+      disposalOfShares = trx.disposalOfShares,
+      noOfSharesHeld = trx.noOfSharesHeld,
+      transactionCount = Some(transactionCount)
     )
 }

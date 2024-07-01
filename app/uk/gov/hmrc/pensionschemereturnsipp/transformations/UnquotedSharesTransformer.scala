@@ -31,14 +31,14 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class UnquotedSharesTransformer @Inject()
-    extends Transformer[UnquotedShareApi.TransactionDetail, UnquotedShareResponse] {
+    extends Transformer[UnquotedShareApi.TransactionDetails, UnquotedShareResponse] {
 
   def merge(
-    unquotedShares: NonEmptyList[UnquotedShareApi.TransactionDetail],
+    unquotedShares: NonEmptyList[UnquotedShareApi.TransactionDetails],
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[UnquotedShareApi.TransactionDetail, SippUnquotedShares.TransactionDetail](
+      .merge[UnquotedShareApi.TransactionDetails, SippUnquotedShares.TransactionDetail](
         unquotedShares,
         etmpData,
         transformSingle,
@@ -51,10 +51,10 @@ class UnquotedSharesTransformer @Inject()
       )
 
   private def transformSingle(
-    details: UnquotedShareApi.TransactionDetail
+    details: UnquotedShareApi.TransactionDetails
   ): SippUnquotedShares.TransactionDetail =
     SippUnquotedShares.TransactionDetail(
-      sharesCompanyDetails = toEtmp(details.shareCompanyDetails),
+      sharesCompanyDetails = details.shareCompanyDetails,
       acquiredFromName = details.acquiredFromName,
       totalCost = details.transactionDetail.totalCost,
       independentValution = details.transactionDetail.independentValuation,
@@ -62,7 +62,7 @@ class UnquotedSharesTransformer @Inject()
       totalDividendsIncome = details.transactionDetail.totalDividendsIncome,
       sharesDisposed = details.sharesDisposed,
       sharesDisposalDetails = details.sharesDisposalDetails.map(toEtmp),
-      noOfSharesHeld = Some(details.noOfSharesHeld)
+      noOfSharesHeld = details.noOfSharesHeld
     )
 
   def transformToResponse(
@@ -86,8 +86,8 @@ class UnquotedSharesTransformer @Inject()
     member: MemberDetails,
     transactionCount: Int,
     trx: etmp.SippUnquotedShares.TransactionDetail
-  ): UnquotedShareApi.TransactionDetail =
-    UnquotedShareApi.TransactionDetail(
+  ): UnquotedShareApi.TransactionDetails =
+    UnquotedShareApi.TransactionDetails(
       row = transactionCount,
       nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
       nino = NinoType(member.nino, member.reasonNoNINO),
@@ -101,7 +101,16 @@ class UnquotedSharesTransformer @Inject()
       ),
       sharesDisposed = trx.sharesDisposed,
       sharesDisposalDetails = trx.sharesDisposalDetails
-        .map(d => UnquotedShareDisposalDetail(trx.sharesDisposalDetails.map(_.disposedShareAmount))),
-      noOfSharesHeld = trx.noOfSharesHeld
+        .map(
+          d =>
+            UnquotedShareDisposalDetail(
+              totalAmount = d.disposedShareAmount,
+              nameOfPurchaser = d.purchaserName,
+              purchaserConnectedParty = d.disposalConnectedParty,
+              independentValuationDisposal = d.independentValutionDisposal
+            )
+        ),
+      noOfSharesHeld = trx.noOfSharesHeld,
+      transactionCount = Some(transactionCount)
     )
 }
