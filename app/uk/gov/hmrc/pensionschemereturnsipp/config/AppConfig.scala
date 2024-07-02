@@ -41,8 +41,10 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
   val getSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-sipp-psr")}"
   val getPsrVersionsUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-psr-versions")}"
 
-  val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
+  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionsSchemeReturn")
+
   val emailApiUrl: String = servicesConfig.baseUrl("email")
+  val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
   val emailSendForce: Boolean = config.getOptional[Boolean]("email.force").getOrElse(false)
 
   def emailCallback(
@@ -52,8 +54,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
     encryptedPsaId: String,
     encryptedPstr: String
   ) =
-    s"$emailCallbackUrl${config
-      .get[String](path = "urls.emailCallback")
+    s"$pensionsSchemeReturnUrl${emailCallbackUrl
       .format(
         pensionSchemeId match {
           case PensionSchemeId.PspId(_) => "PSP"
