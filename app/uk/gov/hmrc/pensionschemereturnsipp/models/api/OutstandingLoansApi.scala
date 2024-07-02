@@ -20,23 +20,21 @@ import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLoanOutstanding
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType
 
 import java.time.LocalDate
 
 case class OutstandingLoansRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[OutstandingLoansApi.TransactionDetail]]
+  transactions: Option[NonEmptyList[OutstandingLoansApi.TransactionDetails]]
 )
 
 case class OutstandingLoansResponse(
-  transactions: List[OutstandingLoansApi.TransactionDetail]
+  transactions: List[OutstandingLoansApi.TransactionDetails]
 )
 
 object OutstandingLoansApi {
 
-  case class TransactionDetail(
+  case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
     loanRecipientName: String,
@@ -49,30 +47,12 @@ object OutstandingLoansApi {
     capitalRepayments: Double,
     interestPayments: Double,
     arrearsOutstandingPrYears: YesNo,
-    outstandingYearEndAmount: Double
+    outstandingYearEndAmount: Double,
+    transactionCount: Option[Int]
   ) extends MemberKey
 
-  object TransactionDetail {
-    implicit val format: OFormat[TransactionDetail] = Json.format[TransactionDetail]
-
-    implicit class TransformationOps(val transactionDetail: TransactionDetail) extends AnyVal {
-      def toEtmp: SippLoanOutstanding.TransactionDetail =
-        SippLoanOutstanding.TransactionDetail(
-          loanRecipientName = transactionDetail.loanRecipientName,
-          dateOfLoan = transactionDetail.dateOfLoan,
-          amountOfLoan = transactionDetail.amountOfLoan,
-          loanConnectedParty =
-            if (transactionDetail.loanConnectedParty.boolean) EtmpConnectedOrUnconnectedType.Connected
-            else EtmpConnectedOrUnconnectedType.Unconnected, //TODO change api type
-          repayDate = transactionDetail.repayDate,
-          interestRate = transactionDetail.interestRate,
-          loanSecurity = transactionDetail.loanSecurity,
-          capitalRepayments = transactionDetail.capitalRepayments,
-          interestPayments = transactionDetail.interestPayments,
-          arrearsOutstandingPrYears = transactionDetail.arrearsOutstandingPrYears,
-          outstandingYearEndAmount = transactionDetail.outstandingYearEndAmount
-        )
-    }
+  object TransactionDetails {
+    implicit val format: OFormat[TransactionDetails] = Json.format[TransactionDetails]
   }
 
   implicit val formatRes: OFormat[OutstandingLoansResponse] = Json.format[OutstandingLoansResponse]

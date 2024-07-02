@@ -20,25 +20,15 @@ import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType, SharesCompanyDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  AssetsFromConnectedPartyApi,
-  PSRSubmissionResponse,
-  ReportDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{
-  EtmpAddress,
-  EtmpSippSharesCompanyDetail,
-  EtmpSippSharesDisposalDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeId, SippPsrSubmission, SippReportDetailsSubmission}
@@ -308,7 +298,7 @@ trait TestValues {
                 Some(
                   List(
                     SippUnquotedShares.TransactionDetail(
-                      EtmpSippSharesCompanyDetail("Boeing", Some("CRN456789"), None, "Primary", 100),
+                      SharesCompanyDetails("Boeing", Some("CRN456789"), None, "Primary", 100),
                       "HL Ltd",
                       9999.99,
                       No,

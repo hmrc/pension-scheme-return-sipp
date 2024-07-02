@@ -77,6 +77,17 @@ class SippPsrSubmissionService @Inject()(
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(request.reportDetails, request.transactions, outstandingLoansTransformer)
 
+  def getOutstandingLoans(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[OutstandingLoansResponse]] =
+    getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, outstandingLoansTransformer)
+
   def submitLandArmsLength(
     request: LandOrConnectedPropertyRequest
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =

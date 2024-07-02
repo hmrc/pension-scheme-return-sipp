@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DisposalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
@@ -54,7 +55,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,
       acquisitionOfShares = property.acquisitionOfShares,
-      sharesCompanyDetails = property.shareCompanyDetails.map(details => toEtmp(details)),
+      sharesCompanyDetails = property.shareCompanyDetails,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
       independentValution = property.independentValuation,
@@ -90,6 +91,32 @@ class AssetsFromConnectedPartyTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    otherAssetsConnectedParty: SippOtherAssetsConnectedParty.TransactionDetail
-  ): AssetsFromConnectedPartyApi.TransactionDetails = ???
+    trx: SippOtherAssetsConnectedParty.TransactionDetail
+  ): AssetsFromConnectedPartyApi.TransactionDetails =
+    AssetsFromConnectedPartyApi.TransactionDetails(
+      nameDOB = toNameDOB(member),
+      nino = toNinoType(member),
+      acquisitionDate = trx.acquisitionDate,
+      assetDescription = trx.assetDescription,
+      acquisitionOfShares = trx.acquisitionOfShares,
+      shareCompanyDetails = trx.sharesCompanyDetails,
+      acquiredFromName = trx.acquiredFromName,
+      totalCost = trx.totalCost,
+      independentValuation = trx.independentValution,
+      tangibleSchedule29A = trx.tangibleSchedule29A,
+      totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
+      isPropertyDisposed = trx.isPropertyDisposed,
+      disposalDetails = Option.when(trx.isPropertyDisposed.boolean)(
+        DisposalDetails(
+          disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
+          namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
+          anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
+          independentValuationDisposal = trx.independentValutionDisposal.get,
+          propertyFullyDisposed = trx.propertyFullyDisposed.get
+        )
+      ),
+      disposalOfShares = trx.disposalOfShares,
+      noOfSharesHeld = trx.noOfSharesHeld,
+      transactionCount = Some(transactionCount)
+    )
 }
