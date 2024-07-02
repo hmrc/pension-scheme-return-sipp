@@ -16,21 +16,169 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi
-import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
-import Arbitraries.outstandingLoanArbitrary
+import cats.data.NonEmptyList
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
-class OutstandingLoansTransformationsSpec extends BaseSpec with ScalaCheckDrivenPropertyChecks {
-  "transforming" should {
-    "be isomorphic" in {
-      forAll { (transactionDetail: OutstandingLoansApi.TransactionDetail) =>
-        val nameDOB = transactionDetail.nameDOB
-        val nino = transactionDetail.nino
+import java.time.LocalDate
 
-        transactionDetail.toEtmp
-          .toApi(nameDOB, nino) mustBe transactionDetail
-      }
+class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTestValues {
+
+  private val transformer: OutstandingLoansTransformer = new OutstandingLoansTransformer()
+
+  val etmpData = EtmpMemberAndTransactions(
+    status = SectionStatus.New,
+    version = None,
+    memberDetails = MemberDetails(
+      firstName = "firstName",
+      middleName = None,
+      lastName = "lastName",
+      nino = Some("nino"),
+      reasonNoNINO = None,
+      dateOfBirth = LocalDate.of(2020, 1, 1)
+    ),
+    landConnectedParty = None,
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = Some(
+      SippLoanOutstanding(
+        1,
+        Some(
+          List(
+            SippLoanOutstanding.TransactionDetail(
+              loanRecipientName = "test",
+              dateOfLoan = LocalDate.of(2020, 1, 1),
+              amountOfLoan = 1,
+              loanConnectedParty = Connected,
+              repayDate = LocalDate.of(2020, 1, 1),
+              interestRate = 1,
+              loanSecurity = YesNo.Yes,
+              capitalRepayments = 1,
+              interestPayments = 1,
+              arrearsOutstandingPrYears = YesNo.Yes,
+              outstandingYearEndAmount = 1
+            )
+          )
+        )
+      )
+    ),
+    unquotedShares = None
+  )
+
+  "merge" should {
+    "update data for a single member when member match is found" in {
+      val testData = etmpData.copy(loanOutstanding = None)
+
+      val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData))
+
+      result mustBe List(
+        etmpData.copy(
+          loanOutstanding = Some(
+            SippLoanOutstanding(
+              1,
+              Some(
+                List(
+                  SippLoanOutstanding.TransactionDetail(
+                    loanRecipientName = "test",
+                    dateOfLoan = LocalDate.of(2020, 1, 1),
+                    amountOfLoan = 1,
+                    loanConnectedParty = Connected,
+                    repayDate = LocalDate.of(2020, 1, 1),
+                    interestRate = 1,
+                    loanSecurity = YesNo.Yes,
+                    capitalRepayments = 1,
+                    interestPayments = 1,
+                    arrearsOutstandingPrYears = YesNo.Yes,
+                    outstandingYearEndAmount = 1
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+    }
+
+    "replace data for a single member when member match is found" in {
+
+      val testDataWithDifferentRow = sippOutstandingLoansApi.copy(loanRecipientName = "test2")
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
+
+      result mustBe List(
+        etmpData.copy(
+          loanOutstanding = Some(
+            SippLoanOutstanding(
+              1,
+              Some(
+                List(
+                  SippLoanOutstanding.TransactionDetail(
+                    loanRecipientName = "test2",
+                    dateOfLoan = LocalDate.of(2020, 1, 1),
+                    amountOfLoan = 1,
+                    loanConnectedParty = Connected,
+                    repayDate = LocalDate.of(2020, 1, 1),
+                    interestRate = 1,
+                    loanSecurity = YesNo.Yes,
+                    capitalRepayments = 1,
+                    interestPayments = 1,
+                    arrearsOutstandingPrYears = YesNo.Yes,
+                    outstandingYearEndAmount = 1
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+    }
+
+    "add data with new member details for a single member when match is not found" in {
+      val testDataWithDifferentRow = sippOutstandingLoansApi.copy(nino = NinoType(Some("otherNino"), None))
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
+
+      result mustBe List(
+        etmpData.copy(loanOutstanding = None),
+        etmpData.copy(
+          memberDetails = MemberDetails(
+            firstName = "firstName",
+            middleName = None,
+            lastName = "lastName",
+            nino = Some("otherNino"),
+            reasonNoNINO = None,
+            dateOfBirth = LocalDate.of(2020, 1, 1)
+          )
+        )
+      )
+    }
+  }
+
+  "transformToResponse" should {
+    "return correct response" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions)
+      )
+
+      result.transactions.length mustBe 1
+      result.transactions.head.transactionCount mustBe Some(1)
+      result.transactions.head.nino.nino mustBe sippMemberDetails.nino
+      result.transactions.head.nameDOB.firstName mustBe sippMemberDetails.firstName
+      result.transactions.head.nameDOB.lastName mustBe sippMemberDetails.lastName
+
+    }
+
+    "return no transaction if related not exist" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions.copy(loanOutstanding = None))
+      )
+
+      result.transactions.length mustBe 0
     }
   }
 }
