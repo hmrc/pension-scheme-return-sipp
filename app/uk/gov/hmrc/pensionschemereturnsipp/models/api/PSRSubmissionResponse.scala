@@ -21,6 +21,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class PSRSubmissionResponse(
   details: ReportDetails,
+  accountingPeriodDetails: AccountingPeriodDetails,
   landConnectedParty: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],
   otherAssetsConnectedParty: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]],
   landArmsLength: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],

@@ -19,6 +19,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp;
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AccountingPeriod,
+  AccountingPeriodDetails,
   AssetsFromConnectedPartyResponse,
   LandOrConnectedPropertyResponse,
   OutstandingLoansResponse,
@@ -82,6 +84,14 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
         LocalDate.parse("2023-04-05"),
         Some("PSR Scheme"),
         Some("001")
+      )
+
+      resultApiResponse.accountingPeriodDetails mustBe AccountingPeriodDetails(
+        Some("002"),
+        List(
+          AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
+          AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
+        )
       )
 
       resultApiResponse.landConnectedParty.nonEmpty mustBe true
