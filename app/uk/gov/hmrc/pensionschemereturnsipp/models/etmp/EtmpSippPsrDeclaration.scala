@@ -18,21 +18,17 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 case class EtmpSippPsrDeclaration(
   submittedBy: String,
   submitterID: String,
   psaID: Option[String],
-  psaDeclaration: Declaration,
-  pspDeclaration: Declaration
+  psaDeclaration: Option[Declaration],
+  pspDeclaration: Option[Declaration]
 )
 
 object EtmpSippPsrDeclaration {
-  case class Declaration(
-    declaration1: YesNo,
-    declaration2: YesNo
-  )
+  case class Declaration(declaration1: Boolean, declaration2: Boolean)
 
   implicit val formatDeclaration: OFormat[Declaration] = Json.format[Declaration]
   implicit val format: OFormat[EtmpSippPsrDeclaration] = Json.format[EtmpSippPsrDeclaration]

@@ -29,13 +29,13 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostVa
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
 import scala.annotation.unused
@@ -58,18 +58,6 @@ trait TestValues {
         None
       )
     )
-  )
-
-  // SIPP - PSR
-  val sampleSippReportDetailsSubmission: SippReportDetailsSubmission = SippReportDetailsSubmission(
-    "17836742CF",
-    periodStart = LocalDate.of(2020, 12, 12),
-    periodEnd = LocalDate.of(2021, 12, 12),
-    memberTransactions = YesNo.Yes
-  )
-
-  val sampleSippPsrSubmission: SippPsrSubmission = SippPsrSubmission(
-    sampleSippReportDetailsSubmission
   )
 
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
@@ -319,7 +307,8 @@ trait TestValues {
             )
           )
         )
-      )
+      ),
+      Some(EtmpSippPsrDeclaration("PSP", "20000019", Some("A0000023"), None, Some(Declaration(true, true))))
     )
 
   val validationMessage: ValidationMessage = {

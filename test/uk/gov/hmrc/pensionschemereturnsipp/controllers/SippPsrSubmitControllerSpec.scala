@@ -40,6 +40,18 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   private val mockSippPsrSubmissionService = mock[SippPsrSubmissionService]
   private val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
+  val requestJson: JsValue = Json.parse(
+    s"""
+       |{
+       |  "pstr" : "17836742CF",
+       |  "fbNumber": "fb",
+       |  "periodStartDate" : "2022-04-06",
+       |  "psrVersion": "1",
+       |  "isPsa": true
+       |}
+       |""".stripMargin
+  )
+
   override def beforeEach(): Unit = {
     reset(mockAuthConnector)
     reset(mockSippPsrSubmissionService)
@@ -73,7 +85,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       thrown.reason mustBe "Bearer token expired"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -89,11 +101,11 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       }
 
       thrown.reason mustBe "Bearer token not supplied"
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
-    "return 204" in {
+    "return 200" in {
       val responseJson: JsObject = Json.obj("mock" -> "pass")
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
@@ -101,25 +113,11 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.submitSippPsr(any())(any(), any()))
+      when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK, responseJson.toString)))
 
-      val requestJson: JsValue = Json.parse(
-        """
-          |{
-          |  "reportDetails" : {
-          |    "pstr" : "17836742CF",
-          |    "psrStatus" : "Compiled",
-          |    "periodStart" : "2022-04-06",
-          |    "periodEnd" : "2023-04-05",
-          |    "memberTransactions": "Yes"
-          |  }
-          |}
-          |""".stripMargin
-      )
-      val postRequest = fakeRequest.withJsonBody(requestJson)
-      val result = controller.submitSippPsr(postRequest)
-      status(result) mustBe Status.NO_CONTENT
+      val result = controller.submitSippPsr(fakeRequest.withJsonBody(requestJson))
+      status(result) mustBe OK
     }
   }
 

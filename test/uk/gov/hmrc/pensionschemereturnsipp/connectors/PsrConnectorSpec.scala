@@ -56,12 +56,8 @@ class PsrConnectorSpec extends BaseConnectorSpec {
   "submitSippPsr" should {
     "return 200 - ok" in {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, ok())
-
       whenReady(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest)) { result: HttpResponse =>
-        WireMock.verify(
-          postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr"))
-        )
-
+        WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
       }
     }
@@ -87,7 +83,6 @@ class PsrConnectorSpec extends BaseConnectorSpec {
     }
 
     "return a SIPP PSR value with periodStartDate and psrVersion" in {
-
       stubGet(
         "/pension-online/scheme-return/SIPP/testPstr?periodStartDate=testPeriodStartDate&psrVersion=testPsrVersion",
         ok(sampleSippPsrResponseAsJsonString)

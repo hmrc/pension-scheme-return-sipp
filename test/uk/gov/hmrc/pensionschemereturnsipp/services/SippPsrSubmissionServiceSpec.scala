@@ -17,18 +17,29 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxOptionId
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
-import play.api.http.Status.{BAD_REQUEST, EXPECTATION_FAILED}
+import play.api.http.Status.BAD_REQUEST
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
-import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeReturnValidationFailureException
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, PSRSubmissionResponse}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRSubmissionTransformer, SippPsrSubmissionToEtmp}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  LandOrConnectedPropertyRequest,
+  PSRSubmissionResponse,
+  PsrSubmissionRequest
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpPsrStatus,
+  EtmpSippAccountingPeriodDetails,
+  EtmpSippReportDetails
+}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -38,7 +49,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   UnquotedSharesTransformer
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
-import uk.gov.hmrc.pensionschemereturnsipp.validators.{JSONSchemaValidator, SchemaValidationResult}
+import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,13 +60,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   override def beforeEach(): Unit = {
     reset(mockPsrConnector)
     reset(mockJSONSchemaValidator)
-    reset(mockSippPsrSubmissionToEtmp)
     reset(mockSippPsrFromEtmp)
   }
 
   private val mockPsrConnector = mock[PsrConnector]
   private val mockJSONSchemaValidator = mock[JSONSchemaValidator]
-  private val mockSippPsrSubmissionToEtmp = mock[SippPsrSubmissionToEtmp]
   private val mockSippPsrFromEtmp = mock[PSRSubmissionTransformer]
   private val mockLandConnectedPartyTransformer = mock[LandConnectedPartyTransformer]
   private val mockArmsLengthTransformer = mock[LandArmsLengthTransformer]
@@ -66,8 +75,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
-    mockJSONSchemaValidator,
-    mockSippPsrSubmissionToEtmp,
     mockSippPsrFromEtmp,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
@@ -168,80 +175,59 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   }
 
   "submitSippPsr" should {
+    val submittedBy = "submittedBy"
+    val submitterId = "submitterId"
+    val psaPspId = "psaPsp"
+    val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
+    import req.{pstr => _, _}
+    val etmpResponse = SippPsrSubmissionEtmpResponse(
+      reportDetails = EtmpSippReportDetails(
+        pstr.some,
+        EtmpPsrStatus.Compiled,
+        LocalDate.now(),
+        LocalDate.now(),
+        YesNo.Yes,
+        None,
+        None
+      ),
+      accountingPeriodDetails = EtmpSippAccountingPeriodDetails("".some, Nil),
+      memberAndTransactions = None,
+      psrDeclaration = None
+    )
+
     "successfully submit only minimal required SIPP submission details" in {
       val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
 
-      when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(sampleSippPsrSubmissionEtmpRequest)
-      when(mockJSONSchemaValidator.validatePayload(any(), any()))
-        .thenReturn(SchemaValidationResult(Set.empty))
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(etmpResponse.some))
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
 
-      whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
-        result mustEqual expectedResponse
-
-        verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
-        verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
+      whenReady(service.submitSippPsr(req, submittedBy, submitterId, psaPspId)) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
       }
-    }
-
-    "successfully submit for max SIPP submission details" in {
-      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
-
-      when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(fullSippPsrSubmissionEtmpRequest)
-      when(mockJSONSchemaValidator.validatePayload(any(), any()))
-        .thenReturn(SchemaValidationResult(Set.empty))
-      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
-        .thenReturn(Future.successful(expectedResponse))
-
-      whenReady(service.submitSippPsr(sampleSippPsrSubmission)) { result: HttpResponse =>
-        result mustEqual expectedResponse
-
-        verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
-        verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
-      }
-    }
-
-    "throw exception when validation fails for submitSippPsr" in {
-      when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(sampleSippPsrSubmissionEtmpRequest)
-      when(mockJSONSchemaValidator.validatePayload(any(), any()))
-        .thenReturn(SchemaValidationResult(Set(validationMessage)))
-
-      val thrown = intercept[PensionSchemeReturnValidationFailureException] {
-        await(service.submitSippPsr(sampleSippPsrSubmission))
-      }
-      thrown.responseCode mustBe BAD_REQUEST
-      thrown.message must include("Invalid payload when submitSippPsr :-\ncustomMessage")
-
-      verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
-      verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
-      verify(mockPsrConnector, never).submitSippPsr(any(), any())(any(), any())
     }
 
     "throw exception when connector call not successful for submitSippPsr" in {
-      when(mockSippPsrSubmissionToEtmp.transform(any())).thenReturn(sampleSippPsrSubmissionEtmpRequest)
-      when(mockJSONSchemaValidator.validatePayload(any(), any()))
-        .thenReturn(SchemaValidationResult(Set.empty))
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(etmpResponse.some))
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.failed(new BadRequestException("invalid-request")))
 
-      val thrown = intercept[ExpectationFailedException] {
-        await(service.submitSippPsr(sampleSippPsrSubmission))
+      val thrown = intercept[BadRequestException] {
+        await(service.submitSippPsr(req, submittedBy, submitterId, psaPspId))
       }
-      thrown.responseCode mustBe EXPECTATION_FAILED
-      thrown.message must include("Nothing to submit")
+      thrown.responseCode mustBe BAD_REQUEST
+      thrown.message must include("invalid-request")
 
-      verify(mockSippPsrSubmissionToEtmp, times(1)).transform(any())
-      verify(mockJSONSchemaValidator, times(1)).validatePayload(any(), any())
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
       verify(mockPsrConnector, times(1)).submitSippPsr(any(), any())(any(), any())
     }
   }
 
   "getPsrVersions" should {
     "successfully return the expected versions" in {
-      val pstr = "testpstr"
       val date = LocalDate.now()
       when(mockPsrConnector.getPsrVersions(pstr, date)).thenReturn(Future.successful(Seq.empty))
       service.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty

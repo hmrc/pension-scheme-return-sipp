@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
 
-case class SippPsrSubmission(
-  reportDetails: SippReportDetailsSubmission
+case class PsrSubmissionRequest(
+  pstr: String,
+  fbNumber: Option[String],
+  periodStartDate: Option[String],
+  psrVersion: Option[String],
+  isPsa: Boolean
 )
 
-object SippPsrSubmission {
-  implicit val formats: OFormat[SippPsrSubmission] = Json.format[SippPsrSubmission]
+object PsrSubmissionRequest {
+  implicit val formats: OFormat[PsrSubmissionRequest] = Json.format[PsrSubmissionRequest]
 }
