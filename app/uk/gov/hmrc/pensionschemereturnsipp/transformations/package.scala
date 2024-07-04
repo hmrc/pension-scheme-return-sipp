@@ -35,7 +35,7 @@ package object transformations {
   implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
     def toEtmp = EtmpAddress(
       addressLine1 = address.addressLine1,
-      addressLine2 = address.addressLine2.get, // todo check with ETMP why it's mandatory
+      addressLine2 = address.addressLine2,
       addressLine3 = address.addressLine3,
       addressLine4 = address.addressLine4,
       addressLine5 = address.addressLine5,
@@ -47,7 +47,7 @@ package object transformations {
   implicit class AddressEtmpOps(val address: EtmpAddress) extends AnyVal {
     def fromEtmp: ApiAddressDetails = ApiAddressDetails(
       addressLine1 = address.addressLine1,
-      addressLine2 = Some(address.addressLine2),
+      addressLine2 = address.addressLine2,
       addressLine3 = address.addressLine3,
       addressLine4 = address.addressLine4,
       addressLine5 = address.addressLine5,

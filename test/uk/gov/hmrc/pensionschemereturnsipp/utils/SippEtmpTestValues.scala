@@ -295,7 +295,7 @@ trait SippEtmpTestValues {
       landOrPropertyinUK = YesNo.Yes,
       addressDetails = AddressDetails(
         addressLine1 = "addressLine1",
-        addressLine2 = Some("addressLine2"),
+        addressLine2 = "addressLine2",
         addressLine3 = None,
         addressLine4 = None,
         addressLine5 = None,
