@@ -21,13 +21,15 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpSippAccountingPeriod,
   EtmpSippAccountingPeriodDetails,
+  EtmpSippPsrDeclaration,
   EtmpSippReportDetails
 }
 
 case class SippPsrSubmissionEtmpResponse(
   reportDetails: EtmpSippReportDetails,
   accountingPeriodDetails: EtmpSippAccountingPeriodDetails,
-  memberAndTransactions: Option[List[EtmpMemberAndTransactions]]
+  memberAndTransactions: Option[List[EtmpMemberAndTransactions]],
+  psrDeclaration: Option[EtmpSippPsrDeclaration] = None
 )
 
 object SippPsrSubmissionEtmpResponse {

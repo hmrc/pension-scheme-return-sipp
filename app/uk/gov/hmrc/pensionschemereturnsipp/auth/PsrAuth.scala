@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.auth
 
+import cats.implicits.catsSyntaxSemigroup
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
@@ -33,7 +34,9 @@ final case class PsrAuthContext[A](
   psaPspId: PensionSchemeId,
   name: Option[Name],
   request: Request[A]
-)
+) {
+  def fullName: Option[String] = name.flatMap(n => n.name |+| n.lastName)
+}
 
 trait PsrAuth extends AuthorisedFunctions with Logging {
 

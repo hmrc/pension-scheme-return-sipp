@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.SippPsrSubmission
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrSubmissionRequest, PsrSubmittedResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -49,15 +49,14 @@ class SippPsrSubmitController @Inject()(
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
 
   def submitSippPsr: Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { context =>
-      val sippPsrSubmission = requiredBody.as[SippPsrSubmission]
-      logger.debug(s"Submitting SIPP PSR - $sippPsrSubmission")
+    authorisedAsPsrUser { user =>
+      val submissionRequest = requiredBody.as[PsrSubmissionRequest]
+      logger.debug(s"Submitting SIPP PSR - $request")
+
       sippPsrSubmissionService
-        .submitSippPsr(sippPsrSubmission, context.psaPspId)
-        .map { response =>
-          logger.debug(s"Submit SIPP PSR - response: ${response.status}")
-          NoContent
-        }
+        .submitSippPsr(submissionRequest, user.fullName.mkString, user.externalId, user.psaPspId)
+        .map(_.fold(_ => false, _ => true))
+        .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }
   }
 

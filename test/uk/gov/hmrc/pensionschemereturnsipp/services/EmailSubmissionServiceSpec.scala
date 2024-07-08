@@ -49,7 +49,7 @@ class EmailSubmissionServiceSpec
   "submitEmail" should {
     "compose minimum details with email template parameters and send the request to the email api returning unit on success" in new TestScope {
       when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(minimumDetails.asRight))
-      val reportDetails = sampleSippPsrSubmissionEtmpRequest.reportDetails
+      val reportDetails = sampleSippPsrSubmissionEtmpResponse.reportDetails
 
       val templateParams = Map(
         "psaName" -> minimumDetails.individualDetails.map(_.fullName).getOrElse(""),
@@ -72,7 +72,7 @@ class EmailSubmissionServiceSpec
 
       emailSubmissionService
         .submitEmail(
-          sampleSippPsrSubmissionEtmpRequest,
+          sampleSippPsrSubmissionEtmpResponse,
           psaId
         )
         .futureValue
@@ -84,7 +84,7 @@ class EmailSubmissionServiceSpec
 
       emailSubmissionService
         .submitEmail(
-          sampleSippPsrSubmissionEtmpRequest,
+          sampleSippPsrSubmissionEtmpResponse,
           psaId
         )
         .futureValue mustBe Left("Failed to fetch minimum details: DelimitedAdmin")

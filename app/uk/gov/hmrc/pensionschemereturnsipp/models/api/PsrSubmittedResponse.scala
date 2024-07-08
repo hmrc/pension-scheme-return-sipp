@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 
-case class EtmpSippPsrDeclaration(
-  submittedBy: String,
-  submitterID: String,
-  psaID: Option[String],
-  psaDeclaration: Option[Declaration],
-  pspDeclaration: Option[Declaration]
+case class PsrSubmittedResponse(
+  emailSent: Boolean
 )
 
-object EtmpSippPsrDeclaration {
-  case class Declaration(declaration1: Boolean, declaration2: Boolean)
-
-  implicit val formatDeclaration: OFormat[Declaration] = Json.format[Declaration]
-  implicit val format: OFormat[EtmpSippPsrDeclaration] = Json.format[EtmpSippPsrDeclaration]
+object PsrSubmittedResponse {
+  implicit val formats: OFormat[PsrSubmittedResponse] = Json.format[PsrSubmittedResponse]
 }

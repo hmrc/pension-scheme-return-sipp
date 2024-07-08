@@ -22,6 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{EmailConnector, MinimalDetailsConnector}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.EmailSubmissionService.{
   SubmissionDateFormatter,
   SubmissionDateTimeFormatter
@@ -38,12 +39,12 @@ class EmailSubmissionService @Inject()(
   clock: Clock
 )(implicit executionContext: ExecutionContext) {
   def submitEmail(
-    sippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest,
+    sippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse,
     pensionSchemeId: PensionSchemeId
   )(
     implicit headerCarrier: HeaderCarrier
   ): Future[Either[String, Unit]] = {
-    val reportDetails = sippPsrSubmissionEtmpRequest.reportDetails
+    val reportDetails = sippPsrSubmissionEtmpResponse.reportDetails
 
     (for {
       minimumDetails <- getMinimumDetails(pensionSchemeId)
@@ -53,7 +54,7 @@ class EmailSubmissionService @Inject()(
         minimumDetails.individualDetails.map(_.fullName),
         minimumDetails.email,
         formatReturnDates(reportDetails.periodStart, reportDetails.periodEnd),
-        sippPsrSubmissionEtmpRequest.reportDetails.schemeName
+        reportDetails.schemeName
       )
     } yield email).value
   }

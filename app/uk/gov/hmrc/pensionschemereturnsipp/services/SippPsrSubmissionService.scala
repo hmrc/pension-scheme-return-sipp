@@ -17,25 +17,25 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
+import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
-import play.api.libs.json._
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http.{BadRequestException, ExpectationFailedException, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.{
-  PensionSchemeId,
-  PensionSchemeReturnValidationFailureException,
-  SippPsrSubmission
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
+  EtmpPsrStatus,
+  EtmpSippPsrDeclaration
 }
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRSubmissionTransformer, SippPsrSubmissionToEtmp}
-import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
-import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,8 +43,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
-  jsonPayloadSchemaValidator: JSONSchemaValidator,
-  sippPsrSubmissionToEtmp: SippPsrSubmissionToEtmp,
   psrSubmissionTransformer: PSRSubmissionTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
@@ -212,30 +210,45 @@ class SippPsrSubmissionService @Inject()(
       }
 
   def submitSippPsr(
-    sippPsrSubmission: SippPsrSubmission,
+    submission: PsrSubmissionRequest,
+    submittedBy: String,
+    submitterId: String,
     pensionSchemeId: PensionSchemeId
-  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] = {
-    val request = sippPsrSubmissionToEtmp.transform(sippPsrSubmission)
-    val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, Json.toJson(request))
-    if (validationResult.hasErrors) {
-      throw PensionSchemeReturnValidationFailureException(
-        s"Invalid payload when submitSippPsr :-\n${validationResult.toString}"
-      )
-    } else {
-      for {
-        response <- psrSubmission(sippPsrSubmission, request)
-        _ <- emailSubmissionService.submitEmail(request, pensionSchemeId)
-      } yield response
-    }
-  }
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
+    for {
+      response <- psrSubmission(submission, submittedBy, submitterId, pensionSchemeId)
+      emailResponse <- emailSubmissionService.submitEmail(response, pensionSchemeId)
+    } yield emailResponse
 
   private def psrSubmission(
-    sippPsrSubmission: SippPsrSubmission,
-    request: SippPsrSubmissionEtmpRequest
-  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    psrConnector.submitSippPsr(sippPsrSubmission.reportDetails.pstr, request).recover {
-      case _: BadRequestException => throw new ExpectationFailedException("Nothing to submit")
-    }
+    submission: PsrSubmissionRequest,
+    submittedBy: String,
+    submitterId: String,
+    pensionSchemeId: PensionSchemeId
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrSubmissionEtmpResponse] = {
+    import submission._
+
+    psrConnector
+      .getSippPsr(pstr, fbNumber, periodStartDate, psrVersion)
+      .flatMap {
+        case Some(response) =>
+          val updateRequest = SippPsrSubmissionEtmpRequest(
+            response.reportDetails.copy(status = EtmpPsrStatus.Submitted),
+            response.accountingPeriodDetails.some,
+            response.memberAndTransactions.flatMap(NonEmptyList.fromList),
+            EtmpSippPsrDeclaration(
+              submittedBy = submittedBy,
+              submitterID = submitterId,
+              psaID = pensionSchemeId.value.some,
+              psaDeclaration = Option.when(isPsa)(Declaration(declaration1 = true, declaration2 = true)),
+              pspDeclaration = Option.unless(!isPsa)(Declaration(declaration1 = true, declaration2 = true))
+            ).some
+          )
+          psrConnector.submitSippPsr(pstr, updateRequest).map(_ => response)
+        case None =>
+          Future.failed(new Exception(s"Submission with pstr $pstr not found"))
+      }
+  }
 
   def getSippPsr(
     pstr: String,

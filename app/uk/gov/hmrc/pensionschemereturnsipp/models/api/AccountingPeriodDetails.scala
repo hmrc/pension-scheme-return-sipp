@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
 
-case class SippPsrSubmission(
-  reportDetails: SippReportDetailsSubmission
+import java.time.LocalDate
+
+case class AccountingPeriodDetails(
+  version: Option[String],
+  accountingPeriods: List[AccountingPeriod]
 )
 
-object SippPsrSubmission {
-  implicit val formats: OFormat[SippPsrSubmission] = Json.format[SippPsrSubmission]
+case class AccountingPeriod(
+  accPeriodStart: LocalDate,
+  accPeriodEnd: LocalDate
+)
+
+object AccountingPeriodDetails {
+  implicit val accountingPeriodFormat: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
+  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
 }

@@ -19,19 +19,25 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AccountingPeriod,
+  AccountingPeriodDetails,
+  PSRSubmissionResponse,
+  ReportDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeId, SippPsrSubmission, SippReportDetailsSubmission}
 
 import java.time.LocalDate
 import scala.annotation.unused
@@ -42,6 +48,9 @@ trait TestValues {
 
   val pstr = "testPstr"
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
+
+  val samplePsaId: PsaId = PsaId("PSA")
+  val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
 
   val enrolments: Enrolments = Enrolments(
     Set(
@@ -56,21 +65,6 @@ trait TestValues {
     )
   )
 
-  // SIPP - PSR
-  val sampleSippReportDetailsSubmission: SippReportDetailsSubmission = SippReportDetailsSubmission(
-    "17836742CF",
-    periodStart = LocalDate.of(2020, 12, 12),
-    periodEnd = LocalDate.of(2021, 12, 12),
-    memberTransactions = YesNo.Yes
-  )
-
-  val sampleSippPsrSubmission: SippPsrSubmission = SippPsrSubmission(
-    sampleSippReportDetailsSubmission
-  )
-
-  val samplePsaId: PsaId = PsaId("PSA")
-  val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
-
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
     details = ReportDetails(
       pstr = "test",
@@ -79,6 +73,10 @@ trait TestValues {
       periodEnd = LocalDate.of(2020, 12, 12),
       schemeName = None,
       psrVersion = None
+    ),
+    accountingPeriodDetails = AccountingPeriodDetails(
+      Some("1.0"),
+      List(AccountingPeriod(LocalDate.of(2020, 12, 12), LocalDate.of(2020, 12, 12)))
     ),
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
@@ -314,7 +312,8 @@ trait TestValues {
             )
           )
         )
-      )
+      ),
+      Some(EtmpSippPsrDeclaration("PSP", "20000019", Some("A0000023"), None, Some(Declaration(true, true))))
     )
 
   val validationMessage: ValidationMessage = {
