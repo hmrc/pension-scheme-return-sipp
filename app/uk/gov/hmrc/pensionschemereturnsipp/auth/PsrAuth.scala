@@ -68,13 +68,13 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
     enrolments
       .getEnrolment(psaEnrolmentKey)
       .flatMap(_.getIdentifier(psaIdKey))
-      .map(enrolement => PsaId(enrolement.value))
+      .map(enrolment => PsaId(enrolment.value))
 
   private def getPspId(enrolments: Enrolments): Option[PspId] =
     enrolments
       .getEnrolment(pspEnrolmentKey)
       .flatMap(_.getIdentifier(pspIdKey))
-      .map(enrolement => PspId(enrolement.value))
+      .map(enrolment => PspId(enrolment.value))
 
   private def getPsaPspId(enrolments: Enrolments): Option[PensionSchemeId] =
     getPsaId(enrolments).orElse(getPspId(enrolments))

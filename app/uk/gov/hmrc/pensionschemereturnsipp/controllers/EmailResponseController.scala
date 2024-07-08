@@ -69,12 +69,8 @@ class EmailResponseController @Inject()(
             },
             valid => {
               valid.events
-                .filterNot(
-                  _.event == Opened
-                )
-                .foreach { event =>
-                  logger.debug(s"Email audit event is $event")
-                }
+                .filterNot(_.event == Opened)
+                .foreach(event => logger.debug(s"Email audit event is $event"))
               Ok
             }
           )
@@ -94,7 +90,7 @@ class EmailResponseController @Inject()(
 
     try {
       require(emailAddress.matches(emailRegex))
-      Right(Tuple3(psaOrPspId, pstr, emailAddress))
+      Right((psaOrPspId, pstr, emailAddress))
     } catch {
       case _: IllegalArgumentException => Left(Forbidden(s"Malformed email : $emailAddress"))
     }

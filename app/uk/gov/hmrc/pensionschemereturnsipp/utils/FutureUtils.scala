@@ -16,21 +16,13 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
+import cats.implicits.catsSyntaxFlatMapOps
+
 import scala.concurrent.{ExecutionContext, Future}
 
 object FutureUtils {
-
   implicit class FutureOps[A](val future: Future[A]) extends AnyVal {
-
-    def tap[B](f: A => Future[B])(implicit ec: ExecutionContext): Future[A] =
-      future.flatMap(a => f(a).as(a).recover(_ => a))
-
     def tapError[B](f: Throwable => Future[B])(implicit ec: ExecutionContext): Future[A] =
-      future.recoverWith {
-        case t => f(t).flatMap(_ => Future.failed(t)).recoverWith(_ => Future.failed(t))
-      }
-
-    def as[B](b: B)(implicit ec: ExecutionContext): Future[B] =
-      future.map(_ => b)
+      future.recoverWith(t => f(t) >> Future.failed(t))
   }
 }
