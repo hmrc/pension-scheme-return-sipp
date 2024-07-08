@@ -35,7 +35,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 import play.api.mvc._
 import com.google.inject.Inject
 import play.api.Logger
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResultException, JsValue}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -59,12 +59,12 @@ class EmailResponseController @Inject()(
     encryptedPstr: String
   ): Action[JsValue] = Action(parser.tolerantJson) { implicit request =>
     decryptPsaOrPspIdAndEmail(encryptedPsaOrPspId, encryptedPstr, email) match {
-      case Right(Tuple3(_, _, _)) =>
+      case Right((_, _, _)) =>
         request.body
           .validate[EmailEvents]
           .fold(
-            _ => {
-              logger.error("failed to decode email events response")
+            errors => {
+              logger.error("failed to decode email events response", JsResultException(errors))
               BadRequest("Bad request received for email call back event")
             },
             valid => {
