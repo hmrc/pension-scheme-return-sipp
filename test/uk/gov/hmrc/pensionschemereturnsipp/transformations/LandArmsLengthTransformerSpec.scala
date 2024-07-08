@@ -39,7 +39,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     landOrPropertyinUK = YesNo.Yes,
     addressDetails = AddressDetails(
       addressLine1 = "addressLine1",
-      addressLine2 = Some("addressLine2"),
+      addressLine2 = "addressLine2",
       addressLine3 = None,
       addressLine4 = None,
       addressLine5 = None,
@@ -256,7 +256,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       landOrPropertyinUK = landOrPropertyinUK,
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
-        addressDetails.addressLine2.some,
+        addressDetails.addressLine2,
         addressDetails.addressLine3,
         addressDetails.addressLine4,
         addressDetails.addressLine5,

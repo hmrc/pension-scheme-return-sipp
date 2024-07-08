@@ -175,7 +175,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       landOrPropertyinUK = landOrPropertyInUK,
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
-        addressDetails.addressLine2.some,
+        addressDetails.addressLine2,
         addressDetails.addressLine3,
         addressDetails.addressLine4,
         addressDetails.addressLine5,
