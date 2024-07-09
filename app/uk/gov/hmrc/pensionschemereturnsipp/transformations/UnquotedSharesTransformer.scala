@@ -57,7 +57,7 @@ class UnquotedSharesTransformer @Inject()
       sharesCompanyDetails = details.shareCompanyDetails,
       acquiredFromName = details.acquiredFromName,
       totalCost = details.transactionDetail.totalCost,
-      independentValution = details.transactionDetail.independentValuation,
+      independentValuation = details.transactionDetail.independentValuation,
       noOfSharesSold = details.transactionDetail.noOfIndependentValuationSharesSold,
       totalDividendsIncome = details.transactionDetail.totalDividendsIncome,
       sharesDisposed = details.sharesDisposed,
@@ -94,7 +94,7 @@ class UnquotedSharesTransformer @Inject()
       acquiredFromName = trx.acquiredFromName,
       transactionDetail = UnquotedShareTransactionDetail(
         trx.totalCost,
-        trx.independentValution,
+        trx.independentValuation,
         trx.noOfSharesSold,
         trx.totalDividendsIncome
       ),
@@ -106,7 +106,7 @@ class UnquotedSharesTransformer @Inject()
               totalAmount = d.disposedShareAmount,
               nameOfPurchaser = d.purchaserName,
               purchaserConnectedParty = d.disposalConnectedParty,
-              independentValuationDisposal = d.independentValutionDisposal
+              independentValuationDisposal = d.independentValuationDisposal
             )
         ),
       noOfSharesHeld = trx.noOfSharesHeld,

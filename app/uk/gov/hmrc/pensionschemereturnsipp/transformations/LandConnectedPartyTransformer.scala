@@ -55,11 +55,11 @@ class LandConnectedPartyTransformer @Inject()
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
       landOrPropertyInUK = property.landOrPropertyinUK,
-      addressDetails = property.addressDetails.toEtmp,
+      addressDetails = property.addressDetails,
       registryDetails = property.registryDetails,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
-      independentValution = property.independentValuation,
+      independentValuation = property.independentValuation,
       jointlyHeld = property.jointlyHeld,
       noOfPersonsIfJointlyHeld = property.noOfPersons,
       residentialSchedule29A = property.residentialSchedule29A,
@@ -73,7 +73,7 @@ class LandConnectedPartyTransformer @Inject()
       disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
       purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
       anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
-      independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
+      independentValuationDisposal = property.disposalDetails.map(_.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
     )
 
@@ -104,11 +104,11 @@ class LandConnectedPartyTransformer @Inject()
       nino = toNinoType(member),
       acquisitionDate = landConnectedParty.acquisitionDate,
       landOrPropertyinUK = landConnectedParty.landOrPropertyInUK,
-      addressDetails = landConnectedParty.addressDetails.fromEtmp,
+      addressDetails = landConnectedParty.addressDetails,
       registryDetails = landConnectedParty.registryDetails,
       acquiredFromName = landConnectedParty.acquiredFromName,
       totalCost = landConnectedParty.totalCost,
-      independentValuation = landConnectedParty.independentValution,
+      independentValuation = landConnectedParty.independentValuation,
       jointlyHeld = landConnectedParty.jointlyHeld,
       noOfPersons = landConnectedParty.noOfPersonsIfJointlyHeld,
       residentialSchedule29A = landConnectedParty.residentialSchedule29A,
@@ -133,7 +133,7 @@ class LandConnectedPartyTransformer @Inject()
           disposedPropertyProceedsAmt <- landConnectedParty.disposedPropertyProceedsAmt
           purchaserNamesIfDisposed <- landConnectedParty.purchaserNamesIfDisposed
           anyOfPurchaserConnected <- landConnectedParty.anyOfPurchaserConnected
-          independentValuationDisposal <- landConnectedParty.independentValutionDisposal
+          independentValuationDisposal <- landConnectedParty.independentValuationDisposal
           propertyFullyDisposed <- landConnectedParty.propertyFullyDisposed
         } yield DisposalDetails(
           disposedPropertyProceedsAmt,

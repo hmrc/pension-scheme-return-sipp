@@ -891,7 +891,7 @@ object PsrConnectorSpec {
       |              "idNumber": "CRN123456"
       |            },
       |            "totalCost": 1234.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "jointlyHeld": "Yes",
       |            "noOfPersons": 1,
       |            "jointPropertyPersonDetails": [
@@ -914,7 +914,7 @@ object PsrConnectorSpec {
       |            "isPropertyDisposed": "Yes",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 2000.99,
-      |              "independentValutionDisposal": "No",
+      |              "independentValuationDisposal": "No",
       |              "propertyFullyDisposed": "No",
       |              "purchaserDetails": [
       |                {
@@ -939,13 +939,13 @@ object PsrConnectorSpec {
       |              "idNumber": "AA200000A"
       |            },
       |            "totalCost": 99999999.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "tangibleSchedule29A": "No",
       |            "totalIncomeOrReceipts": 9999.99,
       |            "isPropertyDisposed": "No",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999999.99,
-      |              "independentValutionDisposal": "No",
+      |              "independentValuationDisposal": "No",
       |              "propertyFullyDisposed": "No",
       |              "purchaserDetails": [
       |                {
@@ -984,7 +984,7 @@ object PsrConnectorSpec {
       |              "idNumber": "CRN678901"
       |            },
       |            "totalCost": 999999.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "jointlyHeld": "No",
       |            "residentialSchedule29A": "No",
       |            "isLeased": "No",
@@ -1005,14 +1005,14 @@ object PsrConnectorSpec {
       |              "indivOrOrgType": "01",
       |              "idNumber": "AA250000A"
       |            },
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "totalIncomeOrReceipts": 9999.99,
       |            "costOrMarket": "Cost Value",
       |            "costMarketValue": 99999.99,
       |            "isPropertyDisposed": "No",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999.99,
-      |              "independentValutionDisposal": "No",
+      |              "independentValuationDisposal": "No",
       |              "propertyFullyDisposed": "No",
       |              "purchaserDetails": [
       |                {
@@ -1063,7 +1063,7 @@ object PsrConnectorSpec {
       |              "idNumber": "CRN345345"
       |            },
       |            "totalCost": 9999.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "noOfSharesSold": 10,
       |            "totalDividendsIncome": 999.99,
       |            "sharesDisposed": "Yes",
@@ -1071,7 +1071,7 @@ object PsrConnectorSpec {
       |              "disposedShareAmount": 9999.99,
       |              "disposalConnectedParty": "Yes",
       |              "purchaserName": "Dave SS",
-      |              "independentValutionDisposal": "No"
+      |              "independentValuationDisposal": "No"
       |            }
       |          }
       |        ]

@@ -54,7 +54,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
               assetDescription = "Asset Description",
               acquiredFromName = "acquiredFromName",
               totalCost = 20.0,
-              independentValution = YesNo.Yes,
+              independentValuation = YesNo.Yes,
               totalIncomeOrReceipts = 20.0, // Updated
               costOrMarket = MarketValue,
               costMarketValue = 20.0,
@@ -62,7 +62,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
               disposedPropertyProceedsAmt = None,
               purchaserNamesIfDisposed = None,
               anyOfPurchaserConnected = None,
-              independentValutionDisposal = None,
+              independentValuationDisposal = None,
               propertyFullyDisposed = None
             )
           )
@@ -91,7 +91,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValution = YesNo.Yes,
+                    independentValuation = YesNo.Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
@@ -99,7 +99,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     disposedPropertyProceedsAmt = None,
                     purchaserNamesIfDisposed = None,
                     anyOfPurchaserConnected = None,
-                    independentValutionDisposal = None,
+                    independentValuationDisposal = None,
                     propertyFullyDisposed = None
                   )
                 )
@@ -129,7 +129,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "test2",
                     totalCost = 20.0,
-                    independentValution = YesNo.Yes,
+                    independentValuation = YesNo.Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
@@ -137,7 +137,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     disposedPropertyProceedsAmt = None,
                     purchaserNamesIfDisposed = None,
                     anyOfPurchaserConnected = None,
-                    independentValutionDisposal = None,
+                    independentValuationDisposal = None,
                     propertyFullyDisposed = None
                   )
                 )
@@ -174,7 +174,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValution = YesNo.Yes,
+                    independentValuation = YesNo.Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
@@ -182,7 +182,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     disposedPropertyProceedsAmt = None,
                     purchaserNamesIfDisposed = None,
                     anyOfPurchaserConnected = None,
-                    independentValutionDisposal = None,
+                    independentValuationDisposal = None,
                     propertyFullyDisposed = None
                   )
                 )

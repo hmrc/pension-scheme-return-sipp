@@ -18,7 +18,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  AddressDetails,
   DisposalDetails,
   NameDOB,
   NinoType,
@@ -34,7 +33,14 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.{CostValue, MarketValue}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AccountingPeriod,
+  AccountingPeriodDetails,
+  AddressDetails,
+  RegistryDetails,
+  SharesCompanyDetails,
+  YesNo
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
@@ -48,7 +54,7 @@ import scala.annotation.unused
 trait SippEtmpTestValues {
   val sampleDate: LocalDate = LocalDate.of(2023, 10, 19)
 
-  private val sippAddress: EtmpAddress = EtmpAddress(
+  private val sippAddress: AddressDetails = AddressDetails(
     addressLine1 = "Flat 9, 76 Bla bla Street",
     addressLine2 = "Another long and Second one",
     addressLine3 = Some("Third Long Line"),
@@ -89,14 +95,14 @@ trait SippEtmpTestValues {
 
   protected val reportDetails: EtmpSippReportDetails = testReportDetails.toEtmp
 
-  private val period: EtmpSippAccountingPeriod = EtmpSippAccountingPeriod(
+  private val period: AccountingPeriod = AccountingPeriod(
     accPeriodStart = sampleDate,
     accPeriodEnd = sampleDate
   )
 
-  protected val accountingPeriodDetails: EtmpSippAccountingPeriodDetails = EtmpSippAccountingPeriodDetails(
+  protected val accountingPeriodDetails: AccountingPeriodDetails = AccountingPeriodDetails(
     version = None,
-    accountingPeriods = List(period)
+    accountingPeriods = NonEmptyList.one(period)
   )
 
   protected val sippMemberDetails = MemberDetails(
@@ -120,7 +126,7 @@ trait SippEtmpTestValues {
     disposedShareAmount = 2123.22,
     disposalConnectedParty = YesNo.Yes,
     purchaserName = "Some Long Purchaser Name",
-    independentValutionDisposal = Yes
+    independentValuationDisposal = Yes
   )
 
   protected val sippLandConnectedPartyTransactionDetail: SippLandConnectedParty.TransactionDetail =
@@ -131,7 +137,7 @@ trait SippEtmpTestValues {
       registryDetails = sippRegistryDetails,
       acquiredFromName = "Acquired From Name",
       totalCost = 999999.99,
-      independentValution = Yes,
+      independentValuation = Yes,
       jointlyHeld = Yes,
       noOfPersonsIfJointlyHeld = Some(2),
       residentialSchedule29A = Yes,
@@ -145,7 +151,7 @@ trait SippEtmpTestValues {
       disposedPropertyProceedsAmt = Some(999999.99),
       purchaserNamesIfDisposed = Some("Name1 Surname1, Name2 Surname2, Name3 Surname3"),
       anyOfPurchaserConnected = Some(No),
-      independentValutionDisposal = Some(No),
+      independentValuationDisposal = Some(No),
       propertyFullyDisposed = Some(Yes)
     )
 
@@ -157,7 +163,7 @@ trait SippEtmpTestValues {
       sharesCompanyDetails = Some(sippSharesCompanyDetail),
       acquiredFromName = "TestLongName TestLongSurname",
       totalCost = 9999999.99,
-      independentValution = Yes,
+      independentValuation = Yes,
       tangibleSchedule29A = Yes,
       totalIncomeOrReceipts = 999999.99,
       isPropertyDisposed = Yes,
@@ -165,7 +171,7 @@ trait SippEtmpTestValues {
       purchaserNamesIfDisposed = Some("Name1 Surname1, Name2 Surname2, Name3 Surname3"),
       anyOfPurchaserConnected = Some(No),
       disposalOfShares = No,
-      independentValutionDisposal = Some(No),
+      independentValuationDisposal = Some(No),
       noOfSharesHeld = Some(2),
       propertyFullyDisposed = Some(Yes)
     )
@@ -177,7 +183,7 @@ trait SippEtmpTestValues {
     registryDetails = sippRegistryDetails,
     acquiredFromName = "Acquired From Name",
     totalCost = 999999.99,
-    independentValution = Yes,
+    independentValuation = Yes,
     jointlyHeld = Yes,
     noOfPersonsIfJointlyHeld = Some(2),
     residentialSchedule29A = Yes,
@@ -191,7 +197,7 @@ trait SippEtmpTestValues {
     disposedPropertyProceedsAmt = Some(999999.99),
     purchaserNamesIfDisposed = Some("Name1 Surname1, Name2 Surname2, Name3 Surname3"),
     anyOfPurchaserConnected = Some(No),
-    independentValutionDisposal = Some(No),
+    independentValuationDisposal = Some(No),
     propertyFullyDisposed = Some(Yes)
   )
 
@@ -200,7 +206,7 @@ trait SippEtmpTestValues {
     acquisitionDate = sampleDate,
     totalCost = 9999999.99,
     acquiredFromName = "TestLongName TestLongSurname",
-    independentValution = Yes,
+    independentValuation = Yes,
     totalIncomeOrReceipts = 9999999.99,
     costOrMarket = CostValue,
     costMarketValue = 9999999.99,
@@ -208,7 +214,7 @@ trait SippEtmpTestValues {
     disposedPropertyProceedsAmt = Some(999999.99),
     purchaserNamesIfDisposed = Some("Name1 Surname1, Name2 Surname2, Name3 Surname3"),
     anyOfPurchaserConnected = Some(No),
-    independentValutionDisposal = Some(No),
+    independentValuationDisposal = Some(No),
     propertyFullyDisposed = Some(Yes)
   )
 
@@ -230,7 +236,7 @@ trait SippEtmpTestValues {
     sharesCompanyDetails = sippSharesCompanyDetail,
     acquiredFromName = "TestLongName TestLongSurname",
     totalCost = 9999999.99,
-    independentValution = Yes,
+    independentValuation = Yes,
     noOfSharesSold = Some(3),
     totalDividendsIncome = 2000.2,
     sharesDisposed = Yes,
@@ -337,7 +343,7 @@ trait SippEtmpTestValues {
             SippLandConnectedParty.TransactionDetail(
               LocalDate.of(2020, 1, 1),
               YesNo.Yes,
-              EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
+              AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
               RegistryDetails(YesNo.No, None, None),
               "acquiredFromName",
               10.0,
@@ -390,7 +396,7 @@ trait SippEtmpTestValues {
       ),
       acquiredFromName = acquiredFromName,
       totalCost = totalCost,
-      independentValuation = independentValution,
+      independentValuation = independentValuation,
       tangibleSchedule29A = tangibleSchedule29A,
       totalIncomeOrReceipts = totalIncomeOrReceipts,
       isPropertyDisposed = YesNo(isPropertyDisposed.boolean),
@@ -399,7 +405,7 @@ trait SippEtmpTestValues {
           disposedPropertyProceedsAmt.get,
           purchaserNamesIfDisposed.get,
           YesNo(anyOfPurchaserConnected.get.boolean),
-          YesNo(independentValutionDisposal.get.boolean),
+          YesNo(independentValuationDisposal.get.boolean),
           YesNo(propertyFullyDisposed.get.boolean)
         )
       },

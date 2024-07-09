@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AddressDetails,
   CostOrMarketType,
   RegistryDetails,
   SharesCompanyDetails,
@@ -62,11 +63,11 @@ object SippLandConnectedParty {
   case class TransactionDetail(
     acquisitionDate: LocalDate,
     landOrPropertyInUK: YesNo,
-    addressDetails: EtmpAddress,
+    addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo, // Previous api has that Valution typo!
+    independentValuation: YesNo,
     jointlyHeld: YesNo,
     noOfPersonsIfJointlyHeld: Option[Int],
     residentialSchedule29A: YesNo,
@@ -80,7 +81,7 @@ object SippLandConnectedParty {
     disposedPropertyProceedsAmt: Option[Double],
     purchaserNamesIfDisposed: Option[String],
     anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
+    independentValuationDisposal: Option[YesNo],
     propertyFullyDisposed: Option[YesNo]
   )
 
@@ -100,14 +101,14 @@ object SippOtherAssetsConnectedParty {
     sharesCompanyDetails: Option[SharesCompanyDetails],
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     tangibleSchedule29A: YesNo,
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
     disposedPropertyProceedsAmt: Option[Double],
     purchaserNamesIfDisposed: Option[String],
     anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
+    independentValuationDisposal: Option[YesNo],
     disposalOfShares: YesNo,
     noOfSharesHeld: Option[Int],
     propertyFullyDisposed: Option[YesNo]
@@ -125,11 +126,11 @@ object SippLandArmsLength {
   case class TransactionDetail(
     acquisitionDate: LocalDate,
     landOrPropertyinUK: YesNo,
-    addressDetails: EtmpAddress,
+    addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     jointlyHeld: YesNo,
     noOfPersonsIfJointlyHeld: Option[Int],
     residentialSchedule29A: YesNo,
@@ -143,7 +144,7 @@ object SippLandArmsLength {
     disposedPropertyProceedsAmt: Option[Double],
     purchaserNamesIfDisposed: Option[String],
     anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
+    independentValuationDisposal: Option[YesNo],
     propertyFullyDisposed: Option[YesNo]
   )
 
@@ -161,7 +162,7 @@ object SippTangibleProperty {
     acquisitionDate: LocalDate,
     totalCost: Double,
     acquiredFromName: String,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     totalIncomeOrReceipts: Double,
     costOrMarket: CostOrMarketType,
     costMarketValue: Double,
@@ -169,7 +170,7 @@ object SippTangibleProperty {
     disposedPropertyProceedsAmt: Option[Double],
     purchaserNamesIfDisposed: Option[String],
     anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
+    independentValuationDisposal: Option[YesNo],
     propertyFullyDisposed: Option[YesNo]
   )
 
@@ -209,7 +210,7 @@ object SippUnquotedShares {
     sharesCompanyDetails: SharesCompanyDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     noOfSharesSold: Option[Int],
     totalDividendsIncome: Double,
     sharesDisposed: YesNo,

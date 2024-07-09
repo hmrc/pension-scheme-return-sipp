@@ -53,7 +53,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       acquisitionDate = property.acquisitionDate,
       totalCost = property.totalCost,
       acquiredFromName = property.acquiredFromName,
-      independentValution = property.independentValuation,
+      independentValuation = property.independentValuation,
       totalIncomeOrReceipts = property.totalIncomeOrReceipts,
       costOrMarket = property.costOrMarket,
       costMarketValue = property.costMarketValue,
@@ -61,7 +61,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
       purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
       anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
-      independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
+      independentValuationDisposal = property.disposalDetails.map(_.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
     )
 
@@ -94,7 +94,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       acquisitionDate = trx.acquisitionDate,
       totalCost = trx.totalCost,
       acquiredFromName = trx.acquiredFromName,
-      independentValuation = trx.independentValution,
+      independentValuation = trx.independentValuation,
       totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
       costOrMarket = trx.costOrMarket,
       costMarketValue = trx.costMarketValue,
@@ -104,7 +104,7 @@ class TangibleMoveablePropertyTransformer @Inject()
           disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
           namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
           anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
-          independentValuationDisposal = trx.independentValutionDisposal.get,
+          independentValuationDisposal = trx.independentValuationDisposal.get,
           propertyFullyDisposed = trx.propertyFullyDisposed.get
         )
       ),

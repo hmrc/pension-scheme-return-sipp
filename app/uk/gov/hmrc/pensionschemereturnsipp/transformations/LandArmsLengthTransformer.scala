@@ -49,11 +49,11 @@ class LandArmsLengthTransformer @Inject()()
     SippLandArmsLength.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
       landOrPropertyinUK = property.landOrPropertyinUK,
-      addressDetails = property.addressDetails.toEtmp,
+      addressDetails = property.addressDetails,
       registryDetails = property.registryDetails,
       acquiredFromName = property.acquiredFromName,
       totalCost = property.totalCost,
-      independentValution = property.independentValuation,
+      independentValuation = property.independentValuation,
       jointlyHeld = property.jointlyHeld,
       noOfPersonsIfJointlyHeld = property.noOfPersons,
       residentialSchedule29A = property.residentialSchedule29A,
@@ -67,7 +67,7 @@ class LandArmsLengthTransformer @Inject()()
       disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
       purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
       anyOfPurchaserConnected = property.disposalDetails.map(d => d.anyPurchaserConnected),
-      independentValutionDisposal = property.disposalDetails.map(d => d.independentValuationDisposal),
+      independentValuationDisposal = property.disposalDetails.map(d => d.independentValuationDisposal),
       propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed)
     )
 
@@ -98,11 +98,11 @@ class LandArmsLengthTransformer @Inject()()
       nino = toNinoType(member),
       acquisitionDate = armsLength.acquisitionDate,
       landOrPropertyinUK = armsLength.landOrPropertyinUK,
-      addressDetails = armsLength.addressDetails.fromEtmp,
+      addressDetails = armsLength.addressDetails,
       registryDetails = armsLength.registryDetails,
       acquiredFromName = armsLength.acquiredFromName,
       totalCost = armsLength.totalCost,
-      independentValuation = armsLength.independentValution,
+      independentValuation = armsLength.independentValuation,
       jointlyHeld = armsLength.jointlyHeld,
       noOfPersons = armsLength.noOfPersonsIfJointlyHeld,
       residentialSchedule29A = armsLength.residentialSchedule29A,
@@ -127,7 +127,7 @@ class LandArmsLengthTransformer @Inject()()
           disposedPropertyProceedsAmt <- armsLength.disposedPropertyProceedsAmt
           purchaserNamesIfDisposed <- armsLength.purchaserNamesIfDisposed
           anyOfPurchaserConnected <- armsLength.anyOfPurchaserConnected
-          independentValuationDisposal <- armsLength.independentValutionDisposal
+          independentValuationDisposal <- armsLength.independentValuationDisposal
           propertyFullyDisposed <- armsLength.propertyFullyDisposed
         } yield DisposalDetails(
           disposedPropertyProceedsAmt,

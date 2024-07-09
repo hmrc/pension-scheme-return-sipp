@@ -17,11 +17,9 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpAddress
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -47,7 +45,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                   SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
-                    EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
+                    AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
                     RegistryDetails(YesNo.No, None, None),
                     "acquiredFromName",
                     10.0,
@@ -92,7 +90,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                   SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
                     YesNo.Yes,
-                    EtmpAddress("addressLine1", "addressLine2", None, None, None, None, "UK"),
+                    AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
                     RegistryDetails(YesNo.No, None, None),
                     "test2",
                     10.0,
@@ -189,7 +187,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       ),
       acquiredFromName = acquiredFromName,
       totalCost = totalCost,
-      independentValuation = independentValution,
+      independentValuation = independentValuation,
       jointlyHeld = jointlyHeld,
       noOfPersons = noOfPersonsIfJointlyHeld,
       residentialSchedule29A = residentialSchedule29A,
@@ -210,7 +208,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
           disposedPropertyProceedsAmt.get,
           purchaserNamesIfDisposed.get,
           anyOfPurchaserConnected.get,
-          independentValutionDisposal.get,
+          independentValuationDisposal.get,
           propertyFullyDisposed.get
         )
       },

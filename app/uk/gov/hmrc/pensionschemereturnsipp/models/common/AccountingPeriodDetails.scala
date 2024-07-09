@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
+import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-
 import java.time.LocalDate
 
-case class EtmpSippAccountingPeriodDetails(
+case class AccountingPeriodDetails(
   version: Option[String],
-  accountingPeriods: List[EtmpSippAccountingPeriod]
+  accountingPeriods: NonEmptyList[AccountingPeriod]
 )
 
-case class EtmpSippAccountingPeriod(
+case class AccountingPeriod(
   accPeriodStart: LocalDate,
   accPeriodEnd: LocalDate
 )
 
-object EtmpSippAccountingPeriodDetails {
-  implicit val accountingPeriodFormat: OFormat[EtmpSippAccountingPeriod] = Json.format[EtmpSippAccountingPeriod]
-  implicit val format: OFormat[EtmpSippAccountingPeriodDetails] = Json.format[EtmpSippAccountingPeriodDetails]
+object AccountingPeriodDetails {
+  implicit val accountingPeriodFormat: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
+  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
 }

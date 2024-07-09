@@ -22,7 +22,7 @@ import play.api.libs.json.{Format, JsError, JsSuccess, Reads, Writes}
 package object api {
   implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
     Reads.list[T].flatMapResult {
-      case Nil => JsError("The list is empty")
+      case Nil => JsError("The list should not be empty")
       case head :: tail => JsSuccess(NonEmptyList(head, tail))
     },
     Writes.list[T].contramap(_.toList)

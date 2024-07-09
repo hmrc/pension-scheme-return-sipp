@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
-import play.api.libs.json.{Json, OFormat}
+import cats.data.NonEmptyList
+import play.api.libs.json._
 
-case class EtmpAddress(
-  addressLine1: String,
-  addressLine2: String,
-  addressLine3: Option[String],
-  addressLine4: Option[String],
-  addressLine5: Option[String],
-  ukPostCode: Option[String],
-  countryCode: String
-)
-
-object EtmpAddress {
-  implicit val format: OFormat[EtmpAddress] = Json.format[EtmpAddress]
+package object common {
+  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
+    Reads.list[T].flatMapResult {
+      case Nil => JsError("The list should not be empty")
+      case head :: tail => JsSuccess(NonEmptyList(head, tail))
+    },
+    Writes.list[T].contramap(_.toList)
+  )
 }

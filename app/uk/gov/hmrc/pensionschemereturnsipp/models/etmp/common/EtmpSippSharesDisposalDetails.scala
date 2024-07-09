@@ -23,7 +23,7 @@ case class EtmpSippSharesDisposalDetails(
   disposedShareAmount: Double,
   disposalConnectedParty: YesNo,
   purchaserName: String,
-  independentValutionDisposal: YesNo
+  independentValuationDisposal: YesNo
 )
 
 object EtmpSippSharesDisposalDetails {

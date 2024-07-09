@@ -32,13 +32,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PSRSubmissionResponse,
   PsrSubmissionRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpPsrStatus,
-  EtmpSippAccountingPeriodDetails,
-  EtmpSippReportDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -179,7 +175,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     val submitterId = "submitterId"
     val psaPspId = "psaPsp"
     val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
-    import req.{pstr => _, _}
     val etmpResponse = SippPsrSubmissionEtmpResponse(
       reportDetails = EtmpSippReportDetails(
         pstr.some,
@@ -190,7 +185,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         None,
         None
       ),
-      accountingPeriodDetails = EtmpSippAccountingPeriodDetails("".some, Nil),
+      accountingPeriodDetails =
+        AccountingPeriodDetails("".some, NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now()))),
       memberAndTransactions = None,
       psrDeclaration = None
     )

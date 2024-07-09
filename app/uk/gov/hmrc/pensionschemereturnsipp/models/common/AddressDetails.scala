@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-
-case class AccountingPeriodDetails(
-  version: Option[String],
-  accountingPeriods: List[AccountingPeriod]
+case class AddressDetails(
+  addressLine1: String,
+  addressLine2: String,
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  addressLine5: Option[String],
+  ukPostCode: Option[String],
+  countryCode: String
 )
 
-case class AccountingPeriod(
-  accPeriodStart: LocalDate,
-  accPeriodEnd: LocalDate
-)
-
-object AccountingPeriodDetails {
-  implicit val accountingPeriodFormat: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
-  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
+object AddressDetails {
+  implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
 }
