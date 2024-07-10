@@ -24,12 +24,14 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import play.api.Logging
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey, pspEnrolmentKey, pspIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class PsrAuthContext[A](
   externalId: String,
-  psaPspId: String,
+  psaPspId: PensionSchemeId,
   name: Option[Name],
   request: Request[A]
 ) {
@@ -62,18 +64,18 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
           Future.failed(new UnauthorizedException("Not Authorised - Unable to retrieve credentials - externalId"))
       }
 
-  private def getPsaId(enrolments: Enrolments): Option[String] =
+  private def getPsaId(enrolments: Enrolments): Option[PsaId] =
     enrolments
       .getEnrolment(psaEnrolmentKey)
       .flatMap(_.getIdentifier(psaIdKey))
-      .map(_.value)
+      .map(enrolment => PsaId(enrolment.value))
 
-  private def getPspId(enrolments: Enrolments): Option[String] =
+  private def getPspId(enrolments: Enrolments): Option[PspId] =
     enrolments
       .getEnrolment(pspEnrolmentKey)
       .flatMap(_.getIdentifier(pspIdKey))
-      .map(_.value)
+      .map(enrolment => PspId(enrolment.value))
 
-  private def getPsaPspId(enrolments: Enrolments): Option[String] =
+  private def getPsaPspId(enrolments: Enrolments): Option[PensionSchemeId] =
     getPsaId(enrolments).orElse(getPspId(enrolments))
 }

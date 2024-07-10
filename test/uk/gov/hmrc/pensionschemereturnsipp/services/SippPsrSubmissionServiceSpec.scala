@@ -68,6 +68,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockAssetsFromConnectedPartyTransformer = mock[AssetsFromConnectedPartyTransformer]
   private val mockUnquotedSharesTransformer = mock[UnquotedSharesTransformer]
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
+  private val mockEmailSubmissionService = mock[EmailSubmissionService]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
@@ -77,7 +78,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     mockOutstandingLoansTransformer,
     mockAssetsFromConnectedPartyTransformer,
     mockUnquotedSharesTransformer,
-    mockTangibleMovablePropertyTransformer
+    mockTangibleMovablePropertyTransformer,
+    mockEmailSubmissionService
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -173,7 +175,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   "submitSippPsr" should {
     val submittedBy = "submittedBy"
     val submitterId = "submitterId"
-    val psaPspId = "psaPsp"
+    val psaPspId = samplePsaId
     val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
     val etmpResponse = SippPsrSubmissionEtmpResponse(
       reportDetails = EtmpSippReportDetails(
@@ -198,6 +200,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(Future.successful(etmpResponse.some))
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
+      when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
+        .thenReturn(Future.successful(Right()))
 
       whenReady(service.submitSippPsr(req, submittedBy, submitterId, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
@@ -213,6 +217,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       val thrown = intercept[BadRequestException] {
         await(service.submitSippPsr(req, submittedBy, submitterId, psaPspId))
+
       }
       thrown.responseCode mustBe BAD_REQUEST
       thrown.message must include("invalid-request")

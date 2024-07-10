@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.config
 
-import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment}
+import play.api.inject.Binding
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 
-class Module extends AbstractModule {
+import java.time.{Clock, ZoneOffset}
 
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector]).asEagerSingleton()
-  }
+class Module extends play.api.inject.Module {
 
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+    Seq(
+      bind[AuthConnector].to(classOf[DefaultAuthConnector]).eagerly(),
+      bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC)),
+      if (configuration.get[Boolean]("mongodb.encryption.enabled")) {
+        bind[Crypto].to(classOf[CryptoImpl]).eagerly()
+      } else {
+        bind[Crypto].toInstance(Crypto.noop).eagerly()
+      }
+    )
 }

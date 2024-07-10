@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
+import cats.implicits.catsSyntaxEitherId
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.Application
@@ -27,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
@@ -101,6 +102,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       }
 
       thrown.reason mustBe "Bearer token not supplied"
+
       verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
@@ -114,10 +116,10 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK, responseJson.toString)))
+        .thenReturn(Future.successful(().asRight))
 
       val result = controller.submitSippPsr(fakeRequest.withJsonBody(requestJson))
-      status(result) mustBe OK
+      status(result) mustBe CREATED
     }
   }
 
