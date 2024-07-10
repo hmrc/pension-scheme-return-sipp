@@ -196,7 +196,7 @@ object SippLoanOutstanding {
     loanRecipientName: String,
     dateOfLoan: LocalDate,
     amountOfLoan: Double,
-    loanConnectedParty: EtmpConnectedOrUnconnectedType,
+    loanConnectedParty: EtmpConnectionStatus,
     repayDate: LocalDate,
     interestRate: Double,
     loanSecurity: YesNo,

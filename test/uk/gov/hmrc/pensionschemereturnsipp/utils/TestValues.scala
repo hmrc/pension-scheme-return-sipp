@@ -30,6 +30,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   AccountingPeriod,
   AccountingPeriodDetails,
   AddressDetails,
+  DisposalDetails,
+  LesseeDetails,
   RegistryDetails,
   SharesCompanyDetails,
   UnquotedShareDisposalDetails,
@@ -38,7 +40,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -159,13 +161,13 @@ trait TestValues {
                       1234.99,
                       No,
                       Yes,
-                      None,
+                      Some(1),
                       No,
                       Yes,
-                      None,
+                      Some(LesseeDetails(1, Yes, LocalDate.parse("2023-03-14"), 9999.99)),
                       999999.99,
                       Yes,
-                      None
+                      Some(DisposalDetails(2000.99, "Micheal K", Yes, No, No))
                     )
                   )
                 )
@@ -186,8 +188,8 @@ trait TestValues {
                       No,
                       No,
                       9999.99,
-                      No,
-                      None,
+                      Yes,
+                      Some(DisposalDetails(9999999.99, "Morris K", No, No, No)),
                       Some(No),
                       Some(0)
                     )
@@ -243,8 +245,8 @@ trait TestValues {
                       9999.99,
                       CostValue,
                       99999.99,
-                      No,
-                      None
+                      Yes,
+                      Some(DisposalDetails(9999.99, "Michel K", No, No, No))
                     )
                   )
                 )
@@ -261,11 +263,11 @@ trait TestValues {
                       999.99,
                       Connected,
                       LocalDate.parse("2023-03-14"),
-                      10.0,
+                      10,
                       No,
                       99999.99,
                       No,
-                      Some(99999.99),
+                      Some(999999.99),
                       9999.99
                     )
                   )
@@ -284,7 +286,7 @@ trait TestValues {
                       No,
                       999.99,
                       Yes,
-                      Some(UnquotedShareDisposalDetails(9999.99, "Dave SS", YesNo.Yes, No, 1, 1))
+                      Some(UnquotedShareDisposalDetails(9999.99, "Dave SS", Yes, No, 10, 1))
                     )
                   )
                 )

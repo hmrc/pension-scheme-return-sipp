@@ -40,7 +40,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   YesNo
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest

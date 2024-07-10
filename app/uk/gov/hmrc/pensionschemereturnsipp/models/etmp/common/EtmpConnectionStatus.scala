@@ -18,14 +18,14 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-sealed abstract class EtmpConnectedOrUnconnectedType(override val entryName: String) extends EnumEntry
+sealed abstract class EtmpConnectionStatus(override val entryName: String) extends EnumEntry
 
-object EtmpConnectedOrUnconnectedType
-    extends Enum[EtmpConnectedOrUnconnectedType]
-    with PlayJsonEnum[EtmpConnectedOrUnconnectedType] {
+object EtmpConnectionStatus extends Enum[EtmpConnectionStatus] with PlayJsonEnum[EtmpConnectionStatus] {
 
-  case object Connected extends EtmpConnectedOrUnconnectedType("01")
-  case object Unconnected extends EtmpConnectedOrUnconnectedType("02")
+  def apply(connected: Boolean): EtmpConnectionStatus = if (connected) Connected else Unconnected
+
+  case object Connected extends EtmpConnectionStatus("01")
+  case object Unconnected extends EtmpConnectionStatus("02")
 
   val values = findValues
 }

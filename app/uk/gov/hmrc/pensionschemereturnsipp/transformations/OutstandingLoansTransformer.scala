@@ -21,8 +21,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{OutstandingLoansApi, OutstandingLoansResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 
 import javax.inject.{Inject, Singleton}
@@ -53,9 +53,7 @@ class OutstandingLoansTransformer @Inject()
       loanRecipientName = property.loanRecipientName,
       dateOfLoan = property.dateOfLoan,
       amountOfLoan = property.amountOfLoan,
-      loanConnectedParty =
-        if (property.loanConnectedParty.boolean) EtmpConnectedOrUnconnectedType.Connected
-        else EtmpConnectedOrUnconnectedType.Unconnected, //TODO change api type
+      loanConnectedParty = EtmpConnectionStatus(property.loanConnectedParty.boolean),
       repayDate = property.repayDate,
       interestRate = property.interestRate,
       loanSecurity = property.loanSecurity,
