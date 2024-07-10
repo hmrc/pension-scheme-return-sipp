@@ -55,7 +55,7 @@ class SippPsrSubmitController @Inject()(
 
       sippPsrSubmissionService
         .submitSippPsr(submissionRequest, user.fullName.mkString, user.externalId, user.psaPspId)
-        .map(_.fold(_ => false, _ => true))
+        .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }
   }
