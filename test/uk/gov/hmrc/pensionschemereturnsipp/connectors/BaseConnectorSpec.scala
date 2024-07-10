@@ -40,15 +40,6 @@ abstract class BaseConnectorSpec
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = scaled(Span(500, Millis)), interval = scaled(Span(50, Millis)))
 
-  protected def applicationBuilder: GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .configure(
-        "auditing.enabled" -> false,
-        "metric.enabled" -> false
-      )
-
-  protected def injected[A: ClassTag](implicit app: Application): A = app.injector.instanceOf[A]
-
   def stubGet(url: String, response: ResponseDefinitionBuilder): StubMapping =
     wireMockServer.stubFor(
       get(urlEqualTo(url))

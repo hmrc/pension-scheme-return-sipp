@@ -27,6 +27,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpPsrStatus,
@@ -47,7 +49,8 @@ class SippPsrSubmissionService @Inject()(
   outstandingLoansTransformer: OutstandingLoansTransformer,
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer,
   unquotedSharesTransformer: UnquotedSharesTransformer,
-  tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer
+  tangibleMovablePropertyTransformer: TangibleMoveablePropertyTransformer,
+  emailSubmissionService: EmailSubmissionService
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -206,11 +209,25 @@ class SippPsrSubmissionService @Inject()(
           transactions.toList.flatMap(txs => transformer.merge(txs, Nil))
       }
 
-  def submitSippPsr(submission: PsrSubmissionRequest, submittedBy: String, submitterId: String, psaPspId: String)(
-    implicit headerCarrier: HeaderCarrier,
-    requestHeader: RequestHeader
-  ): Future[Unit] = {
+  def submitSippPsr(
+    submission: PsrSubmissionRequest,
+    submittedBy: String,
+    submitterId: String,
+    pensionSchemeId: PensionSchemeId
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
+    for {
+      response <- psrSubmission(submission, submittedBy, submitterId, pensionSchemeId)
+      emailResponse <- emailSubmissionService.submitEmail(response, pensionSchemeId)
+    } yield emailResponse
+
+  private def psrSubmission(
+    submission: PsrSubmissionRequest,
+    submittedBy: String,
+    submitterId: String,
+    pensionSchemeId: PensionSchemeId
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrSubmissionEtmpResponse] = {
     import submission._
+
     psrConnector
       .getSippPsr(pstr, fbNumber, periodStartDate, psrVersion)
       .flatMap {
@@ -222,12 +239,12 @@ class SippPsrSubmissionService @Inject()(
             EtmpSippPsrDeclaration(
               submittedBy = submittedBy,
               submitterID = submitterId,
-              psaID = psaPspId.some,
+              psaID = pensionSchemeId.value.some,
               psaDeclaration = Option.when(isPsa)(Declaration(declaration1 = true, declaration2 = true)),
               pspDeclaration = Option.unless(!isPsa)(Declaration(declaration1 = true, declaration2 = true))
             ).some
           )
-          psrConnector.submitSippPsr(pstr, updateRequest).void
+          psrConnector.submitSippPsr(pstr, updateRequest).map(_ => response)
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
       }

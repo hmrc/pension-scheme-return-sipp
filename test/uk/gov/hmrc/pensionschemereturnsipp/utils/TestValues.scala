@@ -19,6 +19,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.utils
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AccountingPeriod,
   AccountingPeriodDetails,
@@ -46,6 +48,9 @@ trait TestValues {
 
   val pstr = "testPstr"
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
+
+  val samplePsaId: PsaId = PsaId("PSA")
+  val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
 
   val enrolments: Enrolments = Enrolments(
     Set(

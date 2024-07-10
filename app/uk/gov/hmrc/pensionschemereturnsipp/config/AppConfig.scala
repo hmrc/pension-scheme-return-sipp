@@ -19,6 +19,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig, runModeConfiguration: Configuration) {
@@ -39,4 +40,29 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
   val submitSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.submit-sipp-psr")}"
   val getSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-sipp-psr")}"
   val getPsrVersionsUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-psr-versions")}"
+
+  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionsSchemeReturn")
+
+  val emailApiUrl: String = servicesConfig.baseUrl("email")
+  val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
+  val emailSendForce: Boolean = config.getOptional[Boolean]("email.force").getOrElse(false)
+
+  def emailCallback(
+    pensionSchemeId: PensionSchemeId,
+    requestId: String,
+    encryptedEmail: String,
+    encryptedPsaId: String,
+    encryptedPstr: String
+  ) =
+    s"$pensionsSchemeReturnUrl${emailCallbackUrl
+      .format(
+        pensionSchemeId match {
+          case PensionSchemeId.PspId(_) => "PSP"
+          case PensionSchemeId.PsaId(_) => "PSA"
+        },
+        requestId,
+        encryptedEmail,
+        encryptedPsaId,
+        encryptedPstr
+      )}"
 }

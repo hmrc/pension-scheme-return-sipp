@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
-import cats.implicits.toFunctorOps
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.PsrSubmissionRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrSubmissionRequest, PsrSubmittedResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -56,7 +55,8 @@ class SippPsrSubmitController @Inject()(
 
       sippPsrSubmissionService
         .submitSippPsr(submissionRequest, user.fullName.mkString, user.externalId, user.psaPspId)
-        .as(Ok)
+        .map(_.isRight)
+        .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }
   }
 
