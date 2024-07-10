@@ -45,9 +45,9 @@ object OutstandingLoansApi {
     interestRate: Double,
     loanSecurity: YesNo,
     capitalRepayments: Double,
-    interestPayments: Double,
     arrearsOutstandingPrYears: YesNo,
     outstandingYearEndAmount: Double,
+    arrearsOutstandingPrYearsAmt: Option[Double],
     transactionCount: Option[Int]
   ) extends MemberKey
 

@@ -19,7 +19,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SharesCompanyDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
@@ -39,7 +40,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
     assetDescription = "Asset Description",
-    acquisitionOfShares = YesNo.Yes,
+    acquisitionOfShares = Yes,
     shareCompanyDetails = Some(
       SharesCompanyDetails(
         companySharesName = "companySharesName",
@@ -51,12 +52,12 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     ),
     acquiredFromName = "acquiredFromName",
     totalCost = 20.0,
-    independentValuation = YesNo.Yes,
-    tangibleSchedule29A = YesNo.Yes,
+    independentValuation = Yes,
+    tangibleSchedule29A = Yes,
     totalIncomeOrReceipts = 20.0,
-    isPropertyDisposed = YesNo.No,
+    isPropertyDisposed = No,
     disposalDetails = None,
-    disposalOfShares = YesNo.No,
+    disposalOfShares = Some(No),
     noOfSharesHeld = Some(1),
     transactionCount = None
   )
@@ -78,24 +79,20 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
         1,
         Some(
           List(
-            SippOtherAssetsConnectedParty.TransactionDetail(
+            SippOtherAssetsConnectedParty.TransactionDetails(
               acquisitionDate = LocalDate.of(2020, 1, 1),
               assetDescription = "Asset Description",
-              acquisitionOfShares = YesNo.Yes,
+              acquisitionOfShares = Yes,
               sharesCompanyDetails = None,
               acquiredFromName = "acquiredFromName",
               totalCost = 20.0,
-              independentValuation = YesNo.Yes,
-              tangibleSchedule29A = YesNo.Yes,
+              independentValuation = Yes,
+              tangibleSchedule29A = Yes,
               totalIncomeOrReceipts = 20.0, // Updated
-              isPropertyDisposed = YesNo.No,
-              disposedPropertyProceedsAmt = None,
-              purchaserNamesIfDisposed = None,
-              anyOfPurchaserConnected = None,
-              independentValuationDisposal = None,
-              disposalOfShares = YesNo.Yes,
-              noOfSharesHeld = None,
-              propertyFullyDisposed = None
+              isPropertyDisposed = No,
+              disposalDetails = None,
+              disposalOfShares = Some(Yes),
+              noOfSharesHeld = None
             )
           )
         )
@@ -120,10 +117,10 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
               1,
               Some(
                 List(
-                  SippOtherAssetsConnectedParty.TransactionDetail(
+                  SippOtherAssetsConnectedParty.TransactionDetails(
                     acquisitionDate = LocalDate.of(2020, 1, 1),
                     assetDescription = "Asset Description",
-                    acquisitionOfShares = YesNo.Yes,
+                    acquisitionOfShares = Yes,
                     sharesCompanyDetails = Some(
                       SharesCompanyDetails(
                         companySharesName = "companySharesName",
@@ -135,17 +132,13 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     ),
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
-                    tangibleSchedule29A = YesNo.Yes,
+                    independentValuation = Yes,
+                    tangibleSchedule29A = Yes,
                     totalIncomeOrReceipts = 20.0,
-                    isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    disposalOfShares = YesNo.No,
-                    noOfSharesHeld = Some(1),
-                    propertyFullyDisposed = None
+                    isPropertyDisposed = No,
+                    disposalDetails = None,
+                    disposalOfShares = Some(No),
+                    noOfSharesHeld = Some(1)
                   )
                 )
               )
@@ -175,10 +168,10 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
               1,
               Some(
                 List(
-                  SippOtherAssetsConnectedParty.TransactionDetail(
+                  SippOtherAssetsConnectedParty.TransactionDetails(
                     acquisitionDate = LocalDate.of(2020, 1, 1),
                     assetDescription = "Asset Description",
-                    acquisitionOfShares = YesNo.Yes,
+                    acquisitionOfShares = Yes,
                     sharesCompanyDetails = Some(
                       SharesCompanyDetails(
                         companySharesName = "testCompanySharesName2",
@@ -190,17 +183,13 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     ),
                     acquiredFromName = "test2",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
-                    tangibleSchedule29A = YesNo.Yes,
+                    independentValuation = Yes,
+                    tangibleSchedule29A = Yes,
                     totalIncomeOrReceipts = 20.0,
-                    isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    disposalOfShares = YesNo.No,
-                    noOfSharesHeld = Some(2),
-                    propertyFullyDisposed = None
+                    isPropertyDisposed = No,
+                    disposalDetails = None,
+                    disposalOfShares = Some(No),
+                    noOfSharesHeld = Some(2)
                   )
                 )
               )
@@ -231,10 +220,10 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
               1,
               Some(
                 List(
-                  SippOtherAssetsConnectedParty.TransactionDetail(
+                  SippOtherAssetsConnectedParty.TransactionDetails(
                     acquisitionDate = LocalDate.of(2020, 1, 1),
                     assetDescription = "Asset Description",
-                    acquisitionOfShares = YesNo.Yes,
+                    acquisitionOfShares = Yes,
                     sharesCompanyDetails = Some(
                       SharesCompanyDetails(
                         companySharesName = "companySharesName",
@@ -246,17 +235,13 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
                     ),
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
-                    tangibleSchedule29A = YesNo.Yes,
+                    independentValuation = Yes,
+                    tangibleSchedule29A = Yes,
                     totalIncomeOrReceipts = 20.0,
-                    isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    disposalOfShares = YesNo.No,
-                    noOfSharesHeld = Some(1),
-                    propertyFullyDisposed = None
+                    isPropertyDisposed = No,
+                    disposalDetails = None,
+                    disposalOfShares = Some(No),
+                    noOfSharesHeld = Some(1)
                   )
                 )
               )

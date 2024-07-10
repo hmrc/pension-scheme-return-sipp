@@ -59,11 +59,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
               costOrMarket = MarketValue,
               costMarketValue = 20.0,
               isPropertyDisposed = YesNo.No,
-              disposedPropertyProceedsAmt = None,
-              purchaserNamesIfDisposed = None,
-              anyOfPurchaserConnected = None,
-              independentValuationDisposal = None,
-              propertyFullyDisposed = None
+              disposalDetails = None
             )
           )
         )
@@ -96,11 +92,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
                     isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    propertyFullyDisposed = None
+                    disposalDetails = None
                   )
                 )
               )
@@ -134,11 +126,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
                     isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    propertyFullyDisposed = None
+                    disposalDetails = None
                   )
                 )
               )
@@ -179,11 +167,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
                     isPropertyDisposed = YesNo.No,
-                    disposedPropertyProceedsAmt = None,
-                    purchaserNamesIfDisposed = None,
-                    anyOfPurchaserConnected = None,
-                    independentValuationDisposal = None,
-                    propertyFullyDisposed = None
+                    disposalDetails = None
                   )
                 )
               )

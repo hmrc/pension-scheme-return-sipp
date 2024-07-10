@@ -34,13 +34,13 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.mvc._
 import com.google.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.{JsResultException, JsValue}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.emailRegex
-import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvents, Opened}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvents, Event}
 
 class EmailResponseController @Inject()(
   cc: ControllerComponents,
@@ -48,8 +48,8 @@ class EmailResponseController @Inject()(
   parser: PlayBodyParsers,
   val authConnector: AuthConnector
 ) extends BackendController(cc)
-    with AuthorisedFunctions {
-  private val logger = Logger(classOf[EmailResponseController])
+    with AuthorisedFunctions
+    with Logging {
 
   def sendAuditEvents(
     submittedBy: String,
@@ -69,7 +69,7 @@ class EmailResponseController @Inject()(
             },
             valid => {
               valid.events
-                .filterNot(_.event == Opened)
+                .filterNot(_.event == Event.Opened)
                 .foreach(event => logger.debug(s"Email audit event is $event"))
               Ok
             }

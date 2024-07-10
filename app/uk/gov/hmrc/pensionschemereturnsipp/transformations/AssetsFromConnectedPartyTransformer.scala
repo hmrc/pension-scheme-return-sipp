@@ -17,7 +17,6 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DisposalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
@@ -36,7 +35,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
+      .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetails](
         assetsFromConnectedParty,
         etmpData,
         transformSingle,
@@ -50,8 +49,8 @@ class AssetsFromConnectedPartyTransformer @Inject()
 
   private def transformSingle(
     property: AssetsFromConnectedPartyApi.TransactionDetails
-  ): SippOtherAssetsConnectedParty.TransactionDetail =
-    SippOtherAssetsConnectedParty.TransactionDetail(
+  ): SippOtherAssetsConnectedParty.TransactionDetails =
+    SippOtherAssetsConnectedParty.TransactionDetails(
       acquisitionDate = property.acquisitionDate,
       assetDescription = property.assetDescription,
       acquisitionOfShares = property.acquisitionOfShares,
@@ -62,13 +61,9 @@ class AssetsFromConnectedPartyTransformer @Inject()
       tangibleSchedule29A = property.tangibleSchedule29A,
       totalIncomeOrReceipts = property.totalIncomeOrReceipts,
       isPropertyDisposed = property.isPropertyDisposed,
-      disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
-      purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
-      independentValuationDisposal = property.disposalDetails.map(_.independentValuationDisposal),
+      disposalDetails = property.disposalDetails,
       disposalOfShares = property.disposalOfShares,
-      noOfSharesHeld = property.noOfSharesHeld,
-      propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
+      noOfSharesHeld = property.noOfSharesHeld
     )
 
   def transformToResponse(
@@ -91,7 +86,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    trx: SippOtherAssetsConnectedParty.TransactionDetail
+    trx: SippOtherAssetsConnectedParty.TransactionDetails
   ): AssetsFromConnectedPartyApi.TransactionDetails =
     AssetsFromConnectedPartyApi.TransactionDetails(
       nameDOB = toNameDOB(member),
@@ -106,15 +101,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
       tangibleSchedule29A = trx.tangibleSchedule29A,
       totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
       isPropertyDisposed = trx.isPropertyDisposed,
-      disposalDetails = Option.when(trx.isPropertyDisposed.boolean)(
-        DisposalDetails(
-          disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
-          namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
-          anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
-          independentValuationDisposal = trx.independentValuationDisposal.get,
-          propertyFullyDisposed = trx.propertyFullyDisposed.get
-        )
-      ),
+      disposalDetails = trx.disposalDetails,
       disposalOfShares = trx.disposalOfShares,
       noOfSharesHeld = trx.noOfSharesHeld,
       transactionCount = Some(transactionCount)

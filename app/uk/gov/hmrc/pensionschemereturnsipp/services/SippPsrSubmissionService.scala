@@ -17,14 +17,14 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
-import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.implicits.catsSyntaxOptionId
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
@@ -211,7 +211,7 @@ class SippPsrSubmissionService @Inject()(
 
   def submitSippPsr(
     submission: PsrSubmissionRequest,
-    submittedBy: String,
+    submittedBy: SubmittedBy,
     submitterId: String,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
@@ -222,7 +222,7 @@ class SippPsrSubmissionService @Inject()(
 
   private def psrSubmission(
     submission: PsrSubmissionRequest,
-    submittedBy: String,
+    submittedBy: SubmittedBy,
     submitterId: String,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrSubmissionEtmpResponse] = {

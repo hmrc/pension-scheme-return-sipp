@@ -23,6 +23,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrSubmissionRequest, PsrSubmittedResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -54,7 +55,7 @@ class SippPsrSubmitController @Inject()(
       logger.debug(s"Submitting SIPP PSR - $request")
 
       sippPsrSubmissionService
-        .submitSippPsr(submissionRequest, user.fullName.mkString, user.externalId, user.psaPspId)
+        .submitSippPsr(submissionRequest, PSA /* todo */, user.externalId, user.psaPspId)
         .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }

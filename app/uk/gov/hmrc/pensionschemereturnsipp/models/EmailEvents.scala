@@ -16,29 +16,26 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models
 
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json._
 
 import java.time.LocalDateTime
 
-sealed trait Event
+sealed trait Event extends EnumEntry
 
-case object Sent extends Event
-case object Delivered extends Event
-case object PermanentBounce extends Event
-case object Opened extends Event
-case object Complained extends Event
+object Event extends Enum[Event] with PlayJsonEnum[Event] {
+  case object Sent extends Event
+  case object Delivered extends Event
+  case object PermanentBounce extends Event
+  case object Opened extends Event
+  case object Complained extends Event
+
+  override def values: IndexedSeq[Event] = findValues
+}
 
 case class EmailEvent(event: Event, detected: LocalDateTime)
 
 object EmailEvent {
-  implicit val formatSent: OFormat[Sent.type] = Json.format[Sent.type]
-  implicit val formatDelivered: OFormat[Delivered.type] = Json.format[Delivered.type]
-  implicit val formatPermanentBounce: OFormat[PermanentBounce.type] = Json.format[PermanentBounce.type]
-  implicit val formatOpened: OFormat[Opened.type] = Json.format[Opened.type]
-  implicit val formatComplained: OFormat[Complained.type] = Json.format[Complained.type]
-
-  implicit val eventFormat: OFormat[Event] = Json.format[Event]
-
   implicit val format: OFormat[EmailEvent] = Json.format[EmailEvent]
 }
 

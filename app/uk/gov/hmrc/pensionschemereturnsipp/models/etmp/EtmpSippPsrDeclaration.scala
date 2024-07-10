@@ -17,10 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 
 case class EtmpSippPsrDeclaration(
-  submittedBy: String,
+  submittedBy: SubmittedBy,
   submitterID: String,
   psaID: Option[String],
   psaDeclaration: Option[Declaration],

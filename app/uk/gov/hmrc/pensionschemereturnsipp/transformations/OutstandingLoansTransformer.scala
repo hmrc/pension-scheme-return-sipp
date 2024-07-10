@@ -60,8 +60,8 @@ class OutstandingLoansTransformer @Inject()
       interestRate = property.interestRate,
       loanSecurity = property.loanSecurity,
       capitalRepayments = property.capitalRepayments,
-      interestPayments = property.interestPayments,
       arrearsOutstandingPrYears = property.arrearsOutstandingPrYears,
+      arrearsOutstandingPrYearsAmt = property.arrearsOutstandingPrYearsAmt,
       outstandingYearEndAmount = property.outstandingYearEndAmount
     )
 
@@ -98,8 +98,8 @@ class OutstandingLoansTransformer @Inject()
       interestRate = trx.interestRate,
       loanSecurity = trx.loanSecurity,
       capitalRepayments = trx.capitalRepayments,
-      interestPayments = trx.interestPayments,
       arrearsOutstandingPrYears = trx.arrearsOutstandingPrYears,
+      arrearsOutstandingPrYearsAmt = trx.arrearsOutstandingPrYearsAmt,
       outstandingYearEndAmount = trx.outstandingYearEndAmount,
       transactionCount = Some(transactionCount)
     )

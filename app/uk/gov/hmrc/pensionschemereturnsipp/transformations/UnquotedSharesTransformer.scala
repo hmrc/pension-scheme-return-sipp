@@ -17,12 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  UnquotedShareDisposalDetail,
-  UnquotedShareTransactionDetail
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{UnquotedShareApi, UnquotedShareResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
@@ -56,13 +51,11 @@ class UnquotedSharesTransformer @Inject()
     SippUnquotedShares.TransactionDetail(
       sharesCompanyDetails = details.shareCompanyDetails,
       acquiredFromName = details.acquiredFromName,
-      totalCost = details.transactionDetail.totalCost,
-      independentValuation = details.transactionDetail.independentValuation,
-      noOfSharesSold = details.transactionDetail.noOfIndependentValuationSharesSold,
-      totalDividendsIncome = details.transactionDetail.totalDividendsIncome,
+      totalCost = details.totalCost,
+      independentValuation = details.independentValuation,
+      totalDividendsIncome = details.totalDividendsIncome,
       sharesDisposed = details.sharesDisposed,
-      sharesDisposalDetails = details.sharesDisposalDetails.map(toEtmp),
-      noOfSharesHeld = details.noOfSharesHeld
+      sharesDisposalDetails = details.sharesDisposalDetails
     )
 
   def transformToResponse(
@@ -92,24 +85,11 @@ class UnquotedSharesTransformer @Inject()
       nino = NinoType(member.nino, member.reasonNoNINO),
       shareCompanyDetails = trx.sharesCompanyDetails,
       acquiredFromName = trx.acquiredFromName,
-      transactionDetail = UnquotedShareTransactionDetail(
-        trx.totalCost,
-        trx.independentValuation,
-        trx.noOfSharesSold,
-        trx.totalDividendsIncome
-      ),
+      totalCost = trx.totalCost,
+      independentValuation = trx.independentValuation,
+      totalDividendsIncome = trx.totalDividendsIncome,
       sharesDisposed = trx.sharesDisposed,
-      sharesDisposalDetails = trx.sharesDisposalDetails
-        .map(
-          d =>
-            UnquotedShareDisposalDetail(
-              totalAmount = d.disposedShareAmount,
-              nameOfPurchaser = d.purchaserName,
-              purchaserConnectedParty = d.disposalConnectedParty,
-              independentValuationDisposal = d.independentValuationDisposal
-            )
-        ),
-      noOfSharesHeld = trx.noOfSharesHeld,
+      sharesDisposalDetails = trx.sharesDisposalDetails,
       transactionCount = Some(transactionCount)
     )
 }

@@ -904,8 +904,8 @@ object PsrConnectorSpec {
       |            "isLeased": "Yes",
       |            "lesseeDetails": [
       |              {
-      |                "lesseeName": "Google Ltd ",
-      |                "lesseeConnectedParty": "01",
+      |                "numberOfLessees": 1,
+      |                "anyLesseeConnectedParty": "Yes",
       |                "leaseGrantedDate": "2023-03-14",
       |                "annualLeaseAmount": 9999.99
       |              }
@@ -914,14 +914,10 @@ object PsrConnectorSpec {
       |            "isPropertyDisposed": "Yes",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 2000.99,
+      |              "purchasersNames": "Micheal K",
+      |              "anyPurchaserConnectedParty": "Yes"
       |              "independentValuationDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Micheal K"
-      |                }
-      |              ]
+      |              "propertyFullyDisposed": "No"
       |            }
       |          }
       |        ]
@@ -945,14 +941,10 @@ object PsrConnectorSpec {
       |            "isPropertyDisposed": "No",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999999.99,
+      |              "purchasersNames": "Morris K",
+      |              "anyPurchaserConnectedParty": "No",
       |              "independentValuationDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Morris K"
-      |                }
-      |              ]
+      |              "propertyFullyDisposed": "No"
       |            },
       |            "disposalOfShares": "No",
       |            "noOfSharesHeld": 0
@@ -1012,14 +1004,10 @@ object PsrConnectorSpec {
       |            "isPropertyDisposed": "No",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999.99,
+      |              "purchasersNames": "Michel K",
+      |              "anyPurchaserConnectedParty": "No",
       |              "independentValuationDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Michel K"
-      |                }
-      |              ]
+      |              "propertyFullyDisposed": "No"
       |            }
       |          }
       |        ]

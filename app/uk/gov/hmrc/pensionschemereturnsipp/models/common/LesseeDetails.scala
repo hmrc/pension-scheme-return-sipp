@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import play.api.libs.json.{Format, Json}
 
-case class DisposalDetails(
-  disposedPropertyProceedsAmt: Double,
-  namesOfPurchasers: String,
-  anyPurchaserConnected: YesNo,
-  independentValuationDisposal: YesNo,
-  propertyFullyDisposed: YesNo
+import java.time.LocalDate
+
+case class LesseeDetails(
+  numberOfLessees: Int,
+  anyLesseeConnectedParty: YesNo,
+  leaseGrantedDate: LocalDate,
+  annualLeaseAmount: Double
 )
 
-object DisposalDetails {
-  implicit val format: OFormat[DisposalDetails] = Json.format[DisposalDetails]
+object LesseeDetails {
+  implicit val lesseeDetailsFormat: Format[LesseeDetails] = Json.format[LesseeDetails]
 }

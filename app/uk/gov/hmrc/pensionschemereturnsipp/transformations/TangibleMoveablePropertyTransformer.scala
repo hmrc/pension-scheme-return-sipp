@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{TangibleMoveablePropertyApi, TangibleMoveablePropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
@@ -58,11 +58,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       costOrMarket = property.costOrMarket,
       costMarketValue = property.costMarketValue,
       isPropertyDisposed = property.isPropertyDisposed,
-      disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
-      purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
-      independentValuationDisposal = property.disposalDetails.map(_.independentValuationDisposal),
-      propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
+      disposalDetails = property.disposalDetails
     )
 
   def transformToResponse(
@@ -99,15 +95,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       costOrMarket = trx.costOrMarket,
       costMarketValue = trx.costMarketValue,
       isPropertyDisposed = trx.isPropertyDisposed,
-      disposalDetails = Option.when(trx.isPropertyDisposed.boolean)(
-        DisposalDetails(
-          disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
-          namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
-          anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
-          independentValuationDisposal = trx.independentValuationDisposal.get,
-          propertyFullyDisposed = trx.propertyFullyDisposed.get
-        )
-      ),
+      disposalDetails = trx.disposalDetails,
       transactionCount = Some(transactionCount)
     )
 }

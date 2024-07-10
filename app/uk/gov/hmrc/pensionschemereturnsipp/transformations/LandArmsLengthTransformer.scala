@@ -17,7 +17,6 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, LesseeDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, LandOrConnectedPropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
@@ -55,20 +54,13 @@ class LandArmsLengthTransformer @Inject()()
       totalCost = property.totalCost,
       independentValuation = property.independentValuation,
       jointlyHeld = property.jointlyHeld,
-      noOfPersonsIfJointlyHeld = property.noOfPersons,
+      noOfPersons = property.noOfPersons,
       residentialSchedule29A = property.residentialSchedule29A,
       isLeased = property.isLeased,
-      noOfPersonsForLessees = property.lesseeDetails.flatMap(_.countOfLessees),
-      anyOfLesseesConnected = property.lesseeDetails.map(l => l.anyOfLesseesConnected),
-      lesseesGrantedAt = property.lesseeDetails.map(_.leaseGrantedDate),
-      annualLeaseAmount = property.lesseeDetails.map(_.annualLeaseAmount),
+      lesseeDetails = property.lesseeDetails,
       totalIncomeOrReceipts = property.totalIncomeOrReceipts,
       isPropertyDisposed = property.isPropertyDisposed,
-      disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
-      purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(d => d.anyPurchaserConnected),
-      independentValuationDisposal = property.disposalDetails.map(d => d.independentValuationDisposal),
-      propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed)
+      disposalDetails = property.disposalDetails
     )
 
   def transformToResponse(
@@ -104,38 +96,13 @@ class LandArmsLengthTransformer @Inject()()
       totalCost = armsLength.totalCost,
       independentValuation = armsLength.independentValuation,
       jointlyHeld = armsLength.jointlyHeld,
-      noOfPersons = armsLength.noOfPersonsIfJointlyHeld,
+      noOfPersons = armsLength.noOfPersons,
       residentialSchedule29A = armsLength.residentialSchedule29A,
       isLeased = armsLength.isLeased,
-      lesseeDetails =
-        for {
-          count <- armsLength.noOfPersonsForLessees
-          isAnyConnected <- armsLength.anyOfLesseesConnected
-          leaseGrantedDate <- armsLength.lesseesGrantedAt
-          annualLeaseAmount <- armsLength.annualLeaseAmount
-        } yield LesseeDetails(
-          Some(count),
-          armsLength.purchaserNamesIfDisposed,
-          isAnyConnected,
-          leaseGrantedDate,
-          annualLeaseAmount
-        ),
+      lesseeDetails = armsLength.lesseeDetails,
       totalIncomeOrReceipts = armsLength.totalIncomeOrReceipts,
       isPropertyDisposed = armsLength.isPropertyDisposed,
-      disposalDetails =
-        for {
-          disposedPropertyProceedsAmt <- armsLength.disposedPropertyProceedsAmt
-          purchaserNamesIfDisposed <- armsLength.purchaserNamesIfDisposed
-          anyOfPurchaserConnected <- armsLength.anyOfPurchaserConnected
-          independentValuationDisposal <- armsLength.independentValuationDisposal
-          propertyFullyDisposed <- armsLength.propertyFullyDisposed
-        } yield DisposalDetails(
-          disposedPropertyProceedsAmt,
-          purchaserNamesIfDisposed,
-          anyOfPurchaserConnected,
-          independentValuationDisposal,
-          propertyFullyDisposed
-        ),
+      disposalDetails = armsLength.disposalDetails,
       transactionCount = Some(transactionCount)
     )
 }

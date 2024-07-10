@@ -55,15 +55,8 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                     YesNo.Yes,
                     YesNo.Yes,
                     None,
-                    None,
-                    None,
-                    None,
                     10.0,
                     YesNo.Yes,
-                    None,
-                    None,
-                    None,
-                    None,
                     None
                   )
                 )
@@ -100,15 +93,8 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                     YesNo.Yes,
                     YesNo.Yes,
                     None,
-                    None,
-                    None,
-                    None,
                     10.0,
                     YesNo.Yes,
-                    None,
-                    None,
-                    None,
-                    None,
                     None
                   )
                 )
@@ -189,29 +175,13 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       totalCost = totalCost,
       independentValuation = independentValuation,
       jointlyHeld = jointlyHeld,
-      noOfPersons = noOfPersonsIfJointlyHeld,
+      noOfPersons = noOfPersons,
       residentialSchedule29A = residentialSchedule29A,
       isLeased = isLeased,
-      lesseeDetails = Option.when(isLeased.boolean)(
-        LesseeDetails(
-          noOfPersonsForLessees,
-          None, // todo model diff
-          anyOfLesseesConnected.get,
-          leaseGrantedDate.get,
-          annualLeaseAmount.get
-        )
-      ),
+      lesseeDetails = lesseeDetails,
       totalIncomeOrReceipts = totalIncomeOrReceipts,
       isPropertyDisposed = isPropertyDisposed,
-      disposalDetails = Option.when(isPropertyDisposed.boolean) {
-        DisposalDetails(
-          disposedPropertyProceedsAmt.get,
-          purchaserNamesIfDisposed.get,
-          anyOfPurchaserConnected.get,
-          independentValuationDisposal.get,
-          propertyFullyDisposed.get
-        )
-      },
+      disposalDetails = disposalDetails,
       transactionCount = None
     )
   }

@@ -17,10 +17,9 @@
 package uk.gov.hmrc.pensionschemereturnsipp
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType, UnquotedShareDisposalDetail}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpSippSharesDisposalDetails
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails, PersonalDetails}
 
 package object transformations {
   implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
@@ -46,14 +45,6 @@ package object transformations {
     )
   }
 
-  def toEtmp(shareDetails: UnquotedShareDisposalDetail): EtmpSippSharesDisposalDetails =
-    EtmpSippSharesDisposalDetails(
-      disposedShareAmount = shareDetails.totalAmount,
-      disposalConnectedParty = shareDetails.purchaserConnectedParty,
-      purchaserName = shareDetails.nameOfPurchaser,
-      independentValuationDisposal = shareDetails.independentValuationDisposal
-    )
-
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =
     MemberDetails(
       nameDoB.firstName,
@@ -72,8 +63,5 @@ package object transformations {
     )
 
   def toNinoType(memberDetails: MemberDetails): NinoType =
-    NinoType(
-      memberDetails.nino,
-      memberDetails.reasonNoNINO
-    )
+    NinoType(memberDetails.nino, memberDetails.reasonNoNINO)
 }

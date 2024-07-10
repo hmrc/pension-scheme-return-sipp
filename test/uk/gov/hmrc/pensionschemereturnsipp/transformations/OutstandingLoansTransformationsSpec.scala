@@ -59,8 +59,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
               interestRate = 1,
               loanSecurity = YesNo.Yes,
               capitalRepayments = 1,
-              interestPayments = 1,
               arrearsOutstandingPrYears = YesNo.Yes,
+              arrearsOutstandingPrYearsAmt = Some(1),
               outstandingYearEndAmount = 1
             )
           )
@@ -92,8 +92,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     interestRate = 1,
                     loanSecurity = YesNo.Yes,
                     capitalRepayments = 1,
-                    interestPayments = 1,
                     arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
                 )
@@ -126,8 +126,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     interestRate = 1,
                     loanSecurity = YesNo.Yes,
                     capitalRepayments = 1,
-                    interestPayments = 1,
                     arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
                 )

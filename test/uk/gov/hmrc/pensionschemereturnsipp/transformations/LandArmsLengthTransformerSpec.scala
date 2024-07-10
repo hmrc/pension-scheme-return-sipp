@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
@@ -91,15 +91,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
               YesNo.Yes,
               YesNo.Yes,
               None,
-              None,
-              None,
-              None,
               10.0,
               YesNo.Yes,
-              None,
-              None,
-              None,
-              None,
               None
             )
           )
@@ -137,15 +130,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
                     YesNo.Yes,
                     YesNo.Yes,
                     None,
-                    None,
-                    None,
-                    None,
                     10.0,
                     YesNo.Yes,
-                    None,
-                    None,
-                    None,
-                    None,
                     None
                   )
                 )
@@ -182,15 +168,8 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
                     YesNo.Yes,
                     YesNo.Yes,
                     None,
-                    None,
-                    None,
-                    None,
                     10.0,
                     YesNo.Yes,
-                    None,
-                    None,
-                    None,
-                    None,
                     None
                   )
                 )
@@ -271,29 +250,13 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       totalCost = totalCost,
       independentValuation = independentValuation,
       jointlyHeld = jointlyHeld,
-      noOfPersons = noOfPersonsIfJointlyHeld,
+      noOfPersons = noOfPersons,
       residentialSchedule29A = residentialSchedule29A,
       isLeased = isLeased,
-      lesseeDetails = Option.when(isLeased.boolean)(
-        LesseeDetails(
-          noOfPersonsForLessees,
-          None, // todo model diff
-          anyOfLesseesConnected.get,
-          lesseesGrantedAt.get,
-          annualLeaseAmount.get
-        )
-      ),
+      lesseeDetails = lesseeDetails,
       totalIncomeOrReceipts = totalIncomeOrReceipts,
       isPropertyDisposed = isPropertyDisposed,
-      disposalDetails = Option.when(isPropertyDisposed.boolean) {
-        DisposalDetails(
-          disposedPropertyProceedsAmt.get,
-          purchaserNamesIfDisposed.get,
-          anyOfPurchaserConnected.get,
-          independentValuationDisposal.get,
-          propertyFullyDisposed.get
-        )
-      },
+      disposalDetails = disposalDetails,
       transactionCount = None
     )
   }
