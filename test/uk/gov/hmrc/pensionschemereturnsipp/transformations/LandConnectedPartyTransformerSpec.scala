@@ -156,7 +156,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
-      landOrPropertyinUK = landOrPropertyInUK,
+      landOrPropertyInUK = landOrPropertyInUK,
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
         addressDetails.addressLine2,

@@ -47,7 +47,7 @@ class LandArmsLengthTransformer @Inject()()
   ): SippLandArmsLength.TransactionDetail =
     SippLandArmsLength.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
-      landOrPropertyinUK = property.landOrPropertyinUK,
+      landOrPropertyInUK = property.landOrPropertyInUK,
       addressDetails = property.addressDetails,
       registryDetails = property.registryDetails,
       acquiredFromName = property.acquiredFromName,
@@ -89,7 +89,7 @@ class LandArmsLengthTransformer @Inject()()
       nameDOB = toNameDOB(member),
       nino = toNinoType(member),
       acquisitionDate = armsLength.acquisitionDate,
-      landOrPropertyinUK = armsLength.landOrPropertyinUK,
+      landOrPropertyInUK = armsLength.landOrPropertyInUK,
       addressDetails = armsLength.addressDetails,
       registryDetails = armsLength.registryDetails,
       acquiredFromName = armsLength.acquiredFromName,

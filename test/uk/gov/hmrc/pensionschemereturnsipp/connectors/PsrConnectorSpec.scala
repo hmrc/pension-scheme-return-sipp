@@ -932,7 +932,7 @@ object PsrConnectorSpec {
       |        "transactionDetails": [
       |          {
       |            "acquisitionDate": "2023-03-14",
-      |            "landOrPropertyinUK": "Yes",
+      |            "landOrPropertyInUK": "Yes",
       |            "addressDetails": {
       |              "addressLine1": "Brighton1",
       |              "addressLine2": "Brighton2",

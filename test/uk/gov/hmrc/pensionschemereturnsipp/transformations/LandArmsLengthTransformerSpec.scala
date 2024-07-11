@@ -35,7 +35,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
-    landOrPropertyinUK = YesNo.Yes,
+    landOrPropertyInUK = YesNo.Yes,
     addressDetails = AddressDetails(
       addressLine1 = "addressLine1",
       addressLine2 = "addressLine2",
@@ -231,7 +231,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       nameDOB = NameDOB(sippMemberDetails.firstName, sippMemberDetails.lastName, sippMemberDetails.dateOfBirth),
       nino = NinoType(sippMemberDetails.nino, sippMemberDetails.reasonNoNINO),
       acquisitionDate = acquisitionDate,
-      landOrPropertyinUK = landOrPropertyinUK,
+      landOrPropertyInUK = landOrPropertyInUK,
       addressDetails = AddressDetails(
         addressDetails.addressLine1,
         addressDetails.addressLine2,

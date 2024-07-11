@@ -53,7 +53,7 @@ class LandConnectedPartyTransformer @Inject()
   ): SippLandConnectedParty.TransactionDetail =
     SippLandConnectedParty.TransactionDetail(
       acquisitionDate = property.acquisitionDate,
-      landOrPropertyInUK = property.landOrPropertyinUK,
+      landOrPropertyInUK = property.landOrPropertyInUK,
       addressDetails = property.addressDetails,
       registryDetails = property.registryDetails,
       acquiredFromName = property.acquiredFromName,
@@ -95,7 +95,7 @@ class LandConnectedPartyTransformer @Inject()
       nameDOB = toNameDOB(member),
       nino = toNinoType(member),
       acquisitionDate = landConnectedParty.acquisitionDate,
-      landOrPropertyinUK = landConnectedParty.landOrPropertyInUK,
+      landOrPropertyInUK = landConnectedParty.landOrPropertyInUK,
       addressDetails = landConnectedParty.addressDetails,
       registryDetails = landConnectedParty.registryDetails,
       acquiredFromName = landConnectedParty.acquiredFromName,

@@ -43,7 +43,7 @@ object LandOrConnectedPropertyApi {
     nameDOB: NameDOB,
     nino: NinoType,
     acquisitionDate: LocalDate,
-    landOrPropertyinUK: YesNo,
+    landOrPropertyInUK: YesNo,
     addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,

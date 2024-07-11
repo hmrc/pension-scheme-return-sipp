@@ -171,7 +171,7 @@ trait SippEtmpTestValues {
 
   protected val sippLandArmsLengthTransactionDetail = SippLandArmsLength.TransactionDetail(
     acquisitionDate = sampleDate,
-    landOrPropertyinUK = Yes,
+    landOrPropertyInUK = Yes,
     addressDetails = sippAddress,
     registryDetails = sippRegistryDetails,
     acquiredFromName = "Acquired From Name",
@@ -280,7 +280,7 @@ trait SippEtmpTestValues {
       nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
       nino = NinoType(nino = Some("nino"), reasonNoNino = None),
       acquisitionDate = LocalDate.of(2020, 1, 1),
-      landOrPropertyinUK = YesNo.Yes,
+      landOrPropertyInUK = YesNo.Yes,
       addressDetails = AddressDetails(
         addressLine1 = "addressLine1",
         addressLine2 = "addressLine2",

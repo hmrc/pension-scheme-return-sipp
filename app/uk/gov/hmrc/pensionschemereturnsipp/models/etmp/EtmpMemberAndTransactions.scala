@@ -143,7 +143,7 @@ case class SippLandArmsLength(
 object SippLandArmsLength {
   case class TransactionDetail(
     acquisitionDate: LocalDate,
-    landOrPropertyinUK: YesNo,
+    landOrPropertyInUK: YesNo,
     addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,
