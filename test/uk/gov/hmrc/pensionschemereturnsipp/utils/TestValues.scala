@@ -24,6 +24,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AccountingPeriod,
   AccountingPeriodDetails,
+  MemberDetailsResponse,
+  MemberDetails => ApiMemberDetails,
   PSRSubmissionResponse,
   ReportDetails
 }
@@ -63,6 +65,10 @@ trait TestValues {
         None
       )
     )
+  )
+
+  val sampleApiMemberDetailsResponse: MemberDetailsResponse = MemberDetailsResponse(
+    members = List(ApiMemberDetails("Dave", Some("K"), "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")))
   )
 
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
