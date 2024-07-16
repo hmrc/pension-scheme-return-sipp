@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
 import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxOptionId
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
@@ -83,7 +84,7 @@ trait TestValues {
     accountingPeriodDetails = AccountingPeriodDetails(
       Some("1.0"),
       NonEmptyList.of(AccountingPeriod(LocalDate.of(2020, 12, 12), LocalDate.of(2020, 12, 12)))
-    ),
+    ).some,
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
     landArmsLength = None,
@@ -132,7 +133,7 @@ trait TestValues {
           AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
           AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
         )
-      ),
+      ).some,
       Some(
         List(
           EtmpMemberAndTransactions(

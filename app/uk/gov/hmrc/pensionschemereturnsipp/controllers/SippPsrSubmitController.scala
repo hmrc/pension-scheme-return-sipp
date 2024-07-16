@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrSubmissionRequest, PsrSubmittedResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -58,6 +59,40 @@ class SippPsrSubmitController @Inject()(
         .submitSippPsr(submissionRequest, PSA /* todo */, user.externalId, user.psaPspId)
         .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
+    }
+  }
+
+  def deleteMember(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      request.body.asJson.map(_.as[PersonalDetails]) match {
+        case Some(personalDetails) =>
+          logger.debug(
+            s"Deleting member - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion, member: $personalDetails"
+          )
+          sippPsrSubmissionService
+            .deleteMember(
+              pstr,
+              optFbNumber,
+              optPeriodStartDate,
+              optPsrVersion,
+              personalDetails
+            )
+            .map { _ =>
+              NoContent
+            }
+            .recover {
+              case ex: Exception =>
+                logger.error(s"Failed to delete member with pstr $pstr", ex)
+                BadRequest("Invalid personal details")
+            }
+        case None =>
+          Future.successful(BadRequest("Invalid personal details"))
+      }
     }
   }
 

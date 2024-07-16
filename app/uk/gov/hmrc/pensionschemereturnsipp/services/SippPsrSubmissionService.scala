@@ -23,16 +23,19 @@ import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnector
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpPsrStatus,
-  EtmpSippPsrDeclaration
+  EtmpSippPsrDeclaration,
+  MemberDetails,
+  PersonalDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
@@ -234,7 +237,7 @@ class SippPsrSubmissionService @Inject()(
         case Some(response) =>
           val updateRequest = SippPsrSubmissionEtmpRequest(
             response.reportDetails.copy(status = EtmpPsrStatus.Submitted),
-            response.accountingPeriodDetails.some,
+            response.accountingPeriodDetails,
             response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             EtmpSippPsrDeclaration(
               submittedBy = submittedBy,
@@ -265,4 +268,49 @@ class SippPsrSubmissionService @Inject()(
     startDate: LocalDate
   )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] =
     psrConnector.getPsrVersions(pstr, startDate)
+
+  def deleteMember(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    personalDetails: PersonalDetails
+  )(
+    implicit hc: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Unit] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .flatMap {
+        case Some(response) =>
+          val updateRequest = SippPsrSubmissionEtmpRequest(
+            // Declaration changed to Compiled state back
+            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled),
+            accountingPeriodDetails = response.accountingPeriodDetails,
+            memberAndTransactions = {
+              response.memberAndTransactions.flatMap { members =>
+                val updatedMembers = members.map { member =>
+                  if (MemberDetails.compare(member.memberDetails.personalDetails, personalDetails)) {
+                    member.copy(status = Deleted, version = None) // Soft delete
+                  } else {
+                    member
+                  }
+                }
+                NonEmptyList.fromList(updatedMembers)
+              }
+            },
+            psrDeclaration = response.psrDeclaration.map(
+              declaration => // Declaration changed to Compiled state back
+                declaration.copy(
+                  psaDeclaration =
+                    declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
+                  pspDeclaration =
+                    declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
+                )
+            )
+          )
+          psrConnector.submitSippPsr(pstr, updateRequest).map(_ => ())
+        case None =>
+          Future.failed(new Exception(s"Submission with pstr $pstr not found"))
+      }
 }

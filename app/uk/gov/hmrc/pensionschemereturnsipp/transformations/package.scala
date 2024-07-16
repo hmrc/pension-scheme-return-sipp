@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails, PersonalDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
 
 package object transformations {
   implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
