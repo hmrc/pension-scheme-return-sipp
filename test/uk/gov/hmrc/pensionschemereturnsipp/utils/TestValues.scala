@@ -71,6 +71,10 @@ trait TestValues {
     )
   )
 
+  val sampleApiMemberDetailsResponse: MemberDetailsResponse = MemberDetailsResponse(
+    members = List(ApiMemberDetails("Dave", Some("K"), "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")))
+  )
+
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
     details = ReportDetails(
       pstr = "test",

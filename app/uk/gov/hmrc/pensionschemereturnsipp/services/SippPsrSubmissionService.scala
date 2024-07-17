@@ -35,7 +35,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpSippPsrDeclaration
 }
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,6 +44,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
   psrSubmissionTransformer: PSRSubmissionTransformer,
+  memberDetailsTransformer: PSRMemberDetailsTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
@@ -265,4 +266,14 @@ class SippPsrSubmissionService @Inject()(
     startDate: LocalDate
   )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] =
     psrConnector.getPsrVersions(pstr, startDate)
+
+  def getMemberDetails(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[MemberDetailsResponse]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map(_.flatMap(memberDetailsTransformer.transform))
 }

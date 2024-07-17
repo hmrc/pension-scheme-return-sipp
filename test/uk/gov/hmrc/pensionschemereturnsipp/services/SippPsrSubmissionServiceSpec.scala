@@ -235,4 +235,26 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       service.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty
     }
   }
+
+  "getMemberDetails" should {
+    "successfully return Member Details" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockMemberDetailsTransformer.transform(any())).thenReturn(Some(sampleApiMemberDetailsResponse))
+
+      val result = service.getMemberDetails(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(sampleApiMemberDetailsResponse)
+    }
+
+    "return None when no Member Details are returned" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getMemberDetails(pstr, Some("test"), None, None).futureValue
+
+      result mustBe None
+    }
+  }
 }

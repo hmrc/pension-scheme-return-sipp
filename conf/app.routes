@@ -3,6 +3,8 @@
 POST   /psr/sipp                                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.submitSippPsr
 GET    /psr/sipp/:pstr                           uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getSippPsr(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
+GET    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getMemberDetails(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
+
 PUT    /psr/land-or-connected-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
 GET    /psr/land-or-connected-property/:pstr     uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
