@@ -152,6 +152,36 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
   }
 
+  "GET Member Details" must {
+    "return 200" in {
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getMemberDetails(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleApiMemberDetailsResponse)))
+
+      val result = controller.getMemberDetails("testPstr", Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.OK
+    }
+
+    "return 404" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getMemberDetails(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result =
+        controller.getMemberDetails("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+      status(result) mustBe Status.NOT_FOUND
+    }
+  }
+
   "Delete Member " must {
     "return no content" in {
       val personalDetails = PersonalDetails("John", None, "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))

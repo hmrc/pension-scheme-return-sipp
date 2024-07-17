@@ -38,7 +38,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -65,6 +65,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockPsrConnector = mock[PsrConnector]
   private val mockJSONSchemaValidator = mock[JSONSchemaValidator]
   private val mockSippPsrFromEtmp = mock[PSRSubmissionTransformer]
+  private val mockMemberDetailsTransformer = mock[PSRMemberDetailsTransformer]
   private val mockLandConnectedPartyTransformer = mock[LandConnectedPartyTransformer]
   private val mockArmsLengthTransformer = mock[LandArmsLengthTransformer]
   private val mockOutstandingLoansTransformer = mock[OutstandingLoansTransformer]
@@ -76,6 +77,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
+    mockMemberDetailsTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
@@ -235,6 +237,28 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val date = LocalDate.now()
       when(mockPsrConnector.getPsrVersions(pstr, date)).thenReturn(Future.successful(Seq.empty))
       service.getPsrVersions(pstr, date).futureValue mustEqual Seq.empty
+    }
+  }
+
+  "getMemberDetails" should {
+    "successfully return Member Details" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockMemberDetailsTransformer.transform(any())).thenReturn(Some(sampleApiMemberDetailsResponse))
+
+      val result = service.getMemberDetails(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(sampleApiMemberDetailsResponse)
+    }
+
+    "return None when no Member Details are returned" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getMemberDetails(pstr, Some("test"), None, None).futureValue
+
+      result mustBe None
     }
   }
 
