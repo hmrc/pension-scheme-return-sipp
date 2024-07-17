@@ -36,7 +36,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.PSRSubmissionTransformer
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -63,6 +63,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockPsrConnector = mock[PsrConnector]
   private val mockJSONSchemaValidator = mock[JSONSchemaValidator]
   private val mockSippPsrFromEtmp = mock[PSRSubmissionTransformer]
+  private val mockMemberDetailsTransformer = mock[PSRMemberDetailsTransformer]
   private val mockLandConnectedPartyTransformer = mock[LandConnectedPartyTransformer]
   private val mockArmsLengthTransformer = mock[LandArmsLengthTransformer]
   private val mockOutstandingLoansTransformer = mock[OutstandingLoansTransformer]
@@ -74,6 +75,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
+    mockMemberDetailsTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,

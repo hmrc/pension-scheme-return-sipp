@@ -22,7 +22,8 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetailsResponse, PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetails => ApiMemberDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
