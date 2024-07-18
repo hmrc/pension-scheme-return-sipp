@@ -16,7 +16,8 @@ object CodeCoverageSettings {
     "uk.gov.hmrc.pensionschemereturnsipp.config.Module",
     "uk.gov.hmrc.pensionschemereturnsipp.models.*",
     "uk.gov.hmrc.pensionschemereturnsipp.utils.*",
-    "uk.gov.hmrc.pensionschemereturnsipp.auth.*"
+    "uk.gov.hmrc.pensionschemereturnsipp.auth.*",
+    "uk.gov.hmrc.pensionschemereturnsipp.validators.*"
   )
 
   val settings: Seq[Setting[?]] = Seq(
