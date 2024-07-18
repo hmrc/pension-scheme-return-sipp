@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, LandOrConnectedPropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
@@ -24,6 +25,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   MemberDetails,
   SippLandConnectedParty
 }
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -39,7 +41,7 @@ class LandConnectedPartyTransformer @Inject()
       .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandConnectedParty.TransactionDetail](
         landConnectedPartyData,
         etmpData,
-        transformSingle,
+        _.transformInto[SippLandConnectedParty.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             landConnectedParty = maybeTransactions.map(
@@ -47,27 +49,6 @@ class LandConnectedPartyTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    property: LandOrConnectedPropertyApi.TransactionDetails
-  ): SippLandConnectedParty.TransactionDetail =
-    SippLandConnectedParty.TransactionDetail(
-      acquisitionDate = property.acquisitionDate,
-      landOrPropertyInUK = property.landOrPropertyInUK,
-      addressDetails = property.addressDetails,
-      registryDetails = property.registryDetails,
-      acquiredFromName = property.acquiredFromName,
-      totalCost = property.totalCost,
-      independentValuation = property.independentValuation,
-      jointlyHeld = property.jointlyHeld,
-      noOfPersons = property.noOfPersons,
-      residentialSchedule29A = property.residentialSchedule29A,
-      isLeased = property.isLeased,
-      lesseeDetails = property.lesseeDetails,
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposalDetails = property.disposalDetails
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -91,24 +72,10 @@ class LandConnectedPartyTransformer @Inject()
     transactionCount: Int,
     landConnectedParty: SippLandConnectedParty.TransactionDetail
   ): LandOrConnectedPropertyApi.TransactionDetails =
-    LandOrConnectedPropertyApi.TransactionDetails(
-      nameDOB = toNameDOB(member),
-      nino = toNinoType(member),
-      acquisitionDate = landConnectedParty.acquisitionDate,
-      landOrPropertyInUK = landConnectedParty.landOrPropertyInUK,
-      addressDetails = landConnectedParty.addressDetails,
-      registryDetails = landConnectedParty.registryDetails,
-      acquiredFromName = landConnectedParty.acquiredFromName,
-      totalCost = landConnectedParty.totalCost,
-      independentValuation = landConnectedParty.independentValuation,
-      jointlyHeld = landConnectedParty.jointlyHeld,
-      noOfPersons = landConnectedParty.noOfPersons,
-      residentialSchedule29A = landConnectedParty.residentialSchedule29A,
-      isLeased = landConnectedParty.isLeased,
-      lesseeDetails = landConnectedParty.lesseeDetails,
-      totalIncomeOrReceipts = landConnectedParty.totalIncomeOrReceipts,
-      isPropertyDisposed = landConnectedParty.isPropertyDisposed,
-      disposalDetails = landConnectedParty.disposalDetails,
-      transactionCount = Some(transactionCount)
-    )
+    landConnectedParty
+      .into[LandOrConnectedPropertyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

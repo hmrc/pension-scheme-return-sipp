@@ -17,10 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{UnquotedShareApi, UnquotedShareResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -36,7 +37,7 @@ class UnquotedSharesTransformer @Inject()
       .merge[UnquotedShareApi.TransactionDetails, SippUnquotedShares.TransactionDetail](
         unquotedShares,
         etmpData,
-        transformSingle,
+        _.transformInto[SippUnquotedShares.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             unquotedShares = maybeTransactions.map(
@@ -44,19 +45,6 @@ class UnquotedSharesTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    details: UnquotedShareApi.TransactionDetails
-  ): SippUnquotedShares.TransactionDetail =
-    SippUnquotedShares.TransactionDetail(
-      sharesCompanyDetails = details.shareCompanyDetails,
-      acquiredFromName = details.acquiredFromName,
-      totalCost = details.totalCost,
-      independentValuation = details.independentValuation,
-      totalDividendsIncome = details.totalDividendsIncome,
-      sharesDisposed = details.sharesDisposed,
-      sharesDisposalDetails = details.sharesDisposalDetails
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -80,16 +68,10 @@ class UnquotedSharesTransformer @Inject()
     transactionCount: Int,
     trx: etmp.SippUnquotedShares.TransactionDetail
   ): UnquotedShareApi.TransactionDetails =
-    UnquotedShareApi.TransactionDetails(
-      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
-      nino = NinoType(member.nino, member.reasonNoNINO),
-      shareCompanyDetails = trx.sharesCompanyDetails,
-      acquiredFromName = trx.acquiredFromName,
-      totalCost = trx.totalCost,
-      independentValuation = trx.independentValuation,
-      totalDividendsIncome = trx.totalDividendsIncome,
-      sharesDisposed = trx.sharesDisposed,
-      sharesDisposalDetails = trx.sharesDisposalDetails,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[UnquotedShareApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

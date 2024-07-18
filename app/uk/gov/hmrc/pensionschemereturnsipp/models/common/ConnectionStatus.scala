@@ -17,14 +17,17 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 
-sealed trait ConnectedOrUnconnectedType extends EnumEntry
-object ConnectedOrUnconnectedType
-    extends Enum[ConnectedOrUnconnectedType]
-    with PlayJsonEnum[ConnectedOrUnconnectedType] {
+sealed abstract class ConnectionStatus(override val entryName: String) extends EnumEntry {
+  def toBoolean: Boolean = this == Connected
+}
 
-  case object Connected extends ConnectedOrUnconnectedType
-  case object Unconnected extends ConnectedOrUnconnectedType
+object ConnectionStatus extends Enum[ConnectionStatus] with PlayJsonEnum[ConnectionStatus] {
+  def apply(connected: Boolean): ConnectionStatus = if (connected) Connected else Unconnected
 
-  override def values: IndexedSeq[ConnectedOrUnconnectedType] = findValues
+  case object Connected extends ConnectionStatus("01")
+  case object Unconnected extends ConnectionStatus("02")
+
+  override def values: IndexedSeq[ConnectionStatus] = findValues
 }

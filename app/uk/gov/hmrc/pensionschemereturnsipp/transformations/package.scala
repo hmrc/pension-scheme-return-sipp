@@ -18,8 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectionStatus, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
+import io.scalaland.chimney.{Transformer => ChimneyTransformer}
 
 package object transformations {
   implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
@@ -64,4 +65,8 @@ package object transformations {
 
   def toNinoType(memberDetails: MemberDetails): NinoType =
     NinoType(memberDetails.nino, memberDetails.reasonNoNINO)
+
+  implicit val connectionTypeToYesNo: ChimneyTransformer[ConnectionStatus, YesNo] = status => YesNo(status.toBoolean)
+  implicit val yesNoToConnectionType: ChimneyTransformer[YesNo, ConnectionStatus] = yesNo =>
+    ConnectionStatus(yesNo.boolean)
 }

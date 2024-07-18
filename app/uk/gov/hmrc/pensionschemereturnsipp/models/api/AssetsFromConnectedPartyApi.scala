@@ -40,7 +40,7 @@ object AssetsFromConnectedPartyApi {
     acquisitionDate: LocalDate,
     assetDescription: String,
     acquisitionOfShares: YesNo,
-    shareCompanyDetails: Option[SharesCompanyDetails],
+    sharesCompanyDetails: Option[SharesCompanyDetails],
     acquiredFromName: String,
     totalCost: Double,
     independentValuation: YesNo,
