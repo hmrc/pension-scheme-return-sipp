@@ -40,7 +40,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   YesNo
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -363,7 +363,7 @@ trait SippEtmpTestValues {
       acquisitionDate = acquisitionDate,
       assetDescription = assetDescription,
       acquisitionOfShares = acquisitionOfShares,
-      shareCompanyDetails = sharesCompanyDetails,
+      sharesCompanyDetails = sharesCompanyDetails,
       acquiredFromName = acquiredFromName,
       totalCost = totalCost,
       independentValuation = independentValuation,
@@ -396,7 +396,7 @@ trait SippEtmpTestValues {
   val sippUnquotedShareApi = UnquotedShareApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
-    shareCompanyDetails = SharesCompanyDetails(
+    sharesCompanyDetails = SharesCompanyDetails(
       companySharesName = "test",
       companySharesCRN = None,
       reasonNoCRN = None,

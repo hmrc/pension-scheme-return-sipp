@@ -17,9 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, LandOrConnectedPropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -34,34 +36,13 @@ class LandArmsLengthTransformer @Inject()()
       .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandArmsLength.TransactionDetail](
         landArmsData,
         etmpData,
-        transformSingle,
+        _.transformInto[SippLandArmsLength.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             landArmsLength =
               maybeTransactions.map(transactions => SippLandArmsLength(transactions.length, Some(transactions.toList)))
           )
       )
-
-  private def transformSingle(
-    property: LandOrConnectedPropertyApi.TransactionDetails
-  ): SippLandArmsLength.TransactionDetail =
-    SippLandArmsLength.TransactionDetail(
-      acquisitionDate = property.acquisitionDate,
-      landOrPropertyInUK = property.landOrPropertyInUK,
-      addressDetails = property.addressDetails,
-      registryDetails = property.registryDetails,
-      acquiredFromName = property.acquiredFromName,
-      totalCost = property.totalCost,
-      independentValuation = property.independentValuation,
-      jointlyHeld = property.jointlyHeld,
-      noOfPersons = property.noOfPersons,
-      residentialSchedule29A = property.residentialSchedule29A,
-      isLeased = property.isLeased,
-      lesseeDetails = property.lesseeDetails,
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposalDetails = property.disposalDetails
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -85,24 +66,10 @@ class LandArmsLengthTransformer @Inject()()
     transactionCount: Int,
     armsLength: etmp.SippLandArmsLength.TransactionDetail
   ): LandOrConnectedPropertyApi.TransactionDetails =
-    LandOrConnectedPropertyApi.TransactionDetails(
-      nameDOB = toNameDOB(member),
-      nino = toNinoType(member),
-      acquisitionDate = armsLength.acquisitionDate,
-      landOrPropertyInUK = armsLength.landOrPropertyInUK,
-      addressDetails = armsLength.addressDetails,
-      registryDetails = armsLength.registryDetails,
-      acquiredFromName = armsLength.acquiredFromName,
-      totalCost = armsLength.totalCost,
-      independentValuation = armsLength.independentValuation,
-      jointlyHeld = armsLength.jointlyHeld,
-      noOfPersons = armsLength.noOfPersons,
-      residentialSchedule29A = armsLength.residentialSchedule29A,
-      isLeased = armsLength.isLeased,
-      lesseeDetails = armsLength.lesseeDetails,
-      totalIncomeOrReceipts = armsLength.totalIncomeOrReceipts,
-      isPropertyDisposed = armsLength.isPropertyDisposed,
-      disposalDetails = armsLength.disposalDetails,
-      transactionCount = Some(transactionCount)
-    )
+    armsLength
+      .into[LandOrConnectedPropertyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

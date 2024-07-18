@@ -17,10 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{TangibleMoveablePropertyApi, TangibleMoveablePropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -36,7 +37,7 @@ class TangibleMoveablePropertyTransformer @Inject()
       .merge[TangibleMoveablePropertyApi.TransactionDetails, SippTangibleProperty.TransactionDetail](
         tangibleMovableProperties,
         etmpData,
-        transformSingle,
+        _.transformInto[SippTangibleProperty.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             tangibleProperty = maybeTransactions.map(
@@ -44,22 +45,6 @@ class TangibleMoveablePropertyTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    property: TangibleMoveablePropertyApi.TransactionDetails
-  ): SippTangibleProperty.TransactionDetail =
-    SippTangibleProperty.TransactionDetail(
-      assetDescription = property.assetDescription,
-      acquisitionDate = property.acquisitionDate,
-      totalCost = property.totalCost,
-      acquiredFromName = property.acquiredFromName,
-      independentValuation = property.independentValuation,
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      costOrMarket = property.costOrMarket,
-      costMarketValue = property.costMarketValue,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposalDetails = property.disposalDetails
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -83,19 +68,10 @@ class TangibleMoveablePropertyTransformer @Inject()
     transactionCount: Int,
     trx: etmp.SippTangibleProperty.TransactionDetail
   ): TangibleMoveablePropertyApi.TransactionDetails =
-    TangibleMoveablePropertyApi.TransactionDetails(
-      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
-      nino = NinoType(member.nino, member.reasonNoNINO),
-      assetDescription = trx.assetDescription,
-      acquisitionDate = trx.acquisitionDate,
-      totalCost = trx.totalCost,
-      acquiredFromName = trx.acquiredFromName,
-      independentValuation = trx.independentValuation,
-      totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
-      costOrMarket = trx.costOrMarket,
-      costMarketValue = trx.costMarketValue,
-      isPropertyDisposed = trx.isPropertyDisposed,
-      disposalDetails = trx.disposalDetails,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[TangibleMoveablePropertyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }
