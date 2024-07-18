@@ -17,13 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{OutstandingLoansApi, OutstandingLoansResponse}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -38,30 +36,13 @@ class OutstandingLoansTransformer @Inject()
       .merge[OutstandingLoansApi.TransactionDetails, SippLoanOutstanding.TransactionDetail](
         updates,
         etmpData,
-        transformSingle,
+        _.transformInto[SippLoanOutstanding.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             loanOutstanding =
               maybeTransactions.map(transactions => SippLoanOutstanding(transactions.length, Some(transactions.toList)))
           )
       )
-
-  private def transformSingle(
-    property: OutstandingLoansApi.TransactionDetails
-  ): SippLoanOutstanding.TransactionDetail =
-    SippLoanOutstanding.TransactionDetail(
-      loanRecipientName = property.loanRecipientName,
-      dateOfLoan = property.dateOfLoan,
-      amountOfLoan = property.amountOfLoan,
-      loanConnectedParty = EtmpConnectionStatus(property.loanConnectedParty.boolean),
-      repayDate = property.repayDate,
-      interestRate = property.interestRate,
-      loanSecurity = property.loanSecurity,
-      capitalRepayments = property.capitalRepayments,
-      arrearsOutstandingPrYears = property.arrearsOutstandingPrYears,
-      arrearsOutstandingPrYearsAmt = property.arrearsOutstandingPrYearsAmt,
-      outstandingYearEndAmount = property.outstandingYearEndAmount
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -85,20 +66,10 @@ class OutstandingLoansTransformer @Inject()
     transactionCount: Int,
     trx: etmp.SippLoanOutstanding.TransactionDetail
   ): OutstandingLoansApi.TransactionDetails =
-    OutstandingLoansApi.TransactionDetails(
-      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
-      nino = NinoType(member.nino, member.reasonNoNINO),
-      loanRecipientName = trx.loanRecipientName,
-      dateOfLoan = trx.dateOfLoan,
-      amountOfLoan = trx.amountOfLoan,
-      loanConnectedParty = YesNo(trx.loanConnectedParty == Connected),
-      repayDate = trx.repayDate,
-      interestRate = trx.interestRate,
-      loanSecurity = trx.loanSecurity,
-      capitalRepayments = trx.capitalRepayments,
-      arrearsOutstandingPrYears = trx.arrearsOutstandingPrYears,
-      arrearsOutstandingPrYearsAmt = trx.arrearsOutstandingPrYearsAmt,
-      outstandingYearEndAmount = trx.outstandingYearEndAmount,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[OutstandingLoansApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

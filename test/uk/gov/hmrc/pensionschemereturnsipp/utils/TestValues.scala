@@ -41,7 +41,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectionStatus.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse

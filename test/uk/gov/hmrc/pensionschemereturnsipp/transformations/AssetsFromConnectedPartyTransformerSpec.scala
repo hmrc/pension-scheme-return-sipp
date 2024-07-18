@@ -41,7 +41,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     acquisitionDate = LocalDate.of(2020, 1, 1),
     assetDescription = "Asset Description",
     acquisitionOfShares = Yes,
-    shareCompanyDetails = Some(
+    sharesCompanyDetails = Some(
       SharesCompanyDetails(
         companySharesName = "companySharesName",
         companySharesCRN = Some("12345678"),
@@ -153,7 +153,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
       val updateValues = assetsFromConnectedPartyTx.copy(
         acquiredFromName = "test2",
         noOfSharesHeld = Some(2),
-        shareCompanyDetails = assetsFromConnectedPartyTx.shareCompanyDetails.map(
+        sharesCompanyDetails = assetsFromConnectedPartyTx.sharesCompanyDetails.map(
           _.copy(
             companySharesName = "testCompanySharesName2"
           )

@@ -17,12 +17,14 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
   SippOtherAssetsConnectedParty
 }
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -38,7 +40,7 @@ class AssetsFromConnectedPartyTransformer @Inject()
       .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetails](
         assetsFromConnectedParty,
         etmpData,
-        transformSingle,
+        _.transformInto[SippOtherAssetsConnectedParty.TransactionDetails],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             otherAssetsConnectedParty = maybeTransactions.map(
@@ -46,25 +48,6 @@ class AssetsFromConnectedPartyTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    property: AssetsFromConnectedPartyApi.TransactionDetails
-  ): SippOtherAssetsConnectedParty.TransactionDetails =
-    SippOtherAssetsConnectedParty.TransactionDetails(
-      acquisitionDate = property.acquisitionDate,
-      assetDescription = property.assetDescription,
-      acquisitionOfShares = property.acquisitionOfShares,
-      sharesCompanyDetails = property.shareCompanyDetails,
-      acquiredFromName = property.acquiredFromName,
-      totalCost = property.totalCost,
-      independentValuation = property.independentValuation,
-      tangibleSchedule29A = property.tangibleSchedule29A,
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposalDetails = property.disposalDetails,
-      disposalOfShares = property.disposalOfShares,
-      noOfSharesHeld = property.noOfSharesHeld
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -88,22 +71,10 @@ class AssetsFromConnectedPartyTransformer @Inject()
     transactionCount: Int,
     trx: SippOtherAssetsConnectedParty.TransactionDetails
   ): AssetsFromConnectedPartyApi.TransactionDetails =
-    AssetsFromConnectedPartyApi.TransactionDetails(
-      nameDOB = toNameDOB(member),
-      nino = toNinoType(member),
-      acquisitionDate = trx.acquisitionDate,
-      assetDescription = trx.assetDescription,
-      acquisitionOfShares = trx.acquisitionOfShares,
-      shareCompanyDetails = trx.sharesCompanyDetails,
-      acquiredFromName = trx.acquiredFromName,
-      totalCost = trx.totalCost,
-      independentValuation = trx.independentValuation,
-      tangibleSchedule29A = trx.tangibleSchedule29A,
-      totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
-      isPropertyDisposed = trx.isPropertyDisposed,
-      disposalDetails = trx.disposalDetails,
-      disposalOfShares = trx.disposalOfShares,
-      noOfSharesHeld = trx.noOfSharesHeld,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[AssetsFromConnectedPartyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

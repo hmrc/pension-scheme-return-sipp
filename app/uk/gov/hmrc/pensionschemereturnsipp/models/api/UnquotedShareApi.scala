@@ -35,7 +35,7 @@ object UnquotedShareApi {
   case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
-    shareCompanyDetails: SharesCompanyDetails,
+    sharesCompanyDetails: SharesCompanyDetails,
     acquiredFromName: String,
     totalCost: Double,
     independentValuation: YesNo,
