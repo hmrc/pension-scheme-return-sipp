@@ -50,10 +50,12 @@ class EmailSubmissionServiceSpec
     "compose minimum details with email template parameters and send the request to the email api returning unit on success" in new TestScope {
       when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(minimumDetails.asRight))
       val reportDetails = sampleSippPsrSubmissionEtmpResponse.reportDetails
+      val psaName = minimumDetails.individualDetails.map(_.fullName).getOrElse("")
+      val schemeName = reportDetails.schemeName.getOrElse("")
 
       val templateParams = Map(
-        "psaName" -> minimumDetails.individualDetails.map(_.fullName).getOrElse(""),
-        "schemeName" -> reportDetails.schemeName.getOrElse(""),
+        "psaName" -> psaName,
+        "schemeName" -> schemeName,
         "periodOfReturn" -> s"${reportDetails.periodStart.format(SubmissionDateFormatter)} to ${reportDetails.periodEnd
           .format(SubmissionDateFormatter)}",
         "dateSubmitted" -> ZonedDateTime.now(clock).format(SubmissionDateTimeFormatter)
@@ -66,7 +68,11 @@ class EmailSubmissionServiceSpec
           reportDetails.pstr.getOrElse(""),
           minimumDetails.email,
           "pods_pension_scheme_return_sipp_submitted",
-          templateParams
+          schemeName,
+          psaName,
+          templateParams,
+          s"${reportDetails.periodStart.getYear}-${reportDetails.periodEnd.getYear}",
+          reportDetails.psrVersion.getOrElse("")
         )
       ).thenReturn(Future.successful(().asRight))
 

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -20,6 +36,10 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
   private val requestId = "test-Request-Id"
   private val testEmailAddress = "test@test.com"
   private val testTemplate = "testTemplate"
+  private val testSchemeName = "testSchemeName"
+  private val testUserName = "testUserName"
+  private val testTaxYear = "2023-2024"
+  private val testReportVersion = "001"
 
   private lazy val connector = injector.instanceOf[EmailConnector]
 
@@ -40,7 +60,11 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
             testPstr,
             testEmailAddress,
             testTemplate,
-            Map.empty
+            testSchemeName,
+            testUserName,
+            Map.empty,
+            testTaxYear,
+            testReportVersion
           )
           .map { result =>
             result.value mustBe ()
@@ -64,7 +88,11 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
             testPstr,
             testEmailAddress,
             testTemplate,
-            Map.empty
+            testSchemeName,
+            testUserName,
+            Map.empty,
+            testTaxYear,
+            testReportVersion
           )
           .map { result =>
             result.left.value mustBe "Failed to send email 503"
@@ -85,7 +113,11 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
             testPstr,
             testEmailAddress,
             testTemplate,
-            Map.empty
+            testSchemeName,
+            testUserName,
+            Map.empty,
+            testTaxYear,
+            testReportVersion
           )
           .map { result =>
             result.left.value mustBe "Failed to send email 204"

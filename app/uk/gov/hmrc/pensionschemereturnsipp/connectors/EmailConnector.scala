@@ -43,7 +43,11 @@ class EmailConnector @Inject()(
     pensionSchemeId: PensionSchemeId,
     requestId: String,
     pstr: String,
-    email: String
+    email: String,
+    schemeName: String,
+    userName: String,
+    taxYear: String,
+    reportVersion: String
   ): String = {
     val encryptedPsaOrPspId = URLEncoder.encode(
       crypto.QueryParameterCrypto.encrypt(PlainText(pensionSchemeId.value)).value,
@@ -53,8 +57,25 @@ class EmailConnector @Inject()(
       URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(pstr)).value, StandardCharsets.UTF_8.toString)
     val encryptedEmail =
       URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(email)).value, StandardCharsets.UTF_8.toString)
+    val encryptedSchemeName =
+      URLEncoder.encode(
+        crypto.QueryParameterCrypto.encrypt(PlainText(schemeName)).value,
+        StandardCharsets.UTF_8.toString
+      )
+    val encryptedUserName =
+      URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(userName)).value, StandardCharsets.UTF_8.toString)
 
-    appConfig.emailCallback(pensionSchemeId, requestId, encryptedEmail, encryptedPsaOrPspId, encryptedPstr)
+    appConfig.emailCallback(
+      pensionSchemeId,
+      requestId,
+      encryptedEmail,
+      encryptedPsaOrPspId,
+      encryptedPstr,
+      encryptedSchemeName,
+      encryptedUserName,
+      taxYear,
+      reportVersion
+    )
   }
 
   //scalastyle:off parameter.number
@@ -64,7 +85,11 @@ class EmailConnector @Inject()(
     pstr: String,
     emailAddress: String,
     templateId: String,
-    templateParams: Map[String, String]
+    schemeName: String,
+    userName: String,
+    templateParams: Map[String, String],
+    taxYear: String,
+    reportVersion: String
   )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Either[String, Unit]] = {
     val emailServiceUrl = s"${appConfig.emailApiUrl}/hmrc/email"
 
@@ -73,7 +98,7 @@ class EmailConnector @Inject()(
       templateId,
       templateParams,
       appConfig.emailSendForce,
-      callBackUrl(pensionSchemeId, requestId, pstr, emailAddress)
+      callBackUrl(pensionSchemeId, requestId, pstr, emailAddress, schemeName, userName, taxYear, reportVersion)
     )
     val jsonData = Json.toJson(sendEmailReq)
 

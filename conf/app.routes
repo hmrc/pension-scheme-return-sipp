@@ -25,4 +25,4 @@ GET    /psr/unquoted-shares/:pstr                uk.gov.hmrc.pensionschemereturn
 
 GET    /psr/versions/:pstr                       uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrVersions(pstr: String, startDate: String)
 
-POST   /psr/email-response/:submittedBy/:requestId/:email/:psaId/:pstr/       uk.gov.hmrc.pensionschemereturnsipp.controllers.EmailResponseController.sendAuditEvents(submittedBy: String, requestId: String, email: String, psaId: String, pstr: String)
+POST   /psr/email-response/:submittedBy/:requestId/:email/:psaId/:pstr/:schemeName/:userName/:taxYear/:reportVersion       uk.gov.hmrc.pensionschemereturnsipp.controllers.EmailResponseController.sendAuditEvents(submittedBy: String, requestId: String, email: String, psaId: String, pstr: String, schemeName: String, userName: String, taxYear: String, reportVersion: String)
