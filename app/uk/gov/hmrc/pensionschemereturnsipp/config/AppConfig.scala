@@ -52,7 +52,11 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
     requestId: String,
     encryptedEmail: String,
     encryptedPsaId: String,
-    encryptedPstr: String
+    encryptedPstr: String,
+    encryptedSchemeName: String,
+    encryptedUserName: String,
+    taxYear: String,
+    reportVersion: String
   ) =
     s"$pensionsSchemeReturnUrl${emailCallbackUrl
       .format(
@@ -63,6 +67,10 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
         requestId,
         encryptedEmail,
         encryptedPsaId,
-        encryptedPstr
+        encryptedPstr,
+        encryptedSchemeName,
+        encryptedUserName,
+        taxYear,
+        reportVersion
       )}"
 }

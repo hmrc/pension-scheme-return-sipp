@@ -18,6 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.config
 
 object Constants {
 
+  val PSA = "PSA"
+
   val psaEnrolmentKey = "HMRC-PODS-ORG"
   val pspEnrolmentKey = "HMRC-PODSPP-ORG"
 

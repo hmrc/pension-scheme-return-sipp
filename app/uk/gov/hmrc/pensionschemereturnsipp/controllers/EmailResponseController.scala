@@ -32,45 +32,70 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
  * limitations under the License.
  */
 
-import play.api.mvc._
 import com.google.inject.Inject
-import play.api.Logging
-import play.api.libs.json.{JsResultException, JsValue}
+import play.api.Logger
+import play.api.libs.json.JsValue
+import play.api.mvc._
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.pensionschemereturnsipp.audit.PsrEmailAuditEvent
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.emailRegex
-import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvents, Event}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvents, Opened}
+import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import scala.concurrent.ExecutionContext
 
 class EmailResponseController @Inject()(
   cc: ControllerComponents,
   crypto: ApplicationCrypto,
   parser: PlayBodyParsers,
+  auditService: AuditService,
   val authConnector: AuthConnector
-) extends BackendController(cc)
-    with AuthorisedFunctions
-    with Logging {
+)(implicit executionContext: ExecutionContext)
+    extends BackendController(cc)
+    with AuthorisedFunctions {
+  private val logger = Logger(classOf[EmailResponseController])
 
   def sendAuditEvents(
     submittedBy: String,
     requestId: String,
     email: String,
     encryptedPsaOrPspId: String,
-    encryptedPstr: String
+    encryptedPstr: String,
+    encryptedSchemeName: String,
+    encryptedUserName: String,
+    taxYear: String,
+    reportVersion: String
   ): Action[JsValue] = Action(parser.tolerantJson) { implicit request =>
-    decryptPsaOrPspIdAndEmail(encryptedPsaOrPspId, encryptedPstr, email) match {
-      case Right((_, _, _)) =>
+    decryptDetails(encryptedPsaOrPspId, encryptedPstr, email, encryptedSchemeName, encryptedUserName) match {
+      case Right(Tuple5(psaOrPspId, pstr, emailAddress, schemeName, userName)) =>
         request.body
           .validate[EmailEvents]
           .fold(
-            errors => {
-              logger.error("failed to decode email events response", JsResultException(errors))
-              BadRequest("Bad request received for email call back event")
-            },
+            _ => BadRequest("Bad request received for email call back event"),
             valid => {
               valid.events
-                .filterNot(_.event == Event.Opened)
-                .foreach(event => logger.debug(s"Email audit event is $event"))
+                .filterNot(
+                  _.event == Opened
+                )
+                .foreach { event =>
+                  logger.debug(s"Email Audit event is $event")
+                  auditService.sendEvent(
+                    PsrEmailAuditEvent(
+                      psaPspId = psaOrPspId,
+                      pstr = pstr,
+                      submittedBy = submittedBy,
+                      emailAddress = emailAddress,
+                      event = event,
+                      requestId = requestId,
+                      reportVersion = reportVersion,
+                      schemeName = schemeName,
+                      taxYear = taxYear,
+                      userName = userName
+                    )
+                  )(request, implicitly)
+                }
               Ok
             }
           )
@@ -79,20 +104,30 @@ class EmailResponseController @Inject()(
     }
   }
 
-  private def decryptPsaOrPspIdAndEmail(
+  private def decryptDetails(
     encryptedPsaOrPspId: String,
     encryptedPstr: String,
-    email: String
-  ): Either[Result, (String, String, String)] = {
-    val psaOrPspId = crypto.QueryParameterCrypto.decrypt(Crypted(encryptedPsaOrPspId)).value
-    val pstr = crypto.QueryParameterCrypto.decrypt(Crypted(encryptedPstr)).value
-    val emailAddress = crypto.QueryParameterCrypto.decrypt(Crypted(email)).value
-
+    email: String,
+    encryptedSchemeName: String,
+    encryptedUserName: String
+  ): Either[Result, (String, String, String, String, String)] = {
+    val emailAddress: String = decrypt(email)
     try {
       require(emailAddress.matches(emailRegex))
-      Right((psaOrPspId, pstr, emailAddress))
+      Right(
+        (
+          decrypt(encryptedPsaOrPspId),
+          decrypt(encryptedPstr),
+          emailAddress,
+          decrypt(encryptedSchemeName),
+          decrypt(encryptedUserName)
+        )
+      )
     } catch {
       case _: IllegalArgumentException => Left(Forbidden(s"Malformed email : $emailAddress"))
     }
   }
+
+  private def decrypt(encrypted: String): String =
+    crypto.QueryParameterCrypto.decrypt(Crypted(encrypted)).value
 }

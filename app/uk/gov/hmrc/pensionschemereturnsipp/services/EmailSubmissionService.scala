@@ -20,8 +20,8 @@ import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{EmailConnector, MinimalDetailsConnector}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.services.EmailSubmissionService.{
   SubmissionDateFormatter,
   SubmissionDateTimeFormatter
@@ -52,8 +52,10 @@ class EmailSubmissionService @Inject()(
         reportDetails.pstr,
         minimumDetails.individualDetails.map(_.fullName),
         minimumDetails.email,
-        formatReturnDates(reportDetails.periodStart, reportDetails.periodEnd),
-        reportDetails.schemeName
+        reportDetails.schemeName,
+        reportDetails.periodStart,
+        reportDetails.periodEnd,
+        reportDetails.psrVersion.getOrElse("")
       )
     } yield email).value
   }
@@ -74,8 +76,10 @@ class EmailSubmissionService @Inject()(
     pstr: Option[String],
     psaName: Option[String],
     email: String,
-    periodOfReturn: String,
-    schemeName: Option[String]
+    schemeName: Option[String],
+    periodStart: LocalDate,
+    periodEnd: LocalDate,
+    psrVersion: String
   )(implicit hc: HeaderCarrier): EitherT[Future, String, Unit] = {
     val requestId = hc.requestId.map(_.value).getOrElse("")
     val submittedDate = ZonedDateTime.now(clock).format(SubmissionDateTimeFormatter)
@@ -83,7 +87,7 @@ class EmailSubmissionService @Inject()(
     val templateParams = Map(
       "psaName" -> psaName.getOrElse(""),
       "schemeName" -> schemeName.getOrElse(""),
-      "periodOfReturn" -> periodOfReturn,
+      "periodOfReturn" -> formatReturnDates(periodStart, periodEnd),
       "dateSubmitted" -> submittedDate
     )
 
@@ -94,7 +98,11 @@ class EmailSubmissionService @Inject()(
         pstr.getOrElse(""),
         email,
         "pods_pension_scheme_return_sipp_submitted",
-        templateParams
+        schemeName.getOrElse(""),
+        psaName.getOrElse(""),
+        templateParams,
+        s"${periodStart.getYear}-${periodEnd.getYear}",
+        psrVersion
       )
     )
   }
