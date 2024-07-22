@@ -22,7 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.AccountingPeriodDetails
 
 case class PSRSubmissionResponse(
   details: ReportDetails,
-  accountingPeriodDetails: AccountingPeriodDetails,
+  accountingPeriodDetails: Option[AccountingPeriodDetails],
   landConnectedParty: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],
   otherAssetsConnectedParty: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]],
   landArmsLength: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],

@@ -29,9 +29,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
@@ -177,6 +179,39 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result =
         controller.getMemberDetails("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
+    }
+  }
+
+  "Delete Member " must {
+    "return no content" in {
+      val personalDetails = PersonalDetails("John", None, "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
+      val fakeRequest = FakeRequest(DELETE, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(Json.toJson(personalDetails))
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val result = controller.deleteMember("testPstr", Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.NO_CONTENT
+    }
+
+    "return bad request" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.failed(new Exception(s"Submission with pstr $pstr not found")))
+
+      val result = controller.deleteMember("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+      status(result) mustBe Status.BAD_REQUEST
     }
   }
 }

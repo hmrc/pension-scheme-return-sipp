@@ -1,0 +1,36 @@
+meta {
+  name: DELETE Member
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{pension-scheme-return-sipp}}/psr/delete-member/24000001IN?fbNumber=000000021221
+  body: json
+  auth: bearer
+}
+
+query {
+  fbNumber: 000000021221
+  ~periodStartDate: 2021-04-06
+  ~psrVersion: 456
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "nino": "AB123456C",
+    "dateOfBirth": "1980-01-01"
+  }
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}

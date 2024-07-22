@@ -86,11 +86,13 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
         Some("001")
       )
 
-      resultApiResponse.accountingPeriodDetails mustBe AccountingPeriodDetails(
-        Some("002"),
-        NonEmptyList.of(
-          AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
-          AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
+      resultApiResponse.accountingPeriodDetails mustBe Some(
+        AccountingPeriodDetails(
+          Some("002"),
+          NonEmptyList.of(
+            AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
+            AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
+          )
         )
       )
 

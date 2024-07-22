@@ -34,6 +34,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
@@ -191,7 +193,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         None
       ),
       accountingPeriodDetails =
-        AccountingPeriodDetails("".some, NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now()))),
+        AccountingPeriodDetails("".some, NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now()))).some,
       memberAndTransactions = None,
       psrDeclaration = None
     )
@@ -257,6 +259,50 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val result = service.getMemberDetails(pstr, Some("test"), None, None).futureValue
 
       result mustBe None
+    }
+  }
+
+  "delete member" should {
+    "successfully delete" in {
+      val response = HttpResponse(200, "OK")
+      val sampleResponse = SippPsrSubmissionEtmpResponse(
+        reportDetails = EtmpSippReportDetails(
+          pstr.some,
+          EtmpPsrStatus.Compiled,
+          LocalDate.now(),
+          LocalDate.now(),
+          YesNo.Yes,
+          None,
+          None
+        ),
+        accountingPeriodDetails = None,
+        memberAndTransactions = Some(List(etmpDataWithLandConnectedTx)),
+        psrDeclaration = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleResponse)))
+
+      when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      whenReady(service.deleteMember(pstr, None, None, None, etmpDataWithLandConnectedTx.memberDetails.personalDetails)) {
+        _ =>
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockPsrConnector, times(1)).submitSippPsr(
+            any(),
+            mockitoEq(
+              SippPsrSubmissionEtmpRequest(
+                reportDetails = sampleResponse.reportDetails,
+                accountingPeriodDetails = None,
+                memberAndTransactions = Some(
+                  NonEmptyList.one(etmpDataWithLandConnectedTx.copy(status = SectionStatus.Deleted, version = None))
+                ),
+                psrDeclaration = None
+              )
+            )
+          )(any(), any())
+      }
     }
   }
 }

@@ -77,6 +77,13 @@ object MemberDetails {
   ): MemberDetails =
     MemberDetails(PersonalDetails(firstName, middleName, lastName, nino, reasonNoNINO, dateOfBirth))
 
+  def compare(p1: PersonalDetails, p2: PersonalDetails): Boolean = {
+    p1.firstName == p2.firstName &&
+    p1.lastName == p2.lastName &&
+    p1.dateOfBirth == p2.dateOfBirth &&
+    p1.nino == p2.nino
+  }
+
   implicit val memberDetailsFormat: OFormat[MemberDetails] = Json.format[MemberDetails]
 }
 
