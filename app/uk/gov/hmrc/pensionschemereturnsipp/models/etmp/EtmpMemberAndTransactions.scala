@@ -18,12 +18,17 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AddressDetails,
+  ConnectionStatus,
   CostOrMarketType,
+  DisposalDetails,
+  LesseeDetails,
   RegistryDetails,
   SharesCompanyDetails,
+  UnquotedShareDisposalDetails,
   YesNo
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 
 import java.time.LocalDate
 
@@ -39,7 +44,7 @@ case class EtmpMemberAndTransactions(
   unquotedShares: Option[SippUnquotedShares]
 )
 
-case class MemberDetails(
+case class PersonalDetails(
   firstName: String,
   middleName: Option[String],
   lastName: String,
@@ -48,12 +53,36 @@ case class MemberDetails(
   dateOfBirth: LocalDate
 )
 
+object PersonalDetails {
+  implicit val personalDetailsFormat: OFormat[PersonalDetails] = Json.format[PersonalDetails]
+}
+
+case class MemberDetails(personalDetails: PersonalDetails) {
+  def firstName: String = personalDetails.firstName
+  def middleName: Option[String] = personalDetails.middleName
+  def lastName: String = personalDetails.lastName
+  def nino: Option[String] = personalDetails.nino
+  def reasonNoNINO: Option[String] = personalDetails.reasonNoNINO
+  def dateOfBirth: LocalDate = personalDetails.dateOfBirth
+}
+
 object MemberDetails {
-  implicit val formatPersonalDetails: OFormat[MemberDetails] = Json.format[MemberDetails]
+  def apply(
+    firstName: String,
+    middleName: Option[String],
+    lastName: String,
+    nino: Option[String],
+    reasonNoNINO: Option[String],
+    dateOfBirth: LocalDate
+  ): MemberDetails =
+    MemberDetails(PersonalDetails(firstName, middleName, lastName, nino, reasonNoNINO, dateOfBirth))
+
+  implicit val memberDetailsFormat: OFormat[MemberDetails] = Json.format[MemberDetails]
 }
 
 case class SippLandConnectedParty(
   noOfTransactions: Int,
+//  version: Option[String], todo uncomment
   transactionDetails: Option[List[SippLandConnectedParty.TransactionDetail]]
 )
 
@@ -62,26 +91,19 @@ object SippLandConnectedParty {
   case class TransactionDetail(
     acquisitionDate: LocalDate,
     landOrPropertyInUK: YesNo,
-    addressDetails: EtmpAddress,
+    addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo, // Previous api has that Valution typo!
+    independentValuation: YesNo,
     jointlyHeld: YesNo,
-    noOfPersonsIfJointlyHeld: Option[Int],
+    noOfPersons: Option[Int],
     residentialSchedule29A: YesNo,
     isLeased: YesNo,
-    noOfPersonsForLessees: Option[Int],
-    anyOfLesseesConnected: Option[YesNo],
-    leaseGrantedDate: Option[LocalDate],
-    annualLeaseAmount: Option[Double],
+    lesseeDetails: Option[LesseeDetails],
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
-    disposedPropertyProceedsAmt: Option[Double],
-    purchaserNamesIfDisposed: Option[String],
-    anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
-    propertyFullyDisposed: Option[YesNo]
+    disposalDetails: Option[DisposalDetails]
   )
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
@@ -89,62 +111,53 @@ object SippLandConnectedParty {
 
 case class SippOtherAssetsConnectedParty(
   noOfTransactions: Int,
-  transactionDetails: Option[List[SippOtherAssetsConnectedParty.TransactionDetail]]
+//  version: Option[String], todo uncomment
+  transactionDetails: Option[List[SippOtherAssetsConnectedParty.TransactionDetails]]
 )
 
 object SippOtherAssetsConnectedParty {
-  case class TransactionDetail(
+  case class TransactionDetails(
     acquisitionDate: LocalDate,
     assetDescription: String,
     acquisitionOfShares: YesNo,
     sharesCompanyDetails: Option[SharesCompanyDetails],
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     tangibleSchedule29A: YesNo,
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
-    disposedPropertyProceedsAmt: Option[Double],
-    purchaserNamesIfDisposed: Option[String],
-    anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
-    disposalOfShares: YesNo,
-    noOfSharesHeld: Option[Int],
-    propertyFullyDisposed: Option[YesNo]
+    disposalDetails: Option[DisposalDetails],
+    disposalOfShares: Option[YesNo],
+    noOfSharesHeld: Option[Int]
   )
 
-  implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
+  implicit val formatTransactionDetails: OFormat[TransactionDetails] = Json.format[TransactionDetails]
 }
 
 case class SippLandArmsLength(
   noOfTransactions: Int,
+//  version: Option[String], todo uncomment
   transactionDetails: Option[List[SippLandArmsLength.TransactionDetail]]
 )
 
 object SippLandArmsLength {
   case class TransactionDetail(
     acquisitionDate: LocalDate,
-    landOrPropertyinUK: YesNo,
-    addressDetails: EtmpAddress,
+    landOrPropertyInUK: YesNo,
+    addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     jointlyHeld: YesNo,
-    noOfPersonsIfJointlyHeld: Option[Int],
+    noOfPersons: Option[Int],
     residentialSchedule29A: YesNo,
     isLeased: YesNo,
-    noOfPersonsForLessees: Option[Int],
-    anyOfLesseesConnected: Option[YesNo],
-    lesseesGrantedAt: Option[LocalDate],
-    annualLeaseAmount: Option[Double],
+    lesseeDetails: Option[LesseeDetails],
     totalIncomeOrReceipts: Double,
     isPropertyDisposed: YesNo,
-    disposedPropertyProceedsAmt: Option[Double],
-    purchaserNamesIfDisposed: Option[String],
-    anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
-    propertyFullyDisposed: Option[YesNo]
+    disposalDetails: Option[DisposalDetails]
   )
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
@@ -152,6 +165,7 @@ object SippLandArmsLength {
 
 case class SippTangibleProperty(
   noOfTransactions: Int,
+//  version: Option[String], todo uncomment
   transactionDetails: Option[List[SippTangibleProperty.TransactionDetail]]
 )
 
@@ -161,16 +175,12 @@ object SippTangibleProperty {
     acquisitionDate: LocalDate,
     totalCost: Double,
     acquiredFromName: String,
-    independentValution: YesNo,
+    independentValuation: YesNo,
     totalIncomeOrReceipts: Double,
     costOrMarket: CostOrMarketType,
     costMarketValue: Double,
     isPropertyDisposed: YesNo,
-    disposedPropertyProceedsAmt: Option[Double],
-    purchaserNamesIfDisposed: Option[String],
-    anyOfPurchaserConnected: Option[YesNo],
-    independentValutionDisposal: Option[YesNo], // Previous api has that Valution typo!
-    propertyFullyDisposed: Option[YesNo]
+    disposalDetails: Option[DisposalDetails]
   )
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]
@@ -178,6 +188,7 @@ object SippTangibleProperty {
 
 case class SippLoanOutstanding(
   noOfTransactions: Int,
+//  version: Option[String], todo uncomment
   transactionDetails: Option[List[SippLoanOutstanding.TransactionDetail]]
 )
 
@@ -186,13 +197,13 @@ object SippLoanOutstanding {
     loanRecipientName: String,
     dateOfLoan: LocalDate,
     amountOfLoan: Double,
-    loanConnectedParty: EtmpConnectedOrUnconnectedType, // TODO -> Maybe it can be yes/no
+    loanConnectedParty: ConnectionStatus,
     repayDate: LocalDate,
     interestRate: Double,
     loanSecurity: YesNo,
     capitalRepayments: Double,
-    interestPayments: Double,
     arrearsOutstandingPrYears: YesNo,
+    arrearsOutstandingPrYearsAmt: Option[Double],
     outstandingYearEndAmount: Double
   )
 
@@ -201,6 +212,7 @@ object SippLoanOutstanding {
 
 case class SippUnquotedShares(
   noOfTransactions: Int,
+//  version: Option[String], todo uncomment
   transactionDetails: Option[List[SippUnquotedShares.TransactionDetail]]
 )
 
@@ -209,12 +221,10 @@ object SippUnquotedShares {
     sharesCompanyDetails: SharesCompanyDetails,
     acquiredFromName: String,
     totalCost: Double,
-    independentValution: YesNo,
-    noOfSharesSold: Option[Int],
+    independentValuation: YesNo,
     totalDividendsIncome: Double,
     sharesDisposed: YesNo,
-    sharesDisposalDetails: Option[EtmpSippSharesDisposalDetails],
-    noOfSharesHeld: Option[Int]
+    sharesDisposalDetails: Option[UnquotedShareDisposalDetails]
   )
 
   implicit val formatTransactionDetails: OFormat[TransactionDetail] = Json.format[TransactionDetail]

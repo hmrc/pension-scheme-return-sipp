@@ -17,15 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  UnquotedShareDisposalDetail,
-  UnquotedShareTransactionDetail
-}
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{UnquotedShareApi, UnquotedShareResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -41,7 +37,7 @@ class UnquotedSharesTransformer @Inject()
       .merge[UnquotedShareApi.TransactionDetails, SippUnquotedShares.TransactionDetail](
         unquotedShares,
         etmpData,
-        transformSingle,
+        _.transformInto[SippUnquotedShares.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             unquotedShares = maybeTransactions.map(
@@ -49,21 +45,6 @@ class UnquotedSharesTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    details: UnquotedShareApi.TransactionDetails
-  ): SippUnquotedShares.TransactionDetail =
-    SippUnquotedShares.TransactionDetail(
-      sharesCompanyDetails = details.shareCompanyDetails,
-      acquiredFromName = details.acquiredFromName,
-      totalCost = details.transactionDetail.totalCost,
-      independentValution = details.transactionDetail.independentValuation,
-      noOfSharesSold = details.transactionDetail.noOfIndependentValuationSharesSold,
-      totalDividendsIncome = details.transactionDetail.totalDividendsIncome,
-      sharesDisposed = details.sharesDisposed,
-      sharesDisposalDetails = details.sharesDisposalDetails.map(toEtmp),
-      noOfSharesHeld = details.noOfSharesHeld
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -87,29 +68,10 @@ class UnquotedSharesTransformer @Inject()
     transactionCount: Int,
     trx: etmp.SippUnquotedShares.TransactionDetail
   ): UnquotedShareApi.TransactionDetails =
-    UnquotedShareApi.TransactionDetails(
-      nameDOB = NameDOB(member.firstName, member.lastName, member.dateOfBirth),
-      nino = NinoType(member.nino, member.reasonNoNINO),
-      shareCompanyDetails = trx.sharesCompanyDetails,
-      acquiredFromName = trx.acquiredFromName,
-      transactionDetail = UnquotedShareTransactionDetail(
-        trx.totalCost,
-        trx.independentValution,
-        trx.noOfSharesSold,
-        trx.totalDividendsIncome
-      ),
-      sharesDisposed = trx.sharesDisposed,
-      sharesDisposalDetails = trx.sharesDisposalDetails
-        .map(
-          d =>
-            UnquotedShareDisposalDetail(
-              totalAmount = d.disposedShareAmount,
-              nameOfPurchaser = d.purchaserName,
-              purchaserConnectedParty = d.disposalConnectedParty,
-              independentValuationDisposal = d.independentValutionDisposal
-            )
-        ),
-      noOfSharesHeld = trx.noOfSharesHeld,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[UnquotedShareApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

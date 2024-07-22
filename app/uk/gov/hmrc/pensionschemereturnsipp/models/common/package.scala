@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
-import play.api.libs.json.{Json, OFormat}
+import cats.data.NonEmptyList
+import play.api.libs.json._
 
-import java.time.LocalDate
-
-case class AccountingPeriodDetails(
-  version: Option[String],
-  accountingPeriods: List[AccountingPeriod]
-)
-
-case class AccountingPeriod(
-  accPeriodStart: LocalDate,
-  accPeriodEnd: LocalDate
-)
-
-object AccountingPeriodDetails {
-  implicit val accountingPeriodFormat: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
-  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
+package object common {
+  implicit def nonEmptyListFormat[T: Format]: Format[NonEmptyList[T]] = Format(
+    Reads.list[T].flatMapResult {
+      case Nil => JsError("The list should not be empty")
+      case head :: tail => JsSuccess(NonEmptyList(head, tail))
+    },
+    Writes.list[T].contramap(_.toList)
+  )
 }

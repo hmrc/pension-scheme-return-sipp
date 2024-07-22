@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
@@ -59,8 +59,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
               interestRate = 1,
               loanSecurity = YesNo.Yes,
               capitalRepayments = 1,
-              interestPayments = 1,
               arrearsOutstandingPrYears = YesNo.Yes,
+              arrearsOutstandingPrYearsAmt = Some(1),
               outstandingYearEndAmount = 1
             )
           )
@@ -92,8 +92,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     interestRate = 1,
                     loanSecurity = YesNo.Yes,
                     capitalRepayments = 1,
-                    interestPayments = 1,
                     arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
                 )
@@ -126,8 +126,8 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     interestRate = 1,
                     loanSecurity = YesNo.Yes,
                     capitalRepayments = 1,
-                    interestPayments = 1,
                     arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
                 )

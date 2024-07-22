@@ -18,13 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json._
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  UnquotedShareDisposalDetail,
-  UnquotedShareTransactionDetail
-}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, UnquotedShareDisposalDetails, YesNo}
 
 case class UnquotedShareRequest(
   reportDetails: ReportDetails,
@@ -40,12 +35,13 @@ object UnquotedShareApi {
   case class TransactionDetails(
     nameDOB: NameDOB,
     nino: NinoType,
-    shareCompanyDetails: SharesCompanyDetails,
+    sharesCompanyDetails: SharesCompanyDetails,
     acquiredFromName: String,
-    transactionDetail: UnquotedShareTransactionDetail,
+    totalCost: Double,
+    independentValuation: YesNo,
+    totalDividendsIncome: Double,
     sharesDisposed: YesNo,
-    sharesDisposalDetails: Option[UnquotedShareDisposalDetail],
-    noOfSharesHeld: Option[Int],
+    sharesDisposalDetails: Option[UnquotedShareDisposalDetails],
     transactionCount: Option[Int]
   ) extends MemberKey
 

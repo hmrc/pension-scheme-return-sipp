@@ -18,8 +18,14 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AddressDetails,
+  DisposalDetails,
+  LesseeDetails,
+  RegistryDetails,
+  YesNo
+}
 
 import java.time.LocalDate
 
@@ -37,7 +43,7 @@ object LandOrConnectedPropertyApi {
     nameDOB: NameDOB,
     nino: NinoType,
     acquisitionDate: LocalDate,
-    landOrPropertyinUK: YesNo,
+    landOrPropertyInUK: YesNo,
     addressDetails: AddressDetails,
     registryDetails: RegistryDetails,
     acquiredFromName: String,

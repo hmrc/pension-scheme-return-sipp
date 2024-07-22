@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-case class UnquotedShareTransactionDetail(
-  totalCost: Double,
-  independentValuation: YesNo,
-  noOfIndependentValuationSharesSold: Option[Int],
-  totalDividendsIncome: Double
-)
+sealed trait SubmittedBy extends EnumEntry
 
-object UnquotedShareTransactionDetail {
-  implicit val formatUnquotedShareTransactionDetail: OFormat[UnquotedShareTransactionDetail] =
-    Json.format[UnquotedShareTransactionDetail]
+object SubmittedBy extends Enum[SubmittedBy] with PlayJsonEnum[SubmittedBy] {
+  case object PSA extends SubmittedBy
+  case object PSP extends SubmittedBy
+
+  override def values: IndexedSeq[SubmittedBy] = findValues
 }

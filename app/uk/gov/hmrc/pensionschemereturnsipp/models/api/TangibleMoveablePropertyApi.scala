@@ -18,8 +18,8 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{CostOrMarketType, DisposalDetails, YesNo}
 
 import java.time.LocalDate
 

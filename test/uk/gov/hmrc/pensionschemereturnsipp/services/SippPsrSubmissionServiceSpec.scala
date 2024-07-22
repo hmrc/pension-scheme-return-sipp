@@ -32,13 +32,10 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PSRSubmissionResponse,
   PsrSubmissionRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpPsrStatus,
-  EtmpSippAccountingPeriodDetails,
-  EtmpSippReportDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -179,11 +176,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   }
 
   "submitSippPsr" should {
-    val submittedBy = "submittedBy"
+    val submittedBy = PSA
     val submitterId = "submitterId"
     val psaPspId = samplePsaId
     val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
-    import req.{pstr => _}
     val etmpResponse = SippPsrSubmissionEtmpResponse(
       reportDetails = EtmpSippReportDetails(
         pstr.some,
@@ -194,7 +190,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         None,
         None
       ),
-      accountingPeriodDetails = EtmpSippAccountingPeriodDetails("".some, Nil),
+      accountingPeriodDetails =
+        AccountingPeriodDetails("".some, NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now()))),
       memberAndTransactions = None,
       psrDeclaration = None
     )
@@ -207,7 +204,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
       when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
-        .thenReturn(Future.successful(Right()))
+        .thenReturn(Future.successful(Right(())))
 
       whenReady(service.submitSippPsr(req, submittedBy, submitterId, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())

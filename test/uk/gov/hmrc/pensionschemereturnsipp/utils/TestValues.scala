@@ -16,28 +16,33 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.utils
 
+import cats.data.NonEmptyList
 import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetailsResponse, PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetails => ApiMemberDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   AccountingPeriod,
   AccountingPeriodDetails,
-  MemberDetailsResponse,
-  MemberDetails => ApiMemberDetails,
-  PSRSubmissionResponse,
-  ReportDetails
+  AddressDetails,
+  DisposalDetails,
+  LesseeDetails,
+  RegistryDetails,
+  SharesCompanyDetails,
+  UnquotedShareDisposalDetails,
+  YesNo
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{RegistryDetails, SharesCompanyDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.EtmpConnectedOrUnconnectedType.Connected
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 
@@ -82,7 +87,7 @@ trait TestValues {
     ),
     accountingPeriodDetails = AccountingPeriodDetails(
       Some("1.0"),
-      List(AccountingPeriod(LocalDate.of(2020, 12, 12), LocalDate.of(2020, 12, 12)))
+      NonEmptyList.of(AccountingPeriod(LocalDate.of(2020, 12, 12), LocalDate.of(2020, 12, 12)))
     ),
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
@@ -94,14 +99,14 @@ trait TestValues {
 
   // SIPP - ETMP
   @unused
-  private val sampleEtmpAccountingPeriodDetails: EtmpSippAccountingPeriodDetails = EtmpSippAccountingPeriodDetails(
+  private val sampleEtmpAccountingPeriodDetails: AccountingPeriodDetails = AccountingPeriodDetails(
     version = Some("002"),
-    accountingPeriods = List(
-      EtmpSippAccountingPeriod(
+    accountingPeriods = NonEmptyList.of(
+      AccountingPeriod(
         accPeriodStart = LocalDate.parse("2022-04-06"),
         accPeriodEnd = LocalDate.parse("2022-12-31")
       ),
-      EtmpSippAccountingPeriod(
+      AccountingPeriod(
         accPeriodStart = LocalDate.parse("2023-01-01"),
         accPeriodEnd = LocalDate.parse("2023-04-05")
       )
@@ -126,11 +131,11 @@ trait TestValues {
         Some("PSR Scheme"),
         Some("001")
       ),
-      EtmpSippAccountingPeriodDetails(
+      AccountingPeriodDetails(
         Some("002"),
-        List(
-          EtmpSippAccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
-          EtmpSippAccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
+        NonEmptyList.of(
+          AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
+          AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
         )
       ),
       Some(
@@ -147,7 +152,7 @@ trait TestValues {
                     SippLandConnectedParty.TransactionDetail(
                       LocalDate.parse("2023-03-14"),
                       Yes,
-                      EtmpAddress(
+                      AddressDetails(
                         "London1",
                         "London2",
                         Some("London3"),
@@ -161,20 +166,13 @@ trait TestValues {
                       1234.99,
                       No,
                       Yes,
-                      None,
+                      Some(1),
                       No,
                       Yes,
-                      None,
-                      None,
-                      None,
-                      None,
+                      Some(LesseeDetails(1, Yes, LocalDate.parse("2023-03-14"), 9999.99)),
                       999999.99,
                       Yes,
-                      None,
-                      None,
-                      None,
-                      None,
-                      None
+                      Some(DisposalDetails(2000.99, "Micheal K", Yes, No, No))
                     )
                   )
                 )
@@ -185,7 +183,7 @@ trait TestValues {
                 1,
                 Some(
                   List(
-                    SippOtherAssetsConnectedParty.TransactionDetail(
+                    SippOtherAssetsConnectedParty.TransactionDetails(
                       LocalDate.parse("2023-03-14"),
                       "Tesco store",
                       No,
@@ -195,14 +193,10 @@ trait TestValues {
                       No,
                       No,
                       9999.99,
-                      No,
-                      None,
-                      None,
-                      None,
-                      None,
-                      No,
-                      Some(0),
-                      None
+                      Yes,
+                      Some(DisposalDetails(9999999.99, "Morris K", No, No, No)),
+                      Some(No),
+                      Some(0)
                     )
                   )
                 )
@@ -216,7 +210,7 @@ trait TestValues {
                     SippLandArmsLength.TransactionDetail(
                       LocalDate.parse("2023-03-14"),
                       Yes,
-                      EtmpAddress(
+                      AddressDetails(
                         "Brighton1",
                         "Brighton2",
                         Some("Brighton3"),
@@ -234,15 +228,8 @@ trait TestValues {
                       No,
                       No,
                       None,
-                      None,
-                      None,
-                      None,
                       2000.99,
                       No,
-                      None,
-                      None,
-                      None,
-                      None,
                       None
                     )
                   )
@@ -263,12 +250,8 @@ trait TestValues {
                       9999.99,
                       CostValue,
                       99999.99,
-                      No,
-                      None,
-                      None,
-                      None,
-                      None,
-                      None
+                      Yes,
+                      Some(DisposalDetails(9999.99, "Michel K", No, No, No))
                     )
                   )
                 )
@@ -285,11 +268,11 @@ trait TestValues {
                       999.99,
                       Connected,
                       LocalDate.parse("2023-03-14"),
-                      10.0,
+                      10,
                       No,
                       99999.99,
-                      99999.99,
                       No,
+                      Some(999999.99),
                       9999.99
                     )
                   )
@@ -306,11 +289,9 @@ trait TestValues {
                       "HL Ltd",
                       9999.99,
                       No,
-                      Some(10),
                       999.99,
                       Yes,
-                      Some(EtmpSippSharesDisposalDetails(9999.99, YesNo.Yes, "Dave SS", No)),
-                      None
+                      Some(UnquotedShareDisposalDetails(9999.99, "Dave SS", Yes, No, 10, 1))
                     )
                   )
                 )
@@ -319,7 +300,15 @@ trait TestValues {
           )
         )
       ),
-      Some(EtmpSippPsrDeclaration("PSP", "20000019", Some("A0000023"), None, Some(Declaration(true, true))))
+      Some(
+        EtmpSippPsrDeclaration(
+          submittedBy = PSP,
+          submitterID = "20000019",
+          psaID = Some("A0000023"),
+          psaDeclaration = None,
+          pspDeclaration = Some(Declaration(declaration1 = true, declaration2 = true))
+        )
+      )
     )
 
   val validationMessage: ValidationMessage = {

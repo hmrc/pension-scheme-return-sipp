@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp;
 
+import cats.data.NonEmptyList
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  AccountingPeriod,
-  AccountingPeriodDetails,
   AssetsFromConnectedPartyResponse,
   LandOrConnectedPropertyResponse,
   OutstandingLoansResponse,
@@ -28,6 +27,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   TangibleMoveablePropertyResponse,
   UnquotedShareResponse
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -88,7 +88,7 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
 
       resultApiResponse.accountingPeriodDetails mustBe AccountingPeriodDetails(
         Some("002"),
-        List(
+        NonEmptyList.of(
           AccountingPeriod(LocalDate.parse("2022-04-06"), LocalDate.parse("2022-12-31")),
           AccountingPeriod(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-04-05"))
         )

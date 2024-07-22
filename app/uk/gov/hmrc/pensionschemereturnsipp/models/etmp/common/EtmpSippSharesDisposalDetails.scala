@@ -21,9 +21,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 case class EtmpSippSharesDisposalDetails(
   disposedShareAmount: Double,
+  purchasersNames: String,
   disposalConnectedParty: YesNo,
-  purchaserName: String,
-  independentValutionDisposal: YesNo
+  independentValuationDisposal: YesNo,
+  noOfSharesSold: Int,
+  noOfSharesHeld: Int
 )
 
 object EtmpSippSharesDisposalDetails {

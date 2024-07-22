@@ -27,8 +27,8 @@ case class EtmpSippReportDetails(
   periodStart: LocalDate,
   periodEnd: LocalDate,
   memberTransactions: YesNo,
-  schemeName: Option[String],
-  psrVersion: Option[String]
+  schemeName: Option[String], // todo remove
+  psrVersion: Option[String] // todo remove
 )
 
 object EtmpSippReportDetails {

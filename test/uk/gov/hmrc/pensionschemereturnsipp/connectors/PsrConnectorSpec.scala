@@ -850,20 +850,12 @@ object PsrConnectorSpec {
       |      "status": "New",
       |      "version": "000",
       |      "memberDetails": {
-      |        "firstName": "Dave",
-      |        "middleName": "K",
-      |        "lastName": "Robin",
-      |        "nino": "AA200000A",
-      |        "dateOfBirth": "1900-03-14",
-      |        "isUKAddress": "Yes",
-      |        "addressDetails": {
-      |          "addressLine1": "Brignton",
-      |          "addressLine2": "Brignton2",
-      |          "addressLine3": "Brignton3",
-      |          "addressLine4": "Brignton4",
-      |          "addressLine5": "Brignton5",
-      |          "ukPostCode": "BN12 4XL",
-      |          "countryCode": "GB"
+      |        "personalDetails": {
+      |          "firstName": "Dave",
+      |          "middleName": "K",
+      |          "lastName": "Robin",
+      |          "nino": "AA200000A",
+      |          "dateOfBirth": "1900-03-14"
       |        }
       |      },
       |      "landConnectedParty": {
@@ -886,42 +878,26 @@ object PsrConnectorSpec {
       |              "registryReference": "Lost"
       |            },
       |            "acquiredFromName": "SUN Ltd",
-      |            "acquiredFromType": {
-      |              "indivOrOrgType": "02",
-      |              "idNumber": "CRN123456"
-      |            },
       |            "totalCost": 1234.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "jointlyHeld": "Yes",
       |            "noOfPersons": 1,
-      |            "jointPropertyPersonDetails": [
-      |              {
-      |                "personName": "Tom K",
-      |                "nino": "AA230000A"
-      |              }
-      |            ],
       |            "residentialSchedule29A": "No",
       |            "isLeased": "Yes",
-      |            "lesseeDetails": [
-      |              {
-      |                "lesseeName": "Google Ltd ",
-      |                "lesseeConnectedParty": "01",
+      |            "lesseeDetails": {
+      |                "numberOfLessees": 1,
+      |                "anyLesseeConnectedParty": "Yes",
       |                "leaseGrantedDate": "2023-03-14",
       |                "annualLeaseAmount": 9999.99
-      |              }
-      |            ],
+      |            },
       |            "totalIncomeOrReceipts": 999999.99,
       |            "isPropertyDisposed": "Yes",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 2000.99,
-      |              "independentValutionDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Micheal K"
-      |                }
-      |              ]
+      |              "purchasersNames": "Micheal K",
+      |              "anyPurchaserConnectedParty": "Yes",
+      |              "independentValuationDisposal": "No",
+      |              "propertyFullyDisposed": "No"
       |            }
       |          }
       |        ]
@@ -934,25 +910,17 @@ object PsrConnectorSpec {
       |            "assetDescription": "Tesco store",
       |            "acquisitionOfShares": "No",
       |            "acquiredFromName": "Morrisons XYZ",
-      |            "acquiredFromType": {
-      |              "indivOrOrgType": "01",
-      |              "idNumber": "AA200000A"
-      |            },
       |            "totalCost": 99999999.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "tangibleSchedule29A": "No",
       |            "totalIncomeOrReceipts": 9999.99,
-      |            "isPropertyDisposed": "No",
+      |            "isPropertyDisposed": "Yes",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999999.99,
-      |              "independentValutionDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Morris K"
-      |                }
-      |              ]
+      |              "purchasersNames": "Morris K",
+      |              "anyPurchaserConnectedParty": "No",
+      |              "independentValuationDisposal": "No",
+      |              "propertyFullyDisposed": "No"
       |            },
       |            "disposalOfShares": "No",
       |            "noOfSharesHeld": 0
@@ -964,7 +932,7 @@ object PsrConnectorSpec {
       |        "transactionDetails": [
       |          {
       |            "acquisitionDate": "2023-03-14",
-      |            "landOrPropertyinUK": "Yes",
+      |            "landOrPropertyInUK": "Yes",
       |            "addressDetails": {
       |              "addressLine1": "Brighton1",
       |              "addressLine2": "Brighton2",
@@ -979,12 +947,8 @@ object PsrConnectorSpec {
       |              "registryReference": "1234XDF"
       |            },
       |            "acquiredFromName": "Willco",
-      |            "acquiredFromType": {
-      |              "indivOrOrgType": "02",
-      |              "idNumber": "CRN678901"
-      |            },
       |            "totalCost": 999999.99,
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "jointlyHeld": "No",
       |            "residentialSchedule29A": "No",
       |            "isLeased": "No",
@@ -1001,25 +965,17 @@ object PsrConnectorSpec {
       |            "acquisitionDate": "2023-03-14",
       |            "totalCost": 999999.99,
       |            "acquiredFromName": "Rambo M",
-      |            "acquiredFromType": {
-      |              "indivOrOrgType": "01",
-      |              "idNumber": "AA250000A"
-      |            },
-      |            "independentValution": "No",
+      |            "independentValuation": "No",
       |            "totalIncomeOrReceipts": 9999.99,
       |            "costOrMarket": "Cost Value",
       |            "costMarketValue": 99999.99,
-      |            "isPropertyDisposed": "No",
+      |            "isPropertyDisposed": "Yes",
       |            "disposalDetails": {
       |              "disposedPropertyProceedsAmt": 9999.99,
-      |              "independentValutionDisposal": "No",
-      |              "propertyFullyDisposed": "No",
-      |              "purchaserDetails": [
-      |                {
-      |                  "purchaserConnectedParty": "01",
-      |                  "purchaserName": "Michel K"
-      |                }
-      |              ]
+      |              "purchasersNames": "Michel K",
+      |              "anyPurchaserConnectedParty": "No",
+      |              "independentValuationDisposal": "No",
+      |              "propertyFullyDisposed": "No"
       |            }
       |          }
       |        ]
@@ -1029,10 +985,6 @@ object PsrConnectorSpec {
       |        "transactionDetails": [
       |          {
       |            "loanRecipientName": "Loyds Ltd",
-      |            "indivOrOrgIdentityDetails": {
-      |              "indivOrOrgType": "02",
-      |              "idNumber": "CRN123456"
-      |            },
       |            "dateOfLoan": "2023-03-14",
       |            "amountOfLoan": 999.99,
       |            "loanConnectedParty": "01",
@@ -1040,7 +992,6 @@ object PsrConnectorSpec {
       |            "interestRate": 10,
       |            "loanSecurity": "No",
       |            "capitalRepayments": 99999.99,
-      |            "interestPayments": 99999.99,
       |            "arrearsOutstandingPrYears": "No",
       |            "arrearsOutstandingPrYearsAmt": 999999.99,
       |            "outstandingYearEndAmount": 9999.99
@@ -1058,20 +1009,17 @@ object PsrConnectorSpec {
       |              "noOfShares": 100
       |            },
       |            "acquiredFromName": "HL Ltd",
-      |            "acquiredFromType": {
-      |              "indivOrOrgType": "02",
-      |              "idNumber": "CRN345345"
-      |            },
       |            "totalCost": 9999.99,
-      |            "independentValution": "No",
-      |            "noOfSharesSold": 10,
+      |            "independentValuation": "No",
       |            "totalDividendsIncome": 999.99,
       |            "sharesDisposed": "Yes",
       |            "sharesDisposalDetails": {
       |              "disposedShareAmount": 9999.99,
+      |              "purchasersNames": "Dave SS",
       |              "disposalConnectedParty": "Yes",
-      |              "purchaserName": "Dave SS",
-      |              "independentValutionDisposal": "No"
+      |              "independentValuationDisposal": "No",
+      |              "noOfSharesSold": 10,
+      |              "noOfSharesHeld": 1
       |            }
       |          }
       |        ]

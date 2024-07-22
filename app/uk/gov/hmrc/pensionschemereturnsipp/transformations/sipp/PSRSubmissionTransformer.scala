@@ -22,7 +22,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.PSRSubmissionResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
-  EtmpAccountingPeriodOps,
   EtmpReportDetailsOps,
   LandArmsLengthTransformer,
   LandConnectedPartyTransformer,
@@ -46,7 +45,7 @@ class PSRSubmissionTransformer @Inject()(
 
     PSRSubmissionResponse(
       details = etmpResponse.reportDetails.toApi,
-      accountingPeriodDetails = etmpResponse.accountingPeriodDetails.toApi,
+      accountingPeriodDetails = etmpResponse.accountingPeriodDetails,
       landConnectedParty = membTxs.flatMap(
         mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)
       ),

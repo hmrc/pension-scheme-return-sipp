@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import cats.data.NonEmptyList
+import play.api.libs.json.{Json, OFormat}
+import java.time.LocalDate
 
-sealed abstract class EtmpConnectedOrUnconnectedType(override val entryName: String) extends EnumEntry
+case class AccountingPeriodDetails(
+  version: Option[String],
+  accountingPeriods: NonEmptyList[AccountingPeriod]
+)
 
-object EtmpConnectedOrUnconnectedType
-    extends Enum[EtmpConnectedOrUnconnectedType]
-    with PlayJsonEnum[EtmpConnectedOrUnconnectedType] {
+case class AccountingPeriod(
+  accPeriodStart: LocalDate,
+  accPeriodEnd: LocalDate
+)
 
-  case object Connected extends EtmpConnectedOrUnconnectedType("01")
-  case object Unconnected extends EtmpConnectedOrUnconnectedType("02")
-
-  val values = findValues
+object AccountingPeriodDetails {
+  implicit val accountingPeriodFormat: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
+  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
 }

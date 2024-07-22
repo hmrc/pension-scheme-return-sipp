@@ -22,13 +22,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.softwaremill.diffx.generic.AutoDerivation
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.time.{Millis, Span}
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.test.{HttpClientSupport, WireMockSupport}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
-
-import scala.reflect.ClassTag
 
 abstract class BaseConnectorSpec
     extends BaseSpec

@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-
-case class EtmpSippAccountingPeriodDetails(
-  version: Option[String],
-  accountingPeriods: List[EtmpSippAccountingPeriod]
+case class UnquotedShareDisposalDetails(
+  disposedShareAmount: Double,
+  purchasersNames: String,
+  disposalConnectedParty: YesNo,
+  independentValuationDisposal: YesNo,
+  noOfSharesSold: Int,
+  noOfSharesHeld: Int
 )
 
-case class EtmpSippAccountingPeriod(
-  accPeriodStart: LocalDate,
-  accPeriodEnd: LocalDate
-)
-
-object EtmpSippAccountingPeriodDetails {
-  implicit val accountingPeriodFormat: OFormat[EtmpSippAccountingPeriod] = Json.format[EtmpSippAccountingPeriod]
-  implicit val format: OFormat[EtmpSippAccountingPeriodDetails] = Json.format[EtmpSippAccountingPeriodDetails]
+object UnquotedShareDisposalDetails {
+  implicit val format: OFormat[UnquotedShareDisposalDetails] = Json.format[UnquotedShareDisposalDetails]
 }

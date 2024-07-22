@@ -17,10 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{DisposalDetails, LesseeDetails}
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyApi, LandOrConnectedPropertyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -35,41 +36,13 @@ class LandArmsLengthTransformer @Inject()()
       .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandArmsLength.TransactionDetail](
         landArmsData,
         etmpData,
-        transformSingle,
+        _.transformInto[SippLandArmsLength.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             landArmsLength =
               maybeTransactions.map(transactions => SippLandArmsLength(transactions.length, Some(transactions.toList)))
           )
       )
-
-  private def transformSingle(
-    property: LandOrConnectedPropertyApi.TransactionDetails
-  ): SippLandArmsLength.TransactionDetail =
-    SippLandArmsLength.TransactionDetail(
-      acquisitionDate = property.acquisitionDate,
-      landOrPropertyinUK = property.landOrPropertyinUK,
-      addressDetails = property.addressDetails.toEtmp,
-      registryDetails = property.registryDetails,
-      acquiredFromName = property.acquiredFromName,
-      totalCost = property.totalCost,
-      independentValution = property.independentValuation,
-      jointlyHeld = property.jointlyHeld,
-      noOfPersonsIfJointlyHeld = property.noOfPersons,
-      residentialSchedule29A = property.residentialSchedule29A,
-      isLeased = property.isLeased,
-      noOfPersonsForLessees = property.lesseeDetails.flatMap(_.countOfLessees),
-      anyOfLesseesConnected = property.lesseeDetails.map(l => l.anyOfLesseesConnected),
-      lesseesGrantedAt = property.lesseeDetails.map(_.leaseGrantedDate),
-      annualLeaseAmount = property.lesseeDetails.map(_.annualLeaseAmount),
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
-      purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(d => d.anyPurchaserConnected),
-      independentValutionDisposal = property.disposalDetails.map(d => d.independentValuationDisposal),
-      propertyFullyDisposed = property.disposalDetails.map(d => d.propertyFullyDisposed)
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -93,49 +66,10 @@ class LandArmsLengthTransformer @Inject()()
     transactionCount: Int,
     armsLength: etmp.SippLandArmsLength.TransactionDetail
   ): LandOrConnectedPropertyApi.TransactionDetails =
-    LandOrConnectedPropertyApi.TransactionDetails(
-      nameDOB = toNameDOB(member),
-      nino = toNinoType(member),
-      acquisitionDate = armsLength.acquisitionDate,
-      landOrPropertyinUK = armsLength.landOrPropertyinUK,
-      addressDetails = armsLength.addressDetails.fromEtmp,
-      registryDetails = armsLength.registryDetails,
-      acquiredFromName = armsLength.acquiredFromName,
-      totalCost = armsLength.totalCost,
-      independentValuation = armsLength.independentValution,
-      jointlyHeld = armsLength.jointlyHeld,
-      noOfPersons = armsLength.noOfPersonsIfJointlyHeld,
-      residentialSchedule29A = armsLength.residentialSchedule29A,
-      isLeased = armsLength.isLeased,
-      lesseeDetails =
-        for {
-          count <- armsLength.noOfPersonsForLessees
-          isAnyConnected <- armsLength.anyOfLesseesConnected
-          leaseGrantedDate <- armsLength.lesseesGrantedAt
-          annualLeaseAmount <- armsLength.annualLeaseAmount
-        } yield LesseeDetails(
-          Some(count),
-          armsLength.purchaserNamesIfDisposed,
-          isAnyConnected,
-          leaseGrantedDate,
-          annualLeaseAmount
-        ),
-      totalIncomeOrReceipts = armsLength.totalIncomeOrReceipts,
-      isPropertyDisposed = armsLength.isPropertyDisposed,
-      disposalDetails =
-        for {
-          disposedPropertyProceedsAmt <- armsLength.disposedPropertyProceedsAmt
-          purchaserNamesIfDisposed <- armsLength.purchaserNamesIfDisposed
-          anyOfPurchaserConnected <- armsLength.anyOfPurchaserConnected
-          independentValuationDisposal <- armsLength.independentValutionDisposal
-          propertyFullyDisposed <- armsLength.propertyFullyDisposed
-        } yield DisposalDetails(
-          disposedPropertyProceedsAmt,
-          purchaserNamesIfDisposed,
-          anyOfPurchaserConnected,
-          independentValuationDisposal,
-          propertyFullyDisposed
-        ),
-      transactionCount = Some(transactionCount)
-    )
+    armsLength
+      .into[LandOrConnectedPropertyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

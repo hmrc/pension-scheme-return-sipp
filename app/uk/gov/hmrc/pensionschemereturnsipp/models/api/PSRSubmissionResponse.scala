@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.AccountingPeriodDetails
 
 case class PSRSubmissionResponse(
   details: ReportDetails,

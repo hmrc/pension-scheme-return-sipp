@@ -17,13 +17,14 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DisposalDetails
+import cats.implicits.catsSyntaxOptionId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AssetsFromConnectedPartyApi, AssetsFromConnectedPartyResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
   SippOtherAssetsConnectedParty
 }
+import io.scalaland.chimney.dsl._
 
 import javax.inject.{Inject, Singleton}
 
@@ -36,10 +37,10 @@ class AssetsFromConnectedPartyTransformer @Inject()
     etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
-      .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetail](
+      .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetails](
         assetsFromConnectedParty,
         etmpData,
-        transformSingle,
+        _.transformInto[SippOtherAssetsConnectedParty.TransactionDetails],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             otherAssetsConnectedParty = maybeTransactions.map(
@@ -47,29 +48,6 @@ class AssetsFromConnectedPartyTransformer @Inject()
             )
           )
       )
-
-  private def transformSingle(
-    property: AssetsFromConnectedPartyApi.TransactionDetails
-  ): SippOtherAssetsConnectedParty.TransactionDetail =
-    SippOtherAssetsConnectedParty.TransactionDetail(
-      acquisitionDate = property.acquisitionDate,
-      assetDescription = property.assetDescription,
-      acquisitionOfShares = property.acquisitionOfShares,
-      sharesCompanyDetails = property.shareCompanyDetails,
-      acquiredFromName = property.acquiredFromName,
-      totalCost = property.totalCost,
-      independentValution = property.independentValuation,
-      tangibleSchedule29A = property.tangibleSchedule29A,
-      totalIncomeOrReceipts = property.totalIncomeOrReceipts,
-      isPropertyDisposed = property.isPropertyDisposed,
-      disposedPropertyProceedsAmt = property.disposalDetails.map(_.disposedPropertyProceedsAmt),
-      purchaserNamesIfDisposed = property.disposalDetails.map(_.namesOfPurchasers),
-      anyOfPurchaserConnected = property.disposalDetails.map(_.anyPurchaserConnected),
-      independentValutionDisposal = property.disposalDetails.map(_.independentValuationDisposal),
-      disposalOfShares = property.disposalOfShares,
-      noOfSharesHeld = property.noOfSharesHeld,
-      propertyFullyDisposed = property.disposalDetails.map(_.propertyFullyDisposed)
-    )
 
   def transformToResponse(
     memberAndTransactions: List[EtmpMemberAndTransactions]
@@ -91,32 +69,12 @@ class AssetsFromConnectedPartyTransformer @Inject()
   def transformTransactionDetails(
     member: MemberDetails,
     transactionCount: Int,
-    trx: SippOtherAssetsConnectedParty.TransactionDetail
+    trx: SippOtherAssetsConnectedParty.TransactionDetails
   ): AssetsFromConnectedPartyApi.TransactionDetails =
-    AssetsFromConnectedPartyApi.TransactionDetails(
-      nameDOB = toNameDOB(member),
-      nino = toNinoType(member),
-      acquisitionDate = trx.acquisitionDate,
-      assetDescription = trx.assetDescription,
-      acquisitionOfShares = trx.acquisitionOfShares,
-      shareCompanyDetails = trx.sharesCompanyDetails,
-      acquiredFromName = trx.acquiredFromName,
-      totalCost = trx.totalCost,
-      independentValuation = trx.independentValution,
-      tangibleSchedule29A = trx.tangibleSchedule29A,
-      totalIncomeOrReceipts = trx.totalIncomeOrReceipts,
-      isPropertyDisposed = trx.isPropertyDisposed,
-      disposalDetails = Option.when(trx.isPropertyDisposed.boolean)(
-        DisposalDetails(
-          disposedPropertyProceedsAmt = trx.disposedPropertyProceedsAmt.get,
-          namesOfPurchasers = trx.purchaserNamesIfDisposed.get,
-          anyPurchaserConnected = trx.anyOfPurchaserConnected.get,
-          independentValuationDisposal = trx.independentValutionDisposal.get,
-          propertyFullyDisposed = trx.propertyFullyDisposed.get
-        )
-      ),
-      disposalOfShares = trx.disposalOfShares,
-      noOfSharesHeld = trx.noOfSharesHeld,
-      transactionCount = Some(transactionCount)
-    )
+    trx
+      .into[AssetsFromConnectedPartyApi.TransactionDetails]
+      .withFieldConst(_.nameDOB, toNameDOB(member))
+      .withFieldConst(_.nino, toNinoType(member))
+      .withFieldConst(_.transactionCount, transactionCount.some)
+      .transform
 }

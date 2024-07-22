@@ -16,46 +16,13 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AccountingPeriod, AccountingPeriodDetails, ReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{
-  NameDOB,
-  NinoType,
-  UnquotedShareDisposalDetail,
-  AddressDetails => ApiAddressDetails
-}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.{EtmpAddress, EtmpSippSharesDisposalDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpSippAccountingPeriodDetails,
-  EtmpSippReportDetails,
-  MemberDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectionStatus, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
+import io.scalaland.chimney.{Transformer => ChimneyTransformer}
 
 package object transformations {
-  implicit class AddressOps(val address: ApiAddressDetails) extends AnyVal {
-    def toEtmp = EtmpAddress(
-      addressLine1 = address.addressLine1,
-      addressLine2 = address.addressLine2,
-      addressLine3 = address.addressLine3,
-      addressLine4 = address.addressLine4,
-      addressLine5 = address.addressLine5,
-      ukPostCode = address.ukPostCode,
-      countryCode = address.countryCode
-    )
-  }
-
-  implicit class AddressEtmpOps(val address: EtmpAddress) extends AnyVal {
-    def fromEtmp: ApiAddressDetails = ApiAddressDetails(
-      addressLine1 = address.addressLine1,
-      addressLine2 = address.addressLine2,
-      addressLine3 = address.addressLine3,
-      addressLine4 = address.addressLine4,
-      addressLine5 = address.addressLine5,
-      ukPostCode = address.ukPostCode,
-      countryCode = address.countryCode
-    )
-  }
-
   implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
     def toApi = ReportDetails(
       pstr = report.pstr.getOrElse(throw new IllegalArgumentException("pstr was missing in the ETMP response")), // todo check with ETMP why it's not mandatory
@@ -64,13 +31,6 @@ package object transformations {
       periodEnd = report.periodEnd,
       schemeName = report.schemeName,
       psrVersion = report.psrVersion
-    )
-  }
-
-  implicit class EtmpAccountingPeriodOps(val details: EtmpSippAccountingPeriodDetails) extends AnyVal {
-    def toApi: AccountingPeriodDetails = AccountingPeriodDetails(
-      version = details.version,
-      accountingPeriods = details.accountingPeriods.map(aP => AccountingPeriod(aP.accPeriodStart, aP.accPeriodEnd))
     )
   }
 
@@ -85,14 +45,6 @@ package object transformations {
       psrVersion = report.psrVersion
     )
   }
-
-  def toEtmp(shareDetails: UnquotedShareDisposalDetail): EtmpSippSharesDisposalDetails =
-    EtmpSippSharesDisposalDetails(
-      disposedShareAmount = shareDetails.totalAmount,
-      disposalConnectedParty = shareDetails.purchaserConnectedParty,
-      purchaserName = shareDetails.nameOfPurchaser,
-      independentValutionDisposal = shareDetails.independentValuationDisposal
-    )
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =
     MemberDetails(
@@ -112,8 +64,9 @@ package object transformations {
     )
 
   def toNinoType(memberDetails: MemberDetails): NinoType =
-    NinoType(
-      memberDetails.nino,
-      memberDetails.reasonNoNINO
-    )
+    NinoType(memberDetails.nino, memberDetails.reasonNoNINO)
+
+  implicit val connectionTypeToYesNo: ChimneyTransformer[ConnectionStatus, YesNo] = status => YesNo(status.toBoolean)
+  implicit val yesNoToConnectionType: ChimneyTransformer[YesNo, ConnectionStatus] = yesNo =>
+    ConnectionStatus(yesNo.boolean)
 }

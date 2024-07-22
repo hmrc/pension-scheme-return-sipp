@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.common
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class EtmpAddress(
-  addressLine1: String,
-  addressLine2: String,
-  addressLine3: Option[String],
-  addressLine4: Option[String],
-  addressLine5: Option[String],
-  ukPostCode: Option[String],
-  countryCode: String
+case class DisposalDetails(
+  disposedPropertyProceedsAmt: Double,
+  purchasersNames: String,
+  anyPurchaserConnectedParty: YesNo,
+  independentValuationDisposal: YesNo,
+  propertyFullyDisposed: YesNo
 )
 
-object EtmpAddress {
-  implicit val format: OFormat[EtmpAddress] = Json.format[EtmpAddress]
+object DisposalDetails {
+  implicit val disposalDetailsFormat: Format[DisposalDetails] = Json.format[DisposalDetails]
 }
