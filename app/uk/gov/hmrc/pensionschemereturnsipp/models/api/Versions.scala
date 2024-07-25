@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
+import play.api.libs.json.{Format, Json}
 
-trait Transformer[T, V] {
-  def merge(
-    updates: NonEmptyList[T],
-    etmp: List[EtmpMemberAndTransactions],
-    version: Option[String]
-  ): List[EtmpMemberAndTransactions]
+case class Versions(
+  landConnectedParty: Option[Version],
+  landArmsLength: Option[Version],
+  otherAssetsConnectedParty: Option[Version],
+  tangibleProperty: Option[Version],
+  loanOutstanding: Option[Version],
+  unquotedShares: Option[Version]
+)
 
-  def transformToResponse(memberAndTransactions: List[EtmpMemberAndTransactions]): V
+object Versions {
+  implicit val format: Format[Versions] = Json.format
 }

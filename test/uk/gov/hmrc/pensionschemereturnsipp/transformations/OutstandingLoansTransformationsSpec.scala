@@ -48,6 +48,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     loanOutstanding = Some(
       SippLoanOutstanding(
         1,
+        None,
         Some(
           List(
             SippLoanOutstanding.TransactionDetail(
@@ -74,13 +75,14 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     "update data for a single member when member match is found" in {
       val testData = etmpData.copy(loanOutstanding = None)
 
-      val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData))
+      val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData), None)
 
       result mustBe List(
         etmpData.copy(
           loanOutstanding = Some(
             SippLoanOutstanding(
               1,
+              None,
               Some(
                 List(
                   SippLoanOutstanding.TransactionDetail(
@@ -108,13 +110,14 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     "replace data for a single member when member match is found" in {
 
       val testDataWithDifferentRow = sippOutstandingLoansApi.copy(loanRecipientName = "test2")
-      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(
           loanOutstanding = Some(
             SippLoanOutstanding(
               1,
+              None,
               Some(
                 List(
                   SippLoanOutstanding.TransactionDetail(
@@ -141,7 +144,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
 
     "add data with new member details for a single member when match is not found" in {
       val testDataWithDifferentRow = sippOutstandingLoansApi.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(loanOutstanding = None),

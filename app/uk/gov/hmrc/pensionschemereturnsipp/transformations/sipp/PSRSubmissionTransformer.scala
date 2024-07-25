@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
+import cats.syntax.traverse._
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.PSRSubmissionResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, Version, Versions}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, VersionedAsset}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
@@ -41,29 +43,41 @@ class PSRSubmissionTransformer @Inject()(
 ) {
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): PSRSubmissionResponse = {
-    val membTxs = etmpResponse.memberAndTransactions
+    val version = versionOrPsrVersion(_, etmpResponse.reportDetails.psrVersion)
+    val membTxs: List[EtmpMemberAndTransactions] = etmpResponse.memberAndTransactions.sequence.flatten
 
     PSRSubmissionResponse(
       details = etmpResponse.reportDetails.toApi,
       accountingPeriodDetails = etmpResponse.accountingPeriodDetails,
-      landConnectedParty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      otherAssetsConnectedParty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      landArmsLength = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(mTxs).transactions)
-      ),
-      tangibleProperty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      loanOutstanding = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(mTxs).transactions)
-      ),
-      unquotedShares = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(mTxs).transactions)
+      landConnectedParty =
+        NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(membTxs).transactions),
+      otherAssetsConnectedParty =
+        NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(membTxs).transactions),
+      landArmsLength = NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(membTxs).transactions),
+      tangibleProperty =
+        NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(membTxs).transactions),
+      loanOutstanding = NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(membTxs).transactions),
+      unquotedShares = NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(membTxs).transactions),
+      Versions(
+        landConnectedParty = version(membTxs.flatMap(_.landConnectedParty)),
+        landArmsLength = version(membTxs.flatMap(_.landArmsLength)),
+        otherAssetsConnectedParty = version(membTxs.flatMap(_.otherAssetsConnectedParty)),
+        tangibleProperty = version(membTxs.flatMap(_.tangibleProperty)),
+        loanOutstanding = version(membTxs.flatMap(_.loanOutstanding)),
+        unquotedShares = version(membTxs.flatMap(_.unquotedShares))
       )
     )
+  }
+
+  private def versionOrPsrVersion(
+    versionedAssets: Iterable[VersionedAsset],
+    psrVersion: Option[String]
+  ): Option[Version] = {
+    val version = versionedAssets
+      .find(_.version != psrVersion)
+      .map(_.version)
+      .getOrElse(psrVersion)
+
+    version.map(Version(_))
   }
 }

@@ -76,6 +76,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     landArmsLength = Some(
       SippLandArmsLength(
         1,
+        None,
         Some(
           List(
             TransactionDetail(
@@ -108,13 +109,14 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     "update LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpData.copy(landArmsLength = None)
 
-      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landArmsDataRow1), List(testEtmpData), None)
 
       result mustBe List(
         etmpData.copy(
           landArmsLength = Some(
             SippLandArmsLength(
               1,
+              None,
               Some(
                 List(
                   TransactionDetail(
@@ -146,13 +148,14 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     "replace LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landArmsDataRow1.copy(acquiredFromName = "test2")
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(
           landArmsLength = Some(
             SippLandArmsLength(
               1,
+              None,
               Some(
                 List(
                   TransactionDetail(
@@ -183,7 +186,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
 
     "add LandArms data with new member details for a single member when match is not found" in {
       val testLandArmsDataRow1 = landArmsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(landArmsLength = None),

@@ -31,7 +31,8 @@ class TangibleMoveablePropertyTransformer @Inject()
 
   def merge(
     tangibleMovableProperties: NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions]
+    etmpData: List[EtmpMemberAndTransactions],
+    version: Option[String]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[TangibleMoveablePropertyApi.TransactionDetails, SippTangibleProperty.TransactionDetail](
@@ -40,8 +41,9 @@ class TangibleMoveablePropertyTransformer @Inject()
         _.transformInto[SippTangibleProperty.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
+            version = version,
             tangibleProperty = maybeTransactions.map(
-              transactions => SippTangibleProperty(transactions.length, Some(transactions.toList))
+              transactions => SippTangibleProperty(transactions.length, version, Some(transactions.toList))
             )
           )
       )

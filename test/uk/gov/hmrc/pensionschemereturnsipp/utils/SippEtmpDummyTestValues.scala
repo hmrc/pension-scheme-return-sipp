@@ -25,6 +25,7 @@ trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 
   protected val sippLandConnectedPartyLong = SippLandConnectedParty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippLandConnectedPartyTransactionDetail))
   )
 
@@ -35,26 +36,31 @@ trait SippEtmpDummyTestValues extends SippEtmpTestValues {
 
   protected val sippOtherAssetsConnectedPartyLong = SippOtherAssetsConnectedParty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippOtherAssetsConnectedPartyTransactionDetail))
   )
 
   protected val sippLandArmsLengthLong = SippLandArmsLength(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippLandArmsLengthTransactionDetail))
   )
 
   private val sippTangiblePropertyLong = SippTangibleProperty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippTangiblePropertyTransactionalDetail))
   )
 
   private val sippLoanOutstandingLong = SippLoanOutstanding(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippLoanOutstandingTransactionalDetail))
   )
 
   private val sippUnquotedSharesLong = SippUnquotedShares(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List.fill(1)(sippUnquotedSharesTransactionalDetail))
   )
 

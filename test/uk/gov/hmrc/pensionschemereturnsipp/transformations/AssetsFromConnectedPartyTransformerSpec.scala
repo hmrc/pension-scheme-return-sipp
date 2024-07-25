@@ -77,6 +77,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     otherAssetsConnectedParty = Some(
       SippOtherAssetsConnectedParty(
         1,
+        None,
         Some(
           List(
             SippOtherAssetsConnectedParty.TransactionDetails(
@@ -108,13 +109,14 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     "put new member data if there is no previous data" in {
       val testEtmpData = etmpData.copy(otherAssetsConnectedParty = None)
 
-      val result = transformer.merge(NonEmptyList.of(assetsFromConnectedPartyTx), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(assetsFromConnectedPartyTx), List(testEtmpData), None)
 
       result mustBe List(
         etmpData.copy(
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
+              None,
               Some(
                 List(
                   SippOtherAssetsConnectedParty.TransactionDetails(
@@ -159,13 +161,14 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
           )
         )
       )
-      val result = transformer.merge(NonEmptyList.of(updateValues), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(updateValues), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
+              None,
               Some(
                 List(
                   SippOtherAssetsConnectedParty.TransactionDetails(
@@ -202,7 +205,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     "add assets from connected party data data with new member details for a single member when match is not found" in {
       val testData = assetsFromConnectedPartyTx.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
+      val result = transformer.merge(NonEmptyList.of(testData), List(etmpData), None)
 
       result mustBe List(
         etmpData.copy(otherAssetsConnectedParty = None), // No more tx for first member :/
@@ -218,6 +221,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
+              None,
               Some(
                 List(
                   SippOtherAssetsConnectedParty.TransactionDetails(
