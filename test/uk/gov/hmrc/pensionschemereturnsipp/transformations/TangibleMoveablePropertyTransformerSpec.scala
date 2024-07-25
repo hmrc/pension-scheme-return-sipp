@@ -35,7 +35,6 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
     version = None,
     memberDetails = MemberDetails(
       firstName = "firstName",
-      middleName = None,
       lastName = "lastName",
       nino = Some("nino"),
       reasonNoNINO = None,
@@ -146,7 +145,6 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
-            middleName = None,
             lastName = "lastName",
             nino = Some("otherNino"),
             reasonNoNINO = None,
