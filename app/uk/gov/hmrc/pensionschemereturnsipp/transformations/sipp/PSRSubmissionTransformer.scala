@@ -19,17 +19,10 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 import cats.syntax.traverse._
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails, Version, Versions}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, VersionedAsset}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
-  AssetsFromConnectedPartyTransformer,
-  LandArmsLengthTransformer,
-  LandConnectedPartyTransformer,
-  OutstandingLoansTransformer,
-  TangibleMoveablePropertyTransformer,
-  UnquotedSharesTransformer
-}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{AssetsFromConnectedPartyTransformer, LandArmsLengthTransformer, LandConnectedPartyTransformer, OutstandingLoansTransformer, TangibleMoveablePropertyTransformer, UnquotedSharesTransformer}
 import io.scalaland.chimney.dsl._
 
 @Singleton()
@@ -49,25 +42,19 @@ class PSRSubmissionTransformer @Inject()(
     PSRSubmissionResponse(
       details = etmpResponse.reportDetails.transformInto[ReportDetails],
       accountingPeriodDetails = etmpResponse.accountingPeriodDetails,
-      landConnectedParty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      otherAssetsConnectedParty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      landArmsLength = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(mTxs).transactions)
-      ),
-      tangibleProperty = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(mTxs).transactions)
-      ),
-      loanOutstanding = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(mTxs).transactions)
-      ),
-      unquotedShares = membTxs.flatMap(
-        mTxs => NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(mTxs).transactions)
-      ),
-      Versions(
+      landConnectedParty =
+        NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(membTxs).transactions),
+      otherAssetsConnectedParty =
+        NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(membTxs).transactions),
+      landArmsLength =
+        NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(membTxs).transactions),
+      tangibleProperty =
+        NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(membTxs).transactions),
+      loanOutstanding =
+        NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(membTxs).transactions),
+      unquotedShares =
+        NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(membTxs).transactions),
+      versions = Versions(
         landConnectedParty = version(membTxs.flatMap(_.landConnectedParty)),
         landArmsLength = version(membTxs.flatMap(_.landArmsLength)),
         otherAssetsConnectedParty = version(membTxs.flatMap(_.otherAssetsConnectedParty)),
