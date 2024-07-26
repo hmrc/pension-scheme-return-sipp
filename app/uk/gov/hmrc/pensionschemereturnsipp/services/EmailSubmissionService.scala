@@ -73,7 +73,7 @@ class EmailSubmissionService @Inject()(
 
   private def sendEmail(
     pensionSchemeId: PensionSchemeId,
-    pstr: Option[String],
+    pstr: String,
     psaName: Option[String],
     email: String,
     schemeName: Option[String],
@@ -95,7 +95,7 @@ class EmailSubmissionService @Inject()(
       emailConnector.sendEmail(
         pensionSchemeId,
         requestId,
-        pstr.getOrElse(""),
+        pstr,
         email,
         "pods_pension_scheme_return_sipp_submitted",
         schemeName.getOrElse(""),

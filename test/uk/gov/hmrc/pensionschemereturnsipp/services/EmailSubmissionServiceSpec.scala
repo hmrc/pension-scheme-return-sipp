@@ -65,7 +65,7 @@ class EmailSubmissionServiceSpec
         emailConnector.sendEmail(
           psaId,
           hc.requestId.map(_.value).getOrElse(""),
-          reportDetails.pstr.getOrElse(""),
+          reportDetails.pstr,
           minimumDetails.email,
           "pods_pension_scheme_return_sipp_submitted",
           schemeName,

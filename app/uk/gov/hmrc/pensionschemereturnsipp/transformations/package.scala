@@ -21,35 +21,17 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectionStatus, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
 import io.scalaland.chimney.{Transformer => ChimneyTransformer}
+import io.scalaland.chimney.dsl._
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 
 package object transformations {
-  implicit class EtmpReportDetailsOps(val report: EtmpSippReportDetails) extends AnyVal {
-    def toApi = ReportDetails(
-      pstr = report.pstr.getOrElse(throw new IllegalArgumentException("pstr was missing in the ETMP response")), // todo check with ETMP why it's not mandatory
-      status = report.status,
-      periodStart = report.periodStart,
-      periodEnd = report.periodEnd,
-      schemeName = report.schemeName,
-      psrVersion = report.psrVersion
-    )
-  }
 
-  implicit class ReportDetailsOps(val report: ReportDetails) extends AnyVal {
-    def toEtmp = EtmpSippReportDetails(
-      pstr = Some(report.pstr),
-      status = report.status,
-      periodStart = report.periodStart,
-      periodEnd = report.periodEnd,
-      memberTransactions = YesNo.Yes,
-      schemeName = report.schemeName,
-      psrVersion = report.psrVersion
-    )
-  }
+  implicit val reportDetailsApiToEtmp: ChimneyTransformer[ReportDetails, EtmpSippReportDetails] =
+    _.into[EtmpSippReportDetails].withFieldConst(_.memberTransactions, Yes).transform
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =
     MemberDetails(
       nameDoB.firstName,
-      None, // todo middleName does not exist in our NameDOB
       nameDoB.lastName,
       nino.nino,
       nino.reasonNoNino,

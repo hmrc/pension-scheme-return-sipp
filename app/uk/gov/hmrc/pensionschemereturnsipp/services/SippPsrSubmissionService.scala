@@ -34,11 +34,13 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   EtmpPsrStatus,
   EtmpSippPsrDeclaration,
+  EtmpSippReportDetails,
   MemberDetails,
   PersonalDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import io.scalaland.chimney.dsl._
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -165,7 +167,7 @@ class SippPsrSubmissionService @Inject()(
     mergeWithExistingEtmpData(reportDetails, transactions, transformer)
       .flatMap { etmpDataAfterMerge =>
         val request = SippPsrSubmissionEtmpRequest(
-          reportDetails = reportDetails.toEtmp,
+          reportDetails = reportDetails.transformInto[EtmpSippReportDetails],
           accountingPeriodDetails = None,
           memberAndTransactions = NonEmptyList.fromList(etmpDataAfterMerge),
           psrDeclaration = None

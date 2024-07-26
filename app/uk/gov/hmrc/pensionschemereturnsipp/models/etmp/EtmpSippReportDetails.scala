@@ -22,7 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import java.time.LocalDate
 
 case class EtmpSippReportDetails(
-  pstr: Option[String],
+  pstr: String,
   status: EtmpPsrStatus,
   periodStart: LocalDate,
   periodEnd: LocalDate,

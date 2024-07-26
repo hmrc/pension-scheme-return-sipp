@@ -44,10 +44,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.ReportDetailsOps
 
 import java.time.LocalDate
 import scala.annotation.unused
+import io.scalaland.chimney.dsl._
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.reportDetailsApiToEtmp
 
 trait SippEtmpTestValues {
   val sampleDate: LocalDate = LocalDate.of(2023, 10, 19)
@@ -87,11 +88,11 @@ trait SippEtmpTestValues {
     status = EtmpPsrStatus.Compiled,
     periodStart = sampleDate,
     periodEnd = sampleDate,
-    schemeName = None,
-    psrVersion = None
+    None,
+    None
   )
 
-  protected val reportDetails: EtmpSippReportDetails = testReportDetails.toEtmp
+  protected val reportDetails: EtmpSippReportDetails = testReportDetails.transformInto[EtmpSippReportDetails]
 
   private val period: AccountingPeriod = AccountingPeriod(
     accPeriodStart = sampleDate,
@@ -105,7 +106,6 @@ trait SippEtmpTestValues {
 
   protected val sippMemberDetails = MemberDetails(
     firstName = "TestLongFirstName",
-    middleName = Some("TestLongMiddleName"),
     lastName = "TestLongLastName",
     nino = Some("QQ123456A"),
     reasonNoNINO = Some("I have a Nino!"),
@@ -311,7 +311,6 @@ trait SippEtmpTestValues {
     version = None,
     memberDetails = MemberDetails(
       firstName = "firstName",
-      middleName = None,
       lastName = "lastName",
       nino = Some("nino"),
       reasonNoNINO = None,

@@ -184,7 +184,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
     val etmpResponse = SippPsrSubmissionEtmpResponse(
       reportDetails = EtmpSippReportDetails(
-        pstr.some,
+        pstr,
         EtmpPsrStatus.Compiled,
         LocalDate.now(),
         LocalDate.now(),
@@ -267,7 +267,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val response = HttpResponse(200, "OK")
       val sampleResponse = SippPsrSubmissionEtmpResponse(
         reportDetails = EtmpSippReportDetails(
-          pstr.some,
+          pstr,
           EtmpPsrStatus.Compiled,
           LocalDate.now(),
           LocalDate.now(),

@@ -115,7 +115,6 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
         etmpDataWithLandConnectedTx.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
-            middleName = None,
             lastName = "lastName",
             nino = Some("otherNino"),
             reasonNoNINO = None,

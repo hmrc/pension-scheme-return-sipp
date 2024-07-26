@@ -18,17 +18,17 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.PSRSubmissionResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
-  EtmpReportDetailsOps,
   LandArmsLengthTransformer,
   LandConnectedPartyTransformer,
   OutstandingLoansTransformer,
   TangibleMoveablePropertyTransformer,
   UnquotedSharesTransformer
 }
+import io.scalaland.chimney.dsl._
 
 @Singleton()
 class PSRSubmissionTransformer @Inject()(
@@ -44,7 +44,7 @@ class PSRSubmissionTransformer @Inject()(
     val membTxs = etmpResponse.memberAndTransactions
 
     PSRSubmissionResponse(
-      details = etmpResponse.reportDetails.toApi,
+      details = etmpResponse.reportDetails.transformInto[ReportDetails],
       accountingPeriodDetails = etmpResponse.accountingPeriodDetails,
       landConnectedParty = membTxs.flatMap(
         mTxs => NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(mTxs).transactions)
