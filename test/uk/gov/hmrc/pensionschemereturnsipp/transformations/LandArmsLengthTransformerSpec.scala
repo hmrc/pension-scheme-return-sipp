@@ -65,7 +65,6 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
     version = None,
     memberDetails = MemberDetails(
       firstName = "firstName",
-      middleName = None,
       lastName = "lastName",
       nino = Some("nino"),
       reasonNoNINO = None,
@@ -193,7 +192,6 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
-            middleName = None,
             lastName = "lastName",
             nino = Some("otherNino"),
             reasonNoNINO = None,

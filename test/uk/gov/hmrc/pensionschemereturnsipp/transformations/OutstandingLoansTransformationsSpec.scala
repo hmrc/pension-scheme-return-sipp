@@ -35,7 +35,6 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     version = None,
     memberDetails = MemberDetails(
       firstName = "firstName",
-      middleName = None,
       lastName = "lastName",
       nino = Some("nino"),
       reasonNoNINO = None,
@@ -151,7 +150,6 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
-            middleName = None,
             lastName = "lastName",
             nino = Some("otherNino"),
             reasonNoNINO = None,

@@ -19,26 +19,14 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetailsResponse, MemberDetails => ApiMemberDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import io.scalaland.chimney.dsl._
 
 @Singleton()
 class PSRMemberDetailsTransformer @Inject() {
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): Option[MemberDetailsResponse] =
     etmpResponse.memberAndTransactions.map(
-      mTxs =>
-        MemberDetailsResponse(
-          mTxs.map(
-            details =>
-              ApiMemberDetails(
-                firstName = details.memberDetails.firstName,
-                middleName = details.memberDetails.middleName,
-                lastName = details.memberDetails.lastName,
-                nino = details.memberDetails.nino,
-                reasonNoNINO = details.memberDetails.reasonNoNINO,
-                dateOfBirth = details.memberDetails.dateOfBirth
-              )
-          )
-        )
+      mTxs => MemberDetailsResponse(mTxs.map(_.memberDetails.personalDetails.transformInto[ApiMemberDetails]))
     )
 
 }

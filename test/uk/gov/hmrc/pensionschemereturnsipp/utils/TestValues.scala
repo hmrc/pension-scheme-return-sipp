@@ -80,7 +80,7 @@ trait TestValues {
   )
 
   val sampleApiMemberDetailsResponse: MemberDetailsResponse = MemberDetailsResponse(
-    members = List(ApiMemberDetails("Dave", Some("K"), "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")))
+    members = List(ApiMemberDetails("Dave", "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")))
   )
 
   val samplePsrSubmission: PSRSubmissionResponse = PSRSubmissionResponse(
@@ -89,8 +89,8 @@ trait TestValues {
       status = EtmpPsrStatus.Submitted,
       periodStart = LocalDate.of(2020, 12, 12),
       periodEnd = LocalDate.of(2020, 12, 12),
-      schemeName = None,
-      psrVersion = None
+      None,
+      None
     ),
     accountingPeriodDetails = AccountingPeriodDetails(
       Some("1.0"),
@@ -129,7 +129,7 @@ trait TestValues {
   )
 
   val sampleSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
-    reportDetails = EtmpSippReportDetails(None, Compiled, sampleToday, sampleToday, YesNo.Yes, None, None),
+    reportDetails = EtmpSippReportDetails("12345678AA", Compiled, sampleToday, sampleToday, YesNo.Yes, None, None),
     accountingPeriodDetails = None,
     memberAndTransactions = None,
     psrDeclaration = None
@@ -138,7 +138,7 @@ trait TestValues {
   val sampleSippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse =
     SippPsrSubmissionEtmpResponse(
       EtmpSippReportDetails(
-        Some("12345678AA"),
+        "12345678AA",
         Compiled,
         LocalDate.parse("2022-04-06"),
         LocalDate.parse("2023-04-05"),
@@ -158,7 +158,7 @@ trait TestValues {
           EtmpMemberAndTransactions(
             New,
             Some("000"),
-            MemberDetails("Dave", Some("K"), "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")),
+            MemberDetails("Dave", "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")),
             Some(
               SippLandConnectedParty(
                 1,

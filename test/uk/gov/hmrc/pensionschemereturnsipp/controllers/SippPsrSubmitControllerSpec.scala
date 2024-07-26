@@ -184,7 +184,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
   "Delete Member " must {
     "return no content" in {
-      val personalDetails = PersonalDetails("John", None, "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
+      val personalDetails = PersonalDetails("John", "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
       val fakeRequest = FakeRequest(DELETE, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(personalDetails))

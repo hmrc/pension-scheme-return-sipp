@@ -46,7 +46,6 @@ case class EtmpMemberAndTransactions(
 
 case class PersonalDetails(
   firstName: String,
-  middleName: Option[String],
   lastName: String,
   nino: Option[String],
   reasonNoNINO: Option[String],
@@ -59,7 +58,6 @@ object PersonalDetails {
 
 case class MemberDetails(personalDetails: PersonalDetails) {
   def firstName: String = personalDetails.firstName
-  def middleName: Option[String] = personalDetails.middleName
   def lastName: String = personalDetails.lastName
   def nino: Option[String] = personalDetails.nino
   def reasonNoNINO: Option[String] = personalDetails.reasonNoNINO
@@ -69,13 +67,12 @@ case class MemberDetails(personalDetails: PersonalDetails) {
 object MemberDetails {
   def apply(
     firstName: String,
-    middleName: Option[String],
     lastName: String,
     nino: Option[String],
     reasonNoNINO: Option[String],
     dateOfBirth: LocalDate
   ): MemberDetails =
-    MemberDetails(PersonalDetails(firstName, middleName, lastName, nino, reasonNoNINO, dateOfBirth))
+    MemberDetails(PersonalDetails(firstName, lastName, nino, reasonNoNINO, dateOfBirth))
 
   def compare(p1: PersonalDetails, p2: PersonalDetails): Boolean =
     p1.firstName == p2.firstName &&
