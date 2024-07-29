@@ -22,7 +22,14 @@ import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails, Version, Versions}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, VersionedAsset}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.{AssetsFromConnectedPartyTransformer, LandArmsLengthTransformer, LandConnectedPartyTransformer, OutstandingLoansTransformer, TangibleMoveablePropertyTransformer, UnquotedSharesTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
+  AssetsFromConnectedPartyTransformer,
+  LandArmsLengthTransformer,
+  LandConnectedPartyTransformer,
+  OutstandingLoansTransformer,
+  TangibleMoveablePropertyTransformer,
+  UnquotedSharesTransformer
+}
 import io.scalaland.chimney.dsl._
 
 @Singleton()
@@ -46,14 +53,11 @@ class PSRSubmissionTransformer @Inject()(
         NonEmptyList.fromList(landConnectedPartyTransformer.transformToResponse(membTxs).transactions),
       otherAssetsConnectedParty =
         NonEmptyList.fromList(assetsFromConnectedPartyTransformer.transformToResponse(membTxs).transactions),
-      landArmsLength =
-        NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(membTxs).transactions),
+      landArmsLength = NonEmptyList.fromList(landArmsLengthTransformer.transformToResponse(membTxs).transactions),
       tangibleProperty =
         NonEmptyList.fromList(tangibleMoveablePropertyTransformer.transformToResponse(membTxs).transactions),
-      loanOutstanding =
-        NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(membTxs).transactions),
-      unquotedShares =
-        NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(membTxs).transactions),
+      loanOutstanding = NonEmptyList.fromList(outstandingLoansTransformer.transformToResponse(membTxs).transactions),
+      unquotedShares = NonEmptyList.fromList(unquotedSharesTransformer.transformToResponse(membTxs).transactions),
       versions = Versions(
         landConnectedParty = version(membTxs.flatMap(_.landConnectedParty)),
         landArmsLength = version(membTxs.flatMap(_.landArmsLength)),
