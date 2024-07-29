@@ -108,6 +108,7 @@ trait TestValues {
       Some(Version("000")),
       Some(Version("000")),
       Some(Version("000")),
+      Some(Version("000")),
       Some(Version("000"))
     )
   )

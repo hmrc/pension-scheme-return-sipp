@@ -42,7 +42,7 @@ case class EtmpMemberAndTransactions(
   tangibleProperty: Option[SippTangibleProperty],
   loanOutstanding: Option[SippLoanOutstanding],
   unquotedShares: Option[SippUnquotedShares]
-)
+) extends VersionedAsset
 
 case class PersonalDetails(
   firstName: String,

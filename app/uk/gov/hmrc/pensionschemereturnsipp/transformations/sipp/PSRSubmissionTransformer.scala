@@ -60,7 +60,8 @@ class PSRSubmissionTransformer @Inject()(
         otherAssetsConnectedParty = version(membTxs.flatMap(_.otherAssetsConnectedParty)),
         tangibleProperty = version(membTxs.flatMap(_.tangibleProperty)),
         loanOutstanding = version(membTxs.flatMap(_.loanOutstanding)),
-        unquotedShares = version(membTxs.flatMap(_.unquotedShares))
+        unquotedShares = version(membTxs.flatMap(_.unquotedShares)),
+        memberDetails = version(membTxs)
       )
     )
   }

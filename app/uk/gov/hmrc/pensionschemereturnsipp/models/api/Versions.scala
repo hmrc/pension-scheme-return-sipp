@@ -24,7 +24,8 @@ case class Versions(
   otherAssetsConnectedParty: Option[Version],
   tangibleProperty: Option[Version],
   loanOutstanding: Option[Version],
-  unquotedShares: Option[Version]
+  unquotedShares: Option[Version],
+  memberDetails: Option[Version]
 )
 
 object Versions {
