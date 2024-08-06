@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi._
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{LandOrConnectedPropertyRequest, OutstandingLoansRequest}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -42,7 +42,12 @@ class LandArmsLengthController @Inject()(
     val requestContent = request.body.as[LandOrConnectedPropertyRequest]
     service
       .submitLandArmsLength(requestContent)
-      .as(NotImplemented)
+      .map { response =>
+        logger.debug(
+          message = s"Submit Land Arms Length PSR details - response: ${response.status}, body: ${response.body}"
+        )
+        NoContent
+      }
   }
 
   def get(

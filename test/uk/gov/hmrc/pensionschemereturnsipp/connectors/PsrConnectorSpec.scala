@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.http.Status.{BAD_REQUEST, OK}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{
+  BadRequestException,
+  HeaderCarrier,
+  HttpResponse,
+  NotFoundException,
+  RequestEntityTooLargeException,
+  UpstreamErrorResponse
+}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.{
   samplePsrVersionsResponse,
   samplePsrVersionsResponseAsJsonString,
@@ -40,16 +48,20 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 
-import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
 
 class PsrConnectorSpec extends BaseConnectorSpec {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val rh: RequestHeader = FakeRequest()
+  private val maxRequestSize = 1024
 
   override lazy val applicationBuilder: GuiceApplicationBuilder =
-    super.applicationBuilder.configure("microservice.services.if-hod.port" -> wireMockPort)
+    super.applicationBuilder.configure(
+      "microservice.services.if-hod.port" -> wireMockPort,
+      "etmpConfig.maxRequestSize" -> maxRequestSize
+    )
 
   private lazy val connector: PsrConnector = applicationBuilder.injector().instanceOf[PsrConnector]
 
@@ -60,6 +72,36 @@ class PsrConnectorSpec extends BaseConnectorSpec {
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
       }
+    }
+
+    "return 413 Payload Too Large when the request body exceeds the maximum size" in {
+      val largeRequest = sampleSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.of(memberAndTransactions))
+      )
+      val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
+
+      whenReady(connector.submitSippPsr("testPstr", largeRequest).failed) { exception =>
+        exception mustBe a[RequestEntityTooLargeException]
+        exception.getMessage mustBe errorMessage
+      }
+    }
+
+    "handle 404 Not Found response" in {
+      stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, notFound())
+
+      val thrown = intercept[NotFoundException] {
+        await(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest))
+      }
+      thrown.responseCode mustBe NOT_FOUND
+    }
+
+    "handle 500 Internal Server Error response" in {
+      stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, serverError())
+
+      val thrown = intercept[UpstreamErrorResponse] {
+        await(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest))
+      }
+      thrown.statusCode mustBe INTERNAL_SERVER_ERROR
     }
   }
 
