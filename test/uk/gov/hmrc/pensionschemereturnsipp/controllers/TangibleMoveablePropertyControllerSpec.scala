@@ -27,12 +27,18 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.formatRes
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.{formatReq, formatRes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  ReportDetails,
+  TangibleMoveablePropertyRequest,
+  TangibleMoveablePropertyResponse
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
@@ -88,6 +94,36 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
         .thenReturn(Future.successful(None))
 
       val result = controller.get("testPstr", Some("fbNumber"), Some("2022-04-06"), Some("1.0"))(fakeRequest)
+      status(result) mustBe Status.NO_CONTENT
+    }
+  }
+
+  "PUT TangibleMoveableProperty" must {
+
+    "return 204 with no data" in {
+      val requestBody = Json.toJson(
+        TangibleMoveablePropertyRequest(
+          reportDetails = ReportDetails(
+            pstr = "test-pstr",
+            status = EtmpPsrStatus.Compiled,
+            periodStart = LocalDate.now,
+            periodEnd = LocalDate.now,
+            schemeName = Some("Schema Name"),
+            psrVersion = Some("001")
+          ),
+          transactions = None
+        )
+      )
+
+      val fakeRequestWithBody = FakeRequest("PUT", "/")
+        .withHeaders(CONTENT_TYPE -> "application/json")
+        .withBody(requestBody)
+
+      when(mockService.submitTangibleMoveableProperty(any())(any(), any()))
+        .thenReturn(Future.successful(HttpResponse(204, "")))
+
+      val result = controller.put(fakeRequestWithBody)
+
       status(result) mustBe Status.NO_CONTENT
     }
   }

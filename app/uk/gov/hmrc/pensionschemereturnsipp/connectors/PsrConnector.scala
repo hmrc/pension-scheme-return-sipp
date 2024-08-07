@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
   implicit ec: ExecutionContext
@@ -50,13 +50,24 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
     val url: String = config.submitSippPsrUrl.format(pstr)
     logger.info(s"Submit SIPP PSR called URL: $url with payload: $request")
 
-    http
-      .POST(url, request, integrationFrameworkHeaders)
-      .map {
-        case response if response.status == OK => response
-        case response => handleErrorResponse("POST", url)(response)
-      }
-      .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, Json.toJson(request)))
+    val jsonRequest = Json.toJson(request)
+    val jsonSizeInBytes = jsonRequest.toString().getBytes("UTF-8").length
+
+    if (jsonSizeInBytes > config.maxRequestSize) {
+      val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
+
+      // Fire the audit event for the size limit exceeded case
+      apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest).apply(Failure(new Throwable(errorMessage)))
+      Future.failed(new RequestEntityTooLargeException(errorMessage))
+    } else {
+      http
+        .POST(url, request, integrationFrameworkHeaders)
+        .map {
+          case response if response.status == OK => response
+          case response => handleErrorResponse("POST", url)(response)
+        }
+        .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest))
+    }
   }
 
   def getSippPsr(

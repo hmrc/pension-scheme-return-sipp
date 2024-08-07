@@ -136,6 +136,170 @@ trait TestValues {
     psrDeclaration = None
   )
 
+  val memberAndTransactions: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
+    New,
+    Some("000"),
+    MemberDetails("Dave", "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")),
+    Some(
+      SippLandConnectedParty(
+        1,
+        None,
+        Some(
+          List(
+            SippLandConnectedParty.TransactionDetail(
+              LocalDate.parse("2023-03-14"),
+              Yes,
+              AddressDetails(
+                "London1",
+                "London2",
+                Some("London3"),
+                Some("London4"),
+                Some("London5"),
+                Some("LH3 4DG"),
+                "GB"
+              ),
+              RegistryDetails(No, Some("Lost"), None),
+              "SUN Ltd",
+              1234.99,
+              No,
+              Yes,
+              Some(1),
+              No,
+              Yes,
+              Some(LesseeDetails(1, Yes, LocalDate.parse("2023-03-14"), 9999.99)),
+              999999.99,
+              Yes,
+              Some(DisposalDetails(2000.99, "Micheal K", Yes, No, No))
+            )
+          )
+        )
+      )
+    ),
+    Some(
+      SippOtherAssetsConnectedParty(
+        1,
+        None,
+        Some(
+          List(
+            SippOtherAssetsConnectedParty.TransactionDetails(
+              LocalDate.parse("2023-03-14"),
+              "Tesco store",
+              No,
+              None,
+              "Morrisons XYZ",
+              9.999999999e7,
+              No,
+              No,
+              9999.99,
+              Yes,
+              Some(DisposalDetails(9999999.99, "Morris K", No, No, No)),
+              Some(No),
+              Some(0)
+            )
+          )
+        )
+      )
+    ),
+    Some(
+      SippLandArmsLength(
+        1,
+        None,
+        Some(
+          List(
+            SippLandArmsLength.TransactionDetail(
+              LocalDate.parse("2023-03-14"),
+              Yes,
+              AddressDetails(
+                "Brighton1",
+                "Brighton2",
+                Some("Brighton3"),
+                Some("Brighton4"),
+                Some("Brighton5"),
+                Some("BN12 4XL"),
+                "GB"
+              ),
+              RegistryDetails(Yes, Some("1234XDF"), None),
+              "Willco",
+              999999.99,
+              No,
+              No,
+              None,
+              No,
+              No,
+              None,
+              2000.99,
+              No,
+              None
+            )
+          )
+        )
+      )
+    ),
+    Some(
+      SippTangibleProperty(
+        1,
+        None,
+        Some(
+          List(
+            SippTangibleProperty.TransactionDetail(
+              "Ice Cream Machine",
+              LocalDate.parse("2023-03-14"),
+              999999.99,
+              "Rambo M",
+              No,
+              9999.99,
+              CostValue,
+              99999.99,
+              Yes,
+              Some(DisposalDetails(9999.99, "Michel K", No, No, No))
+            )
+          )
+        )
+      )
+    ),
+    Some(
+      SippLoanOutstanding(
+        1,
+        None,
+        Some(
+          List(
+            SippLoanOutstanding.TransactionDetail(
+              "Loyds Ltd",
+              LocalDate.parse("2023-03-14"),
+              999.99,
+              Connected,
+              LocalDate.parse("2023-03-14"),
+              10,
+              No,
+              99999.99,
+              No,
+              Some(999999.99),
+              9999.99
+            )
+          )
+        )
+      )
+    ),
+    Some(
+      SippUnquotedShares(
+        1,
+        None,
+        Some(
+          List(
+            SippUnquotedShares.TransactionDetail(
+              SharesCompanyDetails("Boeing", Some("CRN456789"), None, "Primary", 100),
+              "HL Ltd",
+              9999.99,
+              No,
+              999.99,
+              Yes,
+              Some(UnquotedShareDisposalDetails(9999.99, "Dave SS", Yes, No, 10, 1))
+            )
+          )
+        )
+      )
+    )
+  )
   val sampleSippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse =
     SippPsrSubmissionEtmpResponse(
       EtmpSippReportDetails(
@@ -156,170 +320,7 @@ trait TestValues {
       ).some,
       Some(
         List(
-          EtmpMemberAndTransactions(
-            New,
-            Some("000"),
-            MemberDetails("Dave", "Robin", Some("AA200000A"), None, LocalDate.parse("1900-03-14")),
-            Some(
-              SippLandConnectedParty(
-                1,
-                None,
-                Some(
-                  List(
-                    SippLandConnectedParty.TransactionDetail(
-                      LocalDate.parse("2023-03-14"),
-                      Yes,
-                      AddressDetails(
-                        "London1",
-                        "London2",
-                        Some("London3"),
-                        Some("London4"),
-                        Some("London5"),
-                        Some("LH3 4DG"),
-                        "GB"
-                      ),
-                      RegistryDetails(No, Some("Lost"), None),
-                      "SUN Ltd",
-                      1234.99,
-                      No,
-                      Yes,
-                      Some(1),
-                      No,
-                      Yes,
-                      Some(LesseeDetails(1, Yes, LocalDate.parse("2023-03-14"), 9999.99)),
-                      999999.99,
-                      Yes,
-                      Some(DisposalDetails(2000.99, "Micheal K", Yes, No, No))
-                    )
-                  )
-                )
-              )
-            ),
-            Some(
-              SippOtherAssetsConnectedParty(
-                1,
-                None,
-                Some(
-                  List(
-                    SippOtherAssetsConnectedParty.TransactionDetails(
-                      LocalDate.parse("2023-03-14"),
-                      "Tesco store",
-                      No,
-                      None,
-                      "Morrisons XYZ",
-                      9.999999999e7,
-                      No,
-                      No,
-                      9999.99,
-                      Yes,
-                      Some(DisposalDetails(9999999.99, "Morris K", No, No, No)),
-                      Some(No),
-                      Some(0)
-                    )
-                  )
-                )
-              )
-            ),
-            Some(
-              SippLandArmsLength(
-                1,
-                None,
-                Some(
-                  List(
-                    SippLandArmsLength.TransactionDetail(
-                      LocalDate.parse("2023-03-14"),
-                      Yes,
-                      AddressDetails(
-                        "Brighton1",
-                        "Brighton2",
-                        Some("Brighton3"),
-                        Some("Brighton4"),
-                        Some("Brighton5"),
-                        Some("BN12 4XL"),
-                        "GB"
-                      ),
-                      RegistryDetails(Yes, Some("1234XDF"), None),
-                      "Willco",
-                      999999.99,
-                      No,
-                      No,
-                      None,
-                      No,
-                      No,
-                      None,
-                      2000.99,
-                      No,
-                      None
-                    )
-                  )
-                )
-              )
-            ),
-            Some(
-              SippTangibleProperty(
-                1,
-                None,
-                Some(
-                  List(
-                    SippTangibleProperty.TransactionDetail(
-                      "Ice Cream Machine",
-                      LocalDate.parse("2023-03-14"),
-                      999999.99,
-                      "Rambo M",
-                      No,
-                      9999.99,
-                      CostValue,
-                      99999.99,
-                      Yes,
-                      Some(DisposalDetails(9999.99, "Michel K", No, No, No))
-                    )
-                  )
-                )
-              )
-            ),
-            Some(
-              SippLoanOutstanding(
-                1,
-                None,
-                Some(
-                  List(
-                    SippLoanOutstanding.TransactionDetail(
-                      "Loyds Ltd",
-                      LocalDate.parse("2023-03-14"),
-                      999.99,
-                      Connected,
-                      LocalDate.parse("2023-03-14"),
-                      10,
-                      No,
-                      99999.99,
-                      No,
-                      Some(999999.99),
-                      9999.99
-                    )
-                  )
-                )
-              )
-            ),
-            Some(
-              SippUnquotedShares(
-                1,
-                None,
-                Some(
-                  List(
-                    SippUnquotedShares.TransactionDetail(
-                      SharesCompanyDetails("Boeing", Some("CRN456789"), None, "Primary", 100),
-                      "HL Ltd",
-                      9999.99,
-                      No,
-                      999.99,
-                      Yes,
-                      Some(UnquotedShareDisposalDetails(9999.99, "Dave SS", Yes, No, 10, 1))
-                    )
-                  )
-                )
-              )
-            )
-          )
+          memberAndTransactions
         )
       ),
       Some(

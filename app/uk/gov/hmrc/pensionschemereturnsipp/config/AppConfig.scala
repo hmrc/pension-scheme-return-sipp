@@ -47,6 +47,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
   val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
   val emailSendForce: Boolean = config.getOptional[Boolean]("email.force").getOrElse(false)
 
+  val maxRequestSize: Int = config.get[Int]("etmpConfig.maxRequestSize")
+
   def emailCallback(
     pensionSchemeId: PensionSchemeId,
     requestId: String,

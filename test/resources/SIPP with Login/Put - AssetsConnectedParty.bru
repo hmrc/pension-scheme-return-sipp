@@ -24,9 +24,7 @@ body:json {
       "schemeName": "Sample Scheme Name",
       "psrVersion": "1.0"
     },
-    "transactions": {
-      "noOfTransactions": 3,
-      "transactionDetails": [
+    "transactions": [
         {
           "nameDOB": {
             "firstName": "John",
@@ -49,8 +47,8 @@ body:json {
           "isPropertyDisposed": "Yes",
           "disposalDetails": {
             "disposedPropertyProceedsAmt": 300000.00,
-            "namesOfPurchasers": "Buyer Inc.",
-            "anyPurchaserConnected": "No",
+            "purchasersNames": "Buyer Inc.",
+            "anyPurchaserConnectedParty": "No",
             "independentValuationDisposal": "Yes",
             "propertyFullyDisposed": "Yes"
           },
@@ -116,9 +114,38 @@ body:json {
           "disposalDetails": null,
           "disposalOfShares": "No",
           "noOfSharesHeld": 100
+        },
+      {
+          "nameDOB": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "dob": "1980-01-01"
+          },
+          "nino": {
+            "nino": "AB123456C",
+            "reasonNoNino": null
+          },
+          "acquisitionDate": "2023-07-10",
+          "assetDescription": "Company Shares",
+          "acquisitionOfShares": "Yes",
+          "shareCompanyDetails": {
+            "companySharesName": "Tech Corp",
+            "companySharesCRN": "123456789",
+            "reasonNoCRN": null,
+            "sharesClass": "A",
+            "noOfShares": 100
+          },
+          "acquiredFromName": "Bob Brown",
+          "totalCost": 50000.00,
+          "independentValuation": "No",
+          "tangibleSchedule29A": "Yes",
+          "totalIncomeOrReceipts": 2000.00,
+          "isPropertyDisposed": "No",
+          "disposalDetails": null,
+          "disposalOfShares": "No",
+          "noOfSharesHeld": 100
         }
       ]
-    }
   }
   
 }
