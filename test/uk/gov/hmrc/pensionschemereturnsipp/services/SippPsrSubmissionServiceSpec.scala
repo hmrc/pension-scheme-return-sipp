@@ -99,7 +99,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
-      when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List())
+      when(mockLandConnectedPartyTransformer.merge(any(), any(), any())).thenReturn(List())
 
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(response))
@@ -128,7 +128,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
-      when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+      when(mockLandConnectedPartyTransformer.merge(any(), any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
 
       when(mockPsrConnector.submitSippPsr(any(), any())(any(), any()))
         .thenReturn(Future.successful(response))

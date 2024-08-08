@@ -33,13 +33,14 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "update LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpDataWithLandConnectedTx.copy(landConnectedParty = None)
 
-      val result = transformer.merge(NonEmptyList.of(landConnectedTransaction), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(landConnectedTransaction), List(testEtmpData), None)
 
       result mustBe List(
         etmpDataWithLandConnectedTx.copy(
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
+              None,
               Some(
                 List(
                   SippLandConnectedParty.TransactionDetail(
@@ -71,13 +72,14 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
     "replace LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landConnectedTransaction.copy(acquiredFromName = "test2")
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx), None)
 
       result mustBe List(
         etmpDataWithLandConnectedTx.copy(
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
+              None,
               Some(
                 List(
                   SippLandConnectedParty.TransactionDetail(
@@ -108,7 +110,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
     "add LandArms data with new member details for a single member when match is not found" in {
       val testLandArmsDataRow1 = landConnectedTransaction.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx), None)
 
       result mustBe List(
         etmpDataWithLandConnectedTx.copy(landConnectedParty = None),

@@ -228,31 +228,37 @@ trait SippEtmpTestValues {
 
   protected val sippLandConnectedParty = SippLandConnectedParty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippLandConnectedPartyTransactionDetail))
   )
 
   private val sippOtherAssetsConnectedParty = SippOtherAssetsConnectedParty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippOtherAssetsConnectedPartyTransactionDetail))
   )
 
   private val sippLandArmsLength = SippLandArmsLength(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippLandArmsLengthTransactionDetail))
   )
 
   private val sippTangibleProperty = SippTangibleProperty(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippTangiblePropertyTransactionalDetail))
   )
 
   private val sippLoanOutstanding = SippLoanOutstanding(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippLoanOutstandingTransactionalDetail))
   )
 
   private val sippUnquotedShares = SippUnquotedShares(
     noOfTransactions = 1,
+    version = None,
     transactionDetails = Some(List(sippUnquotedSharesTransactionalDetail))
   )
 
@@ -319,6 +325,7 @@ trait SippEtmpTestValues {
     landConnectedParty = Some(
       SippLandConnectedParty(
         1,
+        None,
         Some(
           List(
             SippLandConnectedParty.TransactionDetail(

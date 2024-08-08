@@ -209,10 +209,10 @@ class SippPsrSubmissionService @Inject()(
           val merged = for {
             txs <- transactions
             etmpTxs <- existingEtmpData.memberAndTransactions
-          } yield transformer.merge(txs, etmpTxs)
+          } yield transformer.merge(txs, etmpTxs, None)
           merged.toList.flatten
         case None =>
-          transactions.toList.flatMap(txs => transformer.merge(txs, Nil))
+          transactions.toList.flatMap(txs => transformer.merge(txs, Nil, None))
       }
 
   def submitSippPsr(

@@ -42,7 +42,7 @@ case class EtmpMemberAndTransactions(
   tangibleProperty: Option[SippTangibleProperty],
   loanOutstanding: Option[SippLoanOutstanding],
   unquotedShares: Option[SippUnquotedShares]
-)
+) extends VersionedAsset
 
 case class PersonalDetails(
   firstName: String,
@@ -83,11 +83,15 @@ object MemberDetails {
   implicit val memberDetailsFormat: OFormat[MemberDetails] = Json.format[MemberDetails]
 }
 
+sealed trait VersionedAsset {
+  def version: Option[String]
+}
+
 case class SippLandConnectedParty(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippLandConnectedParty.TransactionDetail]]
-)
+) extends VersionedAsset
 
 object SippLandConnectedParty {
 
@@ -114,9 +118,9 @@ object SippLandConnectedParty {
 
 case class SippOtherAssetsConnectedParty(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippOtherAssetsConnectedParty.TransactionDetails]]
-)
+) extends VersionedAsset
 
 object SippOtherAssetsConnectedParty {
   case class TransactionDetails(
@@ -140,9 +144,9 @@ object SippOtherAssetsConnectedParty {
 
 case class SippLandArmsLength(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippLandArmsLength.TransactionDetail]]
-)
+) extends VersionedAsset
 
 object SippLandArmsLength {
   case class TransactionDetail(
@@ -168,9 +172,9 @@ object SippLandArmsLength {
 
 case class SippTangibleProperty(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippTangibleProperty.TransactionDetail]]
-)
+) extends VersionedAsset
 
 object SippTangibleProperty {
   case class TransactionDetail(
@@ -191,9 +195,9 @@ object SippTangibleProperty {
 
 case class SippLoanOutstanding(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippLoanOutstanding.TransactionDetail]]
-)
+) extends VersionedAsset
 
 object SippLoanOutstanding {
   case class TransactionDetail(
@@ -215,9 +219,9 @@ object SippLoanOutstanding {
 
 case class SippUnquotedShares(
   noOfTransactions: Int,
-//  version: Option[String], todo uncomment
+  version: Option[String],
   transactionDetails: Option[List[SippUnquotedShares.TransactionDetail]]
-)
+) extends VersionedAsset
 
 object SippUnquotedShares {
   case class TransactionDetail(

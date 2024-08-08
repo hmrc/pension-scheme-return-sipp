@@ -35,7 +35,8 @@ class LandConnectedPartyTransformer @Inject()
 
   def merge(
     landConnectedPartyData: NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions]
+    etmpData: List[EtmpMemberAndTransactions],
+    version: Option[String]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandConnectedParty.TransactionDetail](
@@ -44,8 +45,9 @@ class LandConnectedPartyTransformer @Inject()
         _.transformInto[SippLandConnectedParty.TransactionDetail],
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
+            version = version,
             landConnectedParty = maybeTransactions.map(
-              transactions => SippLandConnectedParty(transactions.length, Some(transactions.toList))
+              transactions => SippLandConnectedParty(transactions.length, version, Some(transactions.toList))
             )
           )
       )

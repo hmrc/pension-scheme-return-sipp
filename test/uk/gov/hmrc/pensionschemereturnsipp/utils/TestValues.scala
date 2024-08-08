@@ -23,8 +23,14 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetailsResponse, PSRSubmissionResponse, ReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetails => ApiMemberDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  MemberDetailsResponse,
+  PSRSubmissionResponse,
+  ReportDetails,
+  Version,
+  Versions,
+  MemberDetails => ApiMemberDetails
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
@@ -95,7 +101,16 @@ trait TestValues {
     landArmsLength = None,
     tangibleProperty = None,
     loanOutstanding = None,
-    unquotedShares = None
+    unquotedShares = None,
+    Versions(
+      Some(Version("000")),
+      Some(Version("000")),
+      Some(Version("000")),
+      Some(Version("000")),
+      Some(Version("000")),
+      Some(Version("000")),
+      Some(Version("000"))
+    )
   )
 
   // SIPP - ETMP
@@ -128,6 +143,7 @@ trait TestValues {
     Some(
       SippLandConnectedParty(
         1,
+        None,
         Some(
           List(
             SippLandConnectedParty.TransactionDetail(
@@ -162,6 +178,7 @@ trait TestValues {
     Some(
       SippOtherAssetsConnectedParty(
         1,
+        None,
         Some(
           List(
             SippOtherAssetsConnectedParty.TransactionDetails(
@@ -186,6 +203,7 @@ trait TestValues {
     Some(
       SippLandArmsLength(
         1,
+        None,
         Some(
           List(
             SippLandArmsLength.TransactionDetail(
@@ -220,6 +238,7 @@ trait TestValues {
     Some(
       SippTangibleProperty(
         1,
+        None,
         Some(
           List(
             SippTangibleProperty.TransactionDetail(
@@ -241,6 +260,7 @@ trait TestValues {
     Some(
       SippLoanOutstanding(
         1,
+        None,
         Some(
           List(
             SippLoanOutstanding.TransactionDetail(
@@ -263,6 +283,7 @@ trait TestValues {
     Some(
       SippUnquotedShares(
         1,
+        None,
         Some(
           List(
             SippUnquotedShares.TransactionDetail(
