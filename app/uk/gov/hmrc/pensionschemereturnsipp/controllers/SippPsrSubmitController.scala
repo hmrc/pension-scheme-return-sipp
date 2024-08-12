@@ -22,7 +22,11 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrSubmissionRequest, PsrSubmittedResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  PsrSubmissionRequest,
+  PsrSubmittedResponse,
+  UpdateMemberDetailsRequest
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -140,6 +144,24 @@ class SippPsrSubmitController @Inject()(
           logger.error(s"Retrieving PSR versions for $pstr failed because of invalid startDate $startDateStr", t)
           Future.successful(BadRequest(s"Invalid startDate $startDateStr"))
       }
+    }
+  }
+
+  def updateMember(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ) = Action(parse.json).async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      val updateMemberDetailsRequest = request.body.as[UpdateMemberDetailsRequest]
+      sippPsrSubmissionService
+        .updateMemberDetails(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, updateMemberDetailsRequest)
+        .map {
+          case Some(true) => Ok("")
+          case Some(false) => NotModified
+          case None => NotFound(s"No record found for pstr $pstr")
+        }
     }
   }
 }

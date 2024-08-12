@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
-import cats.implicits.catsSyntaxOptionId
+import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.mvc.RequestHeader
@@ -41,6 +41,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 import io.scalaland.chimney.dsl._
+import MemberDetails.compare
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -281,6 +282,43 @@ class SippPsrSubmissionService @Inject()(
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.flatMap(memberDetailsTransformer.transform))
+
+  def updateMemberDetails(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    request: UpdateMemberDetailsRequest
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[Option[Boolean]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .flatMap {
+        case Some(response) =>
+          val recordFound = response.memberAndTransactions.toList.flatten
+            .exists(t => compare(t.memberDetails.personalDetails, request.current))
+          if (recordFound) {
+            val updateRequest = SippPsrSubmissionEtmpRequest(
+              reportDetails = response.reportDetails,
+              accountingPeriodDetails = response.accountingPeriodDetails,
+              memberAndTransactions = response.memberAndTransactions.flatMap { memberAndTransactions =>
+                val updatedMemberAndTransactions = memberAndTransactions.map { memberAndTransactions =>
+                  if (compare(memberAndTransactions.memberDetails.personalDetails, request.current)) {
+                    memberAndTransactions.copy(
+                      memberDetails = memberAndTransactions.memberDetails.copy(personalDetails = request.updated),
+                      version = None
+                    )
+                  } else memberAndTransactions
+                }
+                NonEmptyList.fromList(updatedMemberAndTransactions)
+              },
+              psrDeclaration = response.psrDeclaration
+            )
+            psrConnector.submitSippPsr(pstr, updateRequest).as(true.some)
+          } else
+            Future.successful(false.some)
+        case None =>
+          Future.successful(None)
+      }
 
   def deleteMember(
     pstr: String,

@@ -5,6 +5,7 @@ GET    /psr/sipp/:pstr                           uk.gov.hmrc.pensionschemereturn
 
 GET    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getMemberDetails(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 PUT    /psr/delete-member/:pstr                  uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.deleteMember(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
+PUT    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.updateMember(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
 PUT    /psr/land-or-connected-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
 GET    /psr/land-or-connected-property/:pstr     uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
