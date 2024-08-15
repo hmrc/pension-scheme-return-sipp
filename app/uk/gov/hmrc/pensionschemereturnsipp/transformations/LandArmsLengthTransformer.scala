@@ -30,19 +30,19 @@ class LandArmsLengthTransformer @Inject()()
     extends Transformer[LandOrConnectedPropertyApi.TransactionDetails, LandOrConnectedPropertyResponse] {
   def merge(
     landArmsData: NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions],
-    version: Option[String]
+    etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[LandOrConnectedPropertyApi.TransactionDetails, SippLandArmsLength.TransactionDetail](
         landArmsData,
         etmpData,
         _.transformInto[SippLandArmsLength.TransactionDetail],
+        _.landArmsLengthTransactions,
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
-            version = version,
+            version = None,
             landArmsLength = maybeTransactions.map(
-              transactions => SippLandArmsLength(transactions.length, version, Some(transactions.toList))
+              transactions => SippLandArmsLength(transactions.length, None, Some(transactions.toList))
             )
           )
       )

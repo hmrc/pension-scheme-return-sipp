@@ -31,19 +31,19 @@ class UnquotedSharesTransformer @Inject()
 
   def merge(
     unquotedShares: NonEmptyList[UnquotedShareApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions],
-    version: Option[String]
+    etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[UnquotedShareApi.TransactionDetails, SippUnquotedShares.TransactionDetail](
         unquotedShares,
         etmpData,
         _.transformInto[SippUnquotedShares.TransactionDetail],
+        _.unquotedSharesTransactions,
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
-            version = version,
+            version = None,
             unquotedShares = maybeTransactions.map(
-              transactions => SippUnquotedShares(transactions.length, version, Some(transactions.toList))
+              transactions => SippUnquotedShares(transactions.length, None, Some(transactions.toList))
             )
           )
       )

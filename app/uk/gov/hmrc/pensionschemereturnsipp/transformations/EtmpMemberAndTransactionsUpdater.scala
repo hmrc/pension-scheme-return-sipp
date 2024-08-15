@@ -30,6 +30,7 @@ object EtmpMemberAndTransactionsUpdater {
     updates: NonEmptyList[T],
     etmpData: List[EtmpMemberAndTransactions],
     transformer: T => EtmpType,
+    extractor: EtmpMemberAndTransactions => List[EtmpType],
     modifier: (Option[NonEmptyList[EtmpType]], EtmpMemberAndTransactions) => EtmpMemberAndTransactions
   ): List[EtmpMemberAndTransactions] = {
     implicit val localDateOrder: Order[LocalDate] = (x, y) => x.compareTo(y)
@@ -52,7 +53,14 @@ object EtmpMemberAndTransactionsUpdater {
           .get(memberKey)
           .map(_.map(transformer))
 
-        modifier(update, etmpTxsByMember)
+        val extracted = extractor(etmpTxsByMember)
+        val updatedList = update.asList
+
+        if (extracted.diff(updatedList).nonEmpty || updatedList.diff(extracted).nonEmpty) {
+          modifier(update, etmpTxsByMember)
+        } else {
+          etmpTxsByMember
+        }
     }.toList
 
     val newMembers = updatesByMember.keySet.diff(etmpDataByMember.keySet)
@@ -70,5 +78,9 @@ object EtmpMemberAndTransactionsUpdater {
         }
 
     updatedEtmpDataByMember ++ newEtmpDataByMember
+  }
+
+  implicit class FlattenOps[A](val maybeNonEmptyList: Option[NonEmptyList[A]]) {
+    def asList: List[A] = maybeNonEmptyList.toList.flatMap(_.toList)
   }
 }

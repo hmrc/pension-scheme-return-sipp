@@ -34,19 +34,19 @@ class AssetsFromConnectedPartyTransformer @Inject()
 
   def merge(
     assetsFromConnectedParty: NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions],
-    version: Option[String]
+    etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[AssetsFromConnectedPartyApi.TransactionDetails, SippOtherAssetsConnectedParty.TransactionDetails](
         assetsFromConnectedParty,
         etmpData,
         _.transformInto[SippOtherAssetsConnectedParty.TransactionDetails],
+        _.otherAssetsConnectedPartyTransactions,
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
-            version = version,
+            version = None,
             otherAssetsConnectedParty = maybeTransactions.map(
-              transactions => SippOtherAssetsConnectedParty(transactions.length, version, Some(transactions.toList))
+              transactions => SippOtherAssetsConnectedParty(transactions.length, None, Some(transactions.toList))
             )
           )
       )
