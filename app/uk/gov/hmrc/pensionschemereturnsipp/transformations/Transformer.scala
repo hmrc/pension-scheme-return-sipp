@@ -22,8 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 trait Transformer[T, V] {
   def merge(
     updates: NonEmptyList[T],
-    etmp: List[EtmpMemberAndTransactions],
-    version: Option[String]
+    etmp: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions]
 
   def transformToResponse(memberAndTransactions: List[EtmpMemberAndTransactions]): V

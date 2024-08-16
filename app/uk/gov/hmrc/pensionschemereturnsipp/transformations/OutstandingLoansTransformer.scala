@@ -30,19 +30,19 @@ class OutstandingLoansTransformer @Inject()
     extends Transformer[OutstandingLoansApi.TransactionDetails, OutstandingLoansResponse] {
   def merge(
     updates: NonEmptyList[OutstandingLoansApi.TransactionDetails],
-    etmpData: List[EtmpMemberAndTransactions],
-    version: Option[String]
+    etmpData: List[EtmpMemberAndTransactions]
   ): List[EtmpMemberAndTransactions] =
     EtmpMemberAndTransactionsUpdater
       .merge[OutstandingLoansApi.TransactionDetails, SippLoanOutstanding.TransactionDetail](
         updates,
         etmpData,
         _.transformInto[SippLoanOutstanding.TransactionDetail],
+        _.loanOutstandingTransactions,
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
-            version = version,
+            version = None,
             loanOutstanding = maybeTransactions.map(
-              transactions => SippLoanOutstanding(transactions.length, version, Some(transactions.toList))
+              transactions => SippLoanOutstanding(transactions.length, None, Some(transactions.toList))
             )
           )
       )

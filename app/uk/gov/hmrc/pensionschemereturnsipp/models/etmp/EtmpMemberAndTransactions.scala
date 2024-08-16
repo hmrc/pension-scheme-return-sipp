@@ -258,4 +258,24 @@ object EtmpMemberAndTransactions {
   implicit val formatLoanOutstanding: OFormat[SippLoanOutstanding] = Json.format[SippLoanOutstanding]
   implicit val formatUnquotedShares: OFormat[SippUnquotedShares] = Json.format[SippUnquotedShares]
   implicit val formatMemberAndTrx: OFormat[EtmpMemberAndTransactions] = Json.format[EtmpMemberAndTransactions]
+
+  implicit class Ops(val etmpMemberAndTransactions: EtmpMemberAndTransactions) extends AnyVal {
+    def landConnectedPartyTransactions: List[SippLandConnectedParty.TransactionDetail] =
+      etmpMemberAndTransactions.landConnectedParty.toList.flatMap(_.transactionDetails).flatten
+
+    def otherAssetsConnectedPartyTransactions: List[SippOtherAssetsConnectedParty.TransactionDetails] =
+      etmpMemberAndTransactions.otherAssetsConnectedParty.toList.flatMap(_.transactionDetails).flatten
+
+    def landArmsLengthTransactions: List[SippLandArmsLength.TransactionDetail] =
+      etmpMemberAndTransactions.landArmsLength.toList.flatMap(_.transactionDetails).flatten
+
+    def tangiblePropertyTransactions: List[SippTangibleProperty.TransactionDetail] =
+      etmpMemberAndTransactions.tangibleProperty.toList.flatMap(_.transactionDetails).flatten
+
+    def loanOutstandingTransactions: List[SippLoanOutstanding.TransactionDetail] =
+      etmpMemberAndTransactions.loanOutstanding.toList.flatMap(_.transactionDetails).flatten
+
+    def unquotedSharesTransactions: List[SippUnquotedShares.TransactionDetail] =
+      etmpMemberAndTransactions.unquotedShares.toList.flatMap(_.transactionDetails).flatten
+  }
 }

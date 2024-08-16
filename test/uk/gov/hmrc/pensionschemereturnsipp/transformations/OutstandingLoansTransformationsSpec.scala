@@ -30,16 +30,33 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
 
   private val transformer: OutstandingLoansTransformer = new OutstandingLoansTransformer()
 
+  val sippLoanOustanding =
+    SippLoanOutstanding.TransactionDetail(
+      loanRecipientName = "test",
+      dateOfLoan = LocalDate.of(2020, 1, 1),
+      amountOfLoan = 1,
+      loanConnectedParty = Connected,
+      repayDate = LocalDate.of(2020, 1, 1),
+      interestRate = 1,
+      loanSecurity = YesNo.Yes,
+      capitalRepayments = 1,
+      arrearsOutstandingPrYears = YesNo.Yes,
+      arrearsOutstandingPrYearsAmt = Some(1),
+      outstandingYearEndAmount = 1
+    )
+
+  val memberDetails = MemberDetails(
+    firstName = "firstName",
+    lastName = "lastName",
+    nino = Some("nino"),
+    reasonNoNINO = None,
+    dateOfBirth = LocalDate.of(2020, 1, 1)
+  )
+
   val etmpData = EtmpMemberAndTransactions(
     status = SectionStatus.New,
     version = None,
-    memberDetails = MemberDetails(
-      firstName = "firstName",
-      lastName = "lastName",
-      nino = Some("nino"),
-      reasonNoNINO = None,
-      dateOfBirth = LocalDate.of(2020, 1, 1)
-    ),
+    memberDetails = memberDetails,
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
     landArmsLength = None,
@@ -48,23 +65,25 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       SippLoanOutstanding(
         1,
         None,
-        Some(
-          List(
-            SippLoanOutstanding.TransactionDetail(
-              loanRecipientName = "test",
-              dateOfLoan = LocalDate.of(2020, 1, 1),
-              amountOfLoan = 1,
-              loanConnectedParty = Connected,
-              repayDate = LocalDate.of(2020, 1, 1),
-              interestRate = 1,
-              loanSecurity = YesNo.Yes,
-              capitalRepayments = 1,
-              arrearsOutstandingPrYears = YesNo.Yes,
-              arrearsOutstandingPrYearsAmt = Some(1),
-              outstandingYearEndAmount = 1
-            )
-          )
-        )
+        Some(List(sippLoanOustanding))
+      )
+    ),
+    unquotedShares = None
+  )
+
+  val existingEtmpData = EtmpMemberAndTransactions(
+    status = SectionStatus.New,
+    version = Some("001"),
+    memberDetails = memberDetails,
+    landConnectedParty = None,
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = Some(
+      SippLoanOutstanding(
+        1,
+        Some("001"),
+        Some(List(sippLoanOustanding))
       )
     ),
     unquotedShares = None
@@ -74,7 +93,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     "update data for a single member when member match is found" in {
       val testData = etmpData.copy(loanOutstanding = None)
 
-      val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData), None)
+      val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData))
 
       result mustBe List(
         etmpData.copy(
@@ -109,7 +128,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
     "replace data for a single member when member match is found" in {
 
       val testDataWithDifferentRow = sippOutstandingLoansApi.copy(loanRecipientName = "test2")
-      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData), None)
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
@@ -141,9 +160,16 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
 
     }
 
+    "not update the version number of the member or transaction when there is no difference in the transactions" in {
+      val testDataWithDifferentRow = sippOutstandingLoansApi
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(existingEtmpData))
+
+      result mustBe List(existingEtmpData)
+    }
+
     "add data with new member details for a single member when match is not found" in {
       val testDataWithDifferentRow = sippOutstandingLoansApi.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData), None)
+      val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
 
       result mustBe List(
         etmpData.copy(loanOutstanding = None),

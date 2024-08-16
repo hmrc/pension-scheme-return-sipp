@@ -356,6 +356,50 @@ trait SippEtmpTestValues {
     unquotedShares = None
   )
 
+  val existingEtmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
+    status = SectionStatus.New,
+    version = Some("001"),
+    memberDetails = MemberDetails(
+      firstName = "firstName",
+      lastName = "lastName",
+      nino = Some("nino"),
+      reasonNoNINO = None,
+      dateOfBirth = LocalDate.of(2020, 1, 1)
+    ),
+    landConnectedParty = Some(
+      SippLandConnectedParty(
+        1,
+        Some("001"),
+        Some(
+          List(
+            SippLandConnectedParty.TransactionDetail(
+              LocalDate.of(2020, 1, 1),
+              YesNo.Yes,
+              AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
+              RegistryDetails(YesNo.No, None, None),
+              "acquiredFromName",
+              10.0,
+              YesNo.Yes,
+              YesNo.Yes,
+              None,
+              YesNo.Yes,
+              YesNo.Yes,
+              None,
+              10.0,
+              YesNo.Yes,
+              None
+            )
+          )
+        )
+      )
+    ),
+    otherAssetsConnectedParty = None,
+    landArmsLength = None,
+    tangibleProperty = None,
+    loanOutstanding = None,
+    unquotedShares = None
+  )
+
   lazy val sippAssetsFromConnectedPartyApi: AssetsFromConnectedPartyApi.TransactionDetails = {
     import sippOtherAssetsConnectedPartyTransactionDetail._
 
