@@ -17,13 +17,16 @@
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
 import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json._
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
 
 case class PsrPostAuditEvent(
   pstr: String,
   payload: JsValue,
   status: Option[Int],
   response: Option[JsValue],
-  errorMessage: Option[String]
+  errorMessage: Option[String],
+  auditDetailPsrStatus: Option[AuditDetailPsrStatus]
 ) extends AuditEvent {
   override def auditType: String = "PSRPost"
 
@@ -33,11 +36,12 @@ case class PsrPostAuditEvent(
     val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("Response" -> s))
     val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("ErrorMessage" -> s))
 
-    val apiDetails =
+    val apiDetails = {
       Json.obj(
         "PensionSchemeTaxReference" -> pstr,
         "Payload" -> payload
-      )
+      ) ++ JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList)
+    }
     apiDetails ++ optStatus ++ optResponse ++ optErrorMessage
   }
 }

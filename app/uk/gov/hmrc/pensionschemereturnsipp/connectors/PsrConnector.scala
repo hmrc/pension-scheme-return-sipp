@@ -23,6 +23,7 @@ import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
@@ -57,7 +58,9 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
 
       // Fire the audit event for the size limit exceeded case
-      apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest).apply(Failure(new Throwable(errorMessage)))
+      apiAuditUtil
+        .firePsrPostAuditEvent(pstr, jsonRequest, request.auditDetailPsrStatus)
+        .apply(Failure(new Throwable(errorMessage)))
       Future.failed(new RequestEntityTooLargeException(errorMessage))
     } else {
       http
@@ -66,7 +69,7 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
           case response if response.status == OK => response
           case response => handleErrorResponse("POST", url)(response)
         }
-        .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest))
+        .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest, request.auditDetailPsrStatus))
     }
   }
 
