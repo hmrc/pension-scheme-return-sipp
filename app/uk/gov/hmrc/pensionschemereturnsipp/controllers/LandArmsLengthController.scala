@@ -38,15 +38,17 @@ class LandArmsLengthController @Inject()(
 ) extends BackendController(cc)
     with PsrAuth {
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val requestContent = request.body.as[LandOrConnectedPropertyRequest]
-    service
-      .submitLandArmsLength(requestContent)
-      .map { response =>
-        logger.debug(
-          message = s"Submit Land Arms Length PSR details - response: ${response.status}, body: ${response.body}"
-        )
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val requestContent = request.body.as[LandOrConnectedPropertyRequest]
+      service
+        .submitLandArmsLength(requestContent, user.psaPspId)
+        .map { response =>
+          logger.debug(
+            message = s"Submit Land Arms Length PSR details - response: ${response.status}, body: ${response.body}"
+          )
+          NoContent
+        }
+    }
   }
 
   def get(

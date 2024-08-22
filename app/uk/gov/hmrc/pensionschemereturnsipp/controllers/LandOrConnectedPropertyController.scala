@@ -44,18 +44,21 @@ class LandOrConnectedPropertyController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val landOrPropertySubmission = request.body.as[LandOrConnectedPropertyRequest]
-    logger.debug(
-      message = s"Submitting LandOrConnectedProperty PSR details - Incoming payload: $landOrPropertySubmission"
-    )
-    sippPsrSubmissionService
-      .submitLandOrConnectedProperty(landOrPropertySubmission)
-      .map { response =>
-        logger.debug(
-          message = s"Submit LandOrConnectedProperty PSR details - response: ${response.status}, body: ${response.body}"
-        )
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val landOrPropertySubmission = request.body.as[LandOrConnectedPropertyRequest]
+      logger.debug(
+        message = s"Submitting LandOrConnectedProperty PSR details - Incoming payload: $landOrPropertySubmission"
+      )
+      sippPsrSubmissionService
+        .submitLandOrConnectedProperty(landOrPropertySubmission, user.psaPspId)
+        .map { response =>
+          logger.debug(
+            message =
+              s"Submit LandOrConnectedProperty PSR details - response: ${response.status}, body: ${response.body}"
+          )
+          NoContent
+        }
+    }
   }
 
   def get(

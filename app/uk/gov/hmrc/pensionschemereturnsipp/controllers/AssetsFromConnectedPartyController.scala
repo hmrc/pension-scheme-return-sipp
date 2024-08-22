@@ -44,17 +44,21 @@ class AssetsFromConnectedPartyController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
-    logger.debug(
-      s"Submitting AssetsFromConnectedParty PSR details - Incoming payload: $assetsFromConnectedPartySubmission"
-    )
-    service
-      .submitAssetsFromConnectedParty(assetsFromConnectedPartySubmission)
-      .map { response =>
-        logger
-          .debug(s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}")
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
+      logger.debug(
+        s"Submitting AssetsFromConnectedParty PSR details - Incoming payload: $assetsFromConnectedPartySubmission"
+      )
+      service
+        .submitAssetsFromConnectedParty(assetsFromConnectedPartySubmission, user.psaPspId)
+        .map { response =>
+          logger
+            .debug(
+              s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}"
+            )
+          NoContent
+        }
+    }
   }
 
   def get(

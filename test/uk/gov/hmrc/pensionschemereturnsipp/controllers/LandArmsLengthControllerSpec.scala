@@ -119,7 +119,7 @@ class LandArmsLengthControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitLandArmsLength(any())(any(), any()))
+      when(mockService.submitLandArmsLength(any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
       val result = controller.put(fakeRequestWithBody)

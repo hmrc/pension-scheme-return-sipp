@@ -44,17 +44,19 @@ class TangibleMoveablePropertyController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val tangibleMoveablePropertySubmission = request.body.as[TangibleMoveablePropertyRequest]
-    logger.debug(
-      s"Submitting TangibleMovableProperty PSR details - Incoming payload: $tangibleMoveablePropertySubmission"
-    )
-    service
-      .submitTangibleMoveableProperty(tangibleMoveablePropertySubmission)
-      .map { response =>
-        logger
-          .debug(s"Submit TangibleMovableProperty PSR details - response: ${response.status}, body: ${response.body}")
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val tangibleMoveablePropertySubmission = request.body.as[TangibleMoveablePropertyRequest]
+      logger.debug(
+        s"Submitting TangibleMovableProperty PSR details - Incoming payload: $tangibleMoveablePropertySubmission"
+      )
+      service
+        .submitTangibleMoveableProperty(tangibleMoveablePropertySubmission, user.psaPspId)
+        .map { response =>
+          logger
+            .debug(s"Submit TangibleMovableProperty PSR details - response: ${response.status}, body: ${response.body}")
+          NoContent
+        }
+    }
   }
 
   def get(

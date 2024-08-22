@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,
@@ -89,7 +90,7 @@ class SippPsrSubmitController @Inject()(
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    authorisedAsPsrUser { user =>
       request.body.asJson.map(_.as[PersonalDetails]) match {
         case Some(personalDetails) =>
           logger.debug(
@@ -101,7 +102,8 @@ class SippPsrSubmitController @Inject()(
               optFbNumber,
               optPeriodStartDate,
               optPsrVersion,
-              personalDetails
+              personalDetails,
+              user.psaPspId
             )
             .map { _ =>
               NoContent
@@ -153,10 +155,17 @@ class SippPsrSubmitController @Inject()(
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ) = Action(parse.json).async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    authorisedAsPsrUser { user =>
       val updateMemberDetailsRequest = request.body.as[UpdateMemberDetailsRequest]
       sippPsrSubmissionService
-        .updateMemberDetails(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, updateMemberDetailsRequest)
+        .updateMemberDetails(
+          pstr,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          updateMemberDetailsRequest,
+          user.psaPspId
+        )
         .map {
           case Some(true) => Ok("")
           case Some(false) => NotModified

@@ -44,18 +44,20 @@ class OutstandingLoansController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val outstandingLoansRequest = request.body.as[OutstandingLoansRequest]
-    logger.debug(
-      message = s"Submitting OutstandingLoan PSR details - Incoming payload: $outstandingLoansRequest"
-    )
-    service
-      .submitOutstandingLoans(outstandingLoansRequest)
-      .map { response =>
-        logger.debug(
-          message = s"Submit OutstandingLoan PSR details - response: ${response.status}, body: ${response.body}"
-        )
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val outstandingLoansRequest = request.body.as[OutstandingLoansRequest]
+      logger.debug(
+        message = s"Submitting OutstandingLoan PSR details - Incoming payload: $outstandingLoansRequest"
+      )
+      service
+        .submitOutstandingLoans(outstandingLoansRequest, user.psaPspId)
+        .map { response =>
+          logger.debug(
+            message = s"Submit OutstandingLoan PSR details - response: ${response.status}, body: ${response.body}"
+          )
+          NoContent
+        }
+    }
   }
 
   def get(

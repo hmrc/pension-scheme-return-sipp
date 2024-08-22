@@ -19,6 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.audit
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.libs.json._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 
 case class PsrPostAuditEvent(
   pstr: String,
@@ -26,6 +27,8 @@ case class PsrPostAuditEvent(
   status: Option[Int],
   response: Option[JsValue],
   errorMessage: Option[String],
+  pensionSchemeId: PensionSchemeId,
+  minimalDetails: MinimalDetails,
   auditDetailPsrStatus: Option[AuditDetailPsrStatus]
 ) extends AuditEvent {
   override def auditType: String = "PSRPost"
@@ -36,12 +39,25 @@ case class PsrPostAuditEvent(
     val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("Response" -> s))
     val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("ErrorMessage" -> s))
 
-    val apiDetails = {
-      Json.obj(
-        "PensionSchemeTaxReference" -> pstr,
-        "Payload" -> payload
-      ) ++ JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList)
-    }
-    apiDetails ++ optStatus ++ optResponse ++ optErrorMessage
+    def credentialRole: String = if (pensionSchemeId.isPSP) "PSP" else "PSA"
+    def affinityGroup: String = if (minimalDetails.organisationName.nonEmpty) "Organisation" else "Individual"
+
+    val psrDetails = Json.obj(
+      "PensionSchemeTaxReference" -> pstr,
+      "affinityGroup" -> affinityGroup,
+      "Payload" -> payload
+    ) ++ psaOrPspIdDetails(
+      credentialRole,
+      pensionSchemeId.value,
+      minimalDetails.individualDetails.map(_.fullName).getOrElse("")
+    ) ++
+      JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList)
+
+    val details = Json.obj(
+      "details" -> psrDetails,
+      "payload" -> payload
+    )
+
+    details ++ optStatus ++ optResponse ++ optErrorMessage
   }
 }

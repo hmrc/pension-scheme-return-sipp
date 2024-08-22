@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.{
   RequestEntityTooLargeException,
   UpstreamErrorResponse
 }
+import uk.gov.hmrc.pensionschemereturnsipp.Generators.minimalDetailsGen
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.{
   samplePsrVersionsResponse,
   samplePsrVersionsResponseAsJsonString,
@@ -57,6 +58,8 @@ class PsrConnectorSpec extends BaseConnectorSpec {
   implicit val rh: RequestHeader = FakeRequest()
   private val maxRequestSize = 1024
 
+  private val minimalDetails = minimalDetailsGen.sample.get
+
   override lazy val applicationBuilder: GuiceApplicationBuilder =
     super.applicationBuilder.configure(
       "microservice.services.if-hod.port" -> wireMockPort,
@@ -68,7 +71,9 @@ class PsrConnectorSpec extends BaseConnectorSpec {
   "submitSippPsr" should {
     "return 200 - ok" in {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, ok())
-      whenReady(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest)) { result: HttpResponse =>
+      whenReady(
+        connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+      ) { result: HttpResponse =>
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
       }
@@ -80,9 +85,10 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
       val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
 
-      whenReady(connector.submitSippPsr("testPstr", largeRequest).failed) { exception =>
-        exception mustBe a[RequestEntityTooLargeException]
-        exception.getMessage mustBe errorMessage
+      whenReady(connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, largeRequest).failed) {
+        exception =>
+          exception mustBe a[RequestEntityTooLargeException]
+          exception.getMessage mustBe errorMessage
       }
     }
 
@@ -90,7 +96,9 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, notFound())
 
       val thrown = intercept[NotFoundException] {
-        await(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest))
+        await(
+          connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+        )
       }
       thrown.responseCode mustBe NOT_FOUND
     }
@@ -99,7 +107,9 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, serverError())
 
       val thrown = intercept[UpstreamErrorResponse] {
-        await(connector.submitSippPsr("testPstr", sampleSippPsrSubmissionEtmpRequest))
+        await(
+          connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+        )
       }
       thrown.statusCode mustBe INTERNAL_SERVER_ERROR
     }

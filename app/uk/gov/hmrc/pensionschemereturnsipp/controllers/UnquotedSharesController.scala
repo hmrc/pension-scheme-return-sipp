@@ -44,17 +44,21 @@ class UnquotedSharesController @Inject()(
     with Logging {
 
   def put: Action[JsValue] = Action(parse.json).async { implicit request =>
-    val unquotedSharesSubmission = request.body.as[UnquotedShareRequest]
-    logger.debug(
-      s"Submitting UnquotedShares PSR details - Incoming payload: $unquotedSharesSubmission"
-    )
-    service
-      .submitUnquotedShares(unquotedSharesSubmission)
-      .map { response =>
-        logger
-          .debug(s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}")
-        NoContent
-      }
+    authorisedAsPsrUser { user =>
+      val unquotedSharesSubmission = request.body.as[UnquotedShareRequest]
+      logger.debug(
+        s"Submitting UnquotedShares PSR details - Incoming payload: $unquotedSharesSubmission"
+      )
+      service
+        .submitUnquotedShares(unquotedSharesSubmission, user.psaPspId)
+        .map { response =>
+          logger
+            .debug(
+              s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}"
+            )
+          NoContent
+        }
+    }
   }
 
   def get(

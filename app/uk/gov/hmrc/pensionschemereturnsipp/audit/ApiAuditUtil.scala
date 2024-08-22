@@ -23,6 +23,7 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -36,6 +37,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
   def firePsrPostAuditEvent(
     pstr: String,
     data: JsValue,
+    pensionSchemeId: PensionSchemeId,
+    minimalDetails: MinimalDetails,
     auditDetailPsrStatus: Option[AuditDetailPsrStatus]
   )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
     case Success(httpResponse) =>
@@ -47,6 +50,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(Status.OK),
           response = Some(httpResponse.json),
           errorMessage = None,
+          pensionSchemeId: PensionSchemeId,
+          minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
         )
       )
@@ -59,6 +64,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.statusCode),
           response = None,
           errorMessage = Some(error.message),
+          pensionSchemeId: PensionSchemeId,
+          minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
         )
       )
@@ -71,6 +78,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.responseCode),
           response = None,
           errorMessage = Some(error.message),
+          pensionSchemeId: PensionSchemeId,
+          minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
         )
       )
@@ -83,6 +92,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = None,
           response = None,
           errorMessage = Some(error.getMessage),
+          pensionSchemeId: PensionSchemeId,
+          minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
         )
       )
