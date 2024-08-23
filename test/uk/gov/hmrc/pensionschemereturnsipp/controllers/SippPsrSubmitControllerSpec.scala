@@ -194,7 +194,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(()))
 
       val result = controller.deleteMember("testPstr", Some("fbNumber"), None, None)(fakeRequest)
@@ -207,7 +207,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.failed(new Exception(s"Submission with pstr $pstr not found")))
 
       val result = controller.deleteMember("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)

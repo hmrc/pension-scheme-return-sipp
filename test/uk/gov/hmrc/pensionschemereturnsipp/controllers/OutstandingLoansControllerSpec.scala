@@ -120,7 +120,7 @@ class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitOutstandingLoans(any())(any(), any()))
+      when(mockService.submitOutstandingLoans(any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
       val result = controller.put(fakeRequestWithBody)

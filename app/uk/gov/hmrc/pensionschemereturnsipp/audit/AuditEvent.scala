@@ -33,12 +33,14 @@ trait AuditEvent {
       case PSA =>
         Json.obj(
           "PensionSchemeAdministratorId" -> psaOrPspId,
-          "SchemeAdministratorName" -> schemeAdministratorOrPractitionerName
+          "SchemeAdministratorName" -> schemeAdministratorOrPractitionerName,
+          "credentialRolePsaPsp" -> credentialRole
         )
       case _ =>
         Json.obj(
           "PensionSchemePractitionerId" -> psaOrPspId,
-          "SchemePractitionerName" -> schemeAdministratorOrPractitionerName
+          "SchemePractitionerName" -> schemeAdministratorOrPractitionerName,
+          "credentialRolePsaPsp" -> credentialRole
         )
     }
 }

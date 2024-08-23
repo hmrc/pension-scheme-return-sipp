@@ -23,7 +23,9 @@ import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -36,13 +38,22 @@ import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: ApiAuditUtil)(
+class PsrConnector @Inject()(
+  config: AppConfig,
+  http: HttpClient,
+  apiAuditUtil: ApiAuditUtil
+)(
   implicit ec: ExecutionContext
 ) extends HttpErrorFunctions
     with HttpResponseHelper
     with Logging {
 
-  def submitSippPsr(pstr: String, request: SippPsrSubmissionEtmpRequest)(
+  def submitSippPsr(
+    pstr: String,
+    pensionSchemeId: PensionSchemeId,
+    minimalDetails: MinimalDetails,
+    request: SippPsrSubmissionEtmpRequest
+  )(
     implicit headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[HttpResponse] = {
@@ -55,9 +66,11 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
 
     if (jsonSizeInBytes > config.maxRequestSize) {
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
-
       // Fire the audit event for the size limit exceeded case
-      apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest).apply(Failure(new Throwable(errorMessage)))
+      apiAuditUtil
+        .firePsrPostAuditEvent(pstr, jsonRequest, pensionSchemeId, minimalDetails, request.auditDetailPsrStatus)
+        .apply(Failure(new Throwable(errorMessage)))
+
       Future.failed(new RequestEntityTooLargeException(errorMessage))
     } else {
       http
@@ -66,7 +79,10 @@ class PsrConnector @Inject()(config: AppConfig, http: HttpClient, apiAuditUtil: 
           case response if response.status == OK => response
           case response => handleErrorResponse("POST", url)(response)
         }
-        .andThen(apiAuditUtil.firePsrPostAuditEvent(pstr, jsonRequest))
+        .andThen(
+          apiAuditUtil
+            .firePsrPostAuditEvent(pstr, jsonRequest, pensionSchemeId, minimalDetails, request.auditDetailPsrStatus)
+        )
     }
   }
 
