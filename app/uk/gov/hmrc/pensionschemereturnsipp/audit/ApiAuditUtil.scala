@@ -23,10 +23,10 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 
 import scala.concurrent.ExecutionContext
@@ -109,7 +109,6 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
     request: RequestHeader
   ): PartialFunction[Try[Option[SippPsrSubmissionEtmpResponse]], Unit] = {
     case Success(optResponse) =>
-      logger.info(s"PsrGetAuditEvent ->> Status: ${Status.OK}, Response: ${Json.toJson(optResponse)}")
       auditService.sendEvent(
         PsrGetAuditEvent(
           pstr = pstr,
@@ -178,12 +177,10 @@ object ApiAuditUtil {
 
   implicit class SippPsrSubmissionEtmpRequestOps(val sippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest)
       extends AnyVal {
-    def auditDetailPsrStatus: Option[AuditDetailPsrStatus] =
-      Option.when(sippPsrSubmissionEtmpRequest.reportDetails.psrVersion.nonEmpty) {
-        sippPsrSubmissionEtmpRequest.reportDetails.status match {
-          case EtmpPsrStatus.Compiled => ChangesCompiled
-          case EtmpPsrStatus.Submitted => ChangedSubmitted
-        }
+    def auditDetailPsrStatus: AuditDetailPsrStatus =
+      sippPsrSubmissionEtmpRequest.reportDetails.status match {
+        case EtmpPsrStatus.Compiled => ChangesCompiled
+        case EtmpPsrStatus.Submitted => ChangedSubmitted
       }
   }
 }

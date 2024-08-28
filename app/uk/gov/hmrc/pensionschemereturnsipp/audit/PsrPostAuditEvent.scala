@@ -35,27 +35,25 @@ case class PsrPostAuditEvent(
 
   override def details: JsObject = {
 
-    val optStatus = status.fold[JsObject](Json.obj())(s => Json.obj("HttpStatus" -> s))
-    val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("Response" -> s))
-    val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("ErrorMessage" -> s))
+    val optStatus = status.fold[JsObject](Json.obj())(s => Json.obj("httpStatus" -> s))
+    val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("response" -> s))
+    val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("errorMessage" -> s))
 
     def credentialRole: String = if (pensionSchemeId.isPSP) "PSP" else "PSA"
     def affinityGroup: String = if (minimalDetails.organisationName.nonEmpty) "Organisation" else "Individual"
 
     val psrDetails = Json.obj(
-      "PensionSchemeTaxReference" -> pstr,
-      "affinityGroup" -> affinityGroup,
-      "Payload" -> payload
+      "pensionSchemeTaxReference" -> pstr,
+      "affinityGroup" -> affinityGroup
     ) ++ psaOrPspIdDetails(
       credentialRole,
       pensionSchemeId.value,
       minimalDetails.individualDetails.map(_.fullName).getOrElse("")
-    ) ++
-      JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList)
+    ) ++ JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList) ++
+      Json.obj("payload" -> payload)
 
     val details = Json.obj(
-      "details" -> psrDetails,
-      "payload" -> payload
+      "details" -> psrDetails
     )
 
     details ++ optStatus ++ optResponse ++ optErrorMessage
