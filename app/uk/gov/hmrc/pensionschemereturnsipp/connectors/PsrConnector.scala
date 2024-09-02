@@ -25,11 +25,12 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
 import java.time.LocalDate
@@ -52,7 +53,9 @@ class PsrConnector @Inject()(
     pstr: String,
     pensionSchemeId: PensionSchemeId,
     minimalDetails: MinimalDetails,
-    request: SippPsrSubmissionEtmpRequest
+    request: SippPsrSubmissionEtmpRequest,
+    maybeTaxYear: Option[DateRange],
+    maybeSchemeName: Option[String]
   )(
     implicit headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
@@ -82,6 +85,18 @@ class PsrConnector @Inject()(
         .andThen(
           apiAuditUtil
             .firePsrPostAuditEvent(pstr, jsonRequest, pensionSchemeId, minimalDetails, request.auditDetailPsrStatus)
+        )
+        .andThen(
+          apiAuditUtil
+            .firePSRSubmissionEvent(
+              pstr,
+              jsonRequest,
+              pensionSchemeId,
+              minimalDetails,
+              maybeSchemeName,
+              maybeTaxYear,
+              request
+            )
         )
     }
   }
