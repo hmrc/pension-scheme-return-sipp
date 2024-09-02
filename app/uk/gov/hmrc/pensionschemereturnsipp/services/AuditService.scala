@@ -35,6 +35,11 @@ trait AuditService {
 
   def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit
 
+  def sendEventWithSource[T <: AuditEvent](event: T, auditSource: String)(
+    implicit rh: RequestHeader,
+    ec: ExecutionContext
+  ): Unit
+
 }
 
 class AuditServiceImpl @Inject()(config: AppConfig, connector: AuditConnector) extends AuditService with Logging {
@@ -42,13 +47,19 @@ class AuditServiceImpl @Inject()(config: AppConfig, connector: AuditConnector) e
   private implicit def toHc(request: RequestHeader): AuditHeaderCarrier =
     auditHeaderCarrier(HeaderCarrierConverter.fromRequest(request))
 
-  def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit = {
+  def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit =
+    sendEventWithSource(event, config.appName)
+
+  override def sendEventWithSource[T <: AuditEvent](
+    event: T,
+    auditSource: String
+  )(implicit rh: RequestHeader, ec: ExecutionContext): Unit = {
 
     logger.info(s"[AuditService][sendEvent] sending ${event.auditType}")
 
     val result: Future[AuditResult] = connector.sendExtendedEvent(
       ExtendedDataEvent(
-        auditSource = config.appName,
+        auditSource = auditSource,
         auditType = event.auditType,
         tags = rh.toAuditTags(
           transactionName = event.auditType,
@@ -65,4 +76,5 @@ class AuditServiceImpl @Inject()(config: AppConfig, connector: AuditConnector) e
         logger.error(s"[AuditService][sendEvent] failed to send event ${event.auditType}", e)
     }
   }
+
 }

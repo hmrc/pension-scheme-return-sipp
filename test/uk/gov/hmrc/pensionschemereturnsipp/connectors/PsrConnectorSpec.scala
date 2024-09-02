@@ -72,7 +72,14 @@ class PsrConnectorSpec extends BaseConnectorSpec {
     "return 200 - ok" in {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, ok())
       whenReady(
-        connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+        connector.submitSippPsr(
+          "testPstr",
+          samplePensionSchemeId,
+          minimalDetails,
+          sampleSippPsrSubmissionEtmpRequest,
+          None,
+          None
+        )
       ) { result: HttpResponse =>
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
@@ -85,10 +92,11 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
       val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
 
-      whenReady(connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, largeRequest).failed) {
-        exception =>
-          exception mustBe a[RequestEntityTooLargeException]
-          exception.getMessage mustBe errorMessage
+      whenReady(
+        connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, largeRequest, None, None).failed
+      ) { exception =>
+        exception mustBe a[RequestEntityTooLargeException]
+        exception.getMessage mustBe errorMessage
       }
     }
 
@@ -97,7 +105,14 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
       val thrown = intercept[NotFoundException] {
         await(
-          connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+          connector.submitSippPsr(
+            "testPstr",
+            samplePensionSchemeId,
+            minimalDetails,
+            sampleSippPsrSubmissionEtmpRequest,
+            None,
+            None
+          )
         )
       }
       thrown.responseCode mustBe NOT_FOUND
@@ -108,7 +123,14 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
       val thrown = intercept[UpstreamErrorResponse] {
         await(
-          connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, sampleSippPsrSubmissionEtmpRequest)
+          connector.submitSippPsr(
+            "testPstr",
+            samplePensionSchemeId,
+            minimalDetails,
+            sampleSippPsrSubmissionEtmpRequest,
+            None,
+            None
+          )
         )
       }
       thrown.statusCode mustBe INTERNAL_SERVER_ERROR

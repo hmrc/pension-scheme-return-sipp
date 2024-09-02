@@ -50,7 +50,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
        |  "fbNumber": "fb",
        |  "periodStartDate" : "2022-04-06",
        |  "psrVersion": "1",
-       |  "isPsa": true
+       |  "isPsa": true,
+       |  "taxYear": {"from": "2022-04-06", "to": "2023-04-06"},
+       |  "schemeName": "testScheme"
        |}
        |""".stripMargin
   )
