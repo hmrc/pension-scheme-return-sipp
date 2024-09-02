@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
+import cats.syntax.either._
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.MockitoSugar.{never, reset, times, verify, when}
 import play.api.http.Status.BAD_REQUEST
@@ -39,7 +40,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -50,8 +55,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues, TestValues}
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
-import cats.syntax.either._
-import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -77,11 +80,13 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
   private val mockEmailSubmissionService = mock[EmailSubmissionService]
   private val mockMinimalDetailsConnector = mock[MinimalDetailsConnector]
+  private val mockPsrExistenceTransformer = mock[PSRAssetsExistenceTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
     mockMemberDetailsTransformer,
+    mockPsrExistenceTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
@@ -321,6 +326,19 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           )
         )(any(), any())
       }
+    }
+  }
+
+  "getAssetsExistence" should {
+    "successfully return Member Details" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockPsrExistenceTransformer.transform(any())).thenReturn(Some(samplePsrAssetsExistenceResponse))
+
+      val result = service.getPsrAssetsExistence(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(samplePsrAssetsExistenceResponse)
     }
   }
 }

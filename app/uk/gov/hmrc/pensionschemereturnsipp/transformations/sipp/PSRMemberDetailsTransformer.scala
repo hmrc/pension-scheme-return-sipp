@@ -17,12 +17,12 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import com.google.inject.{Inject, Singleton}
+import io.scalaland.chimney.dsl._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{MemberDetailsResponse, MemberDetails => ApiMemberDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import io.scalaland.chimney.dsl._
 
 @Singleton()
-class PSRMemberDetailsTransformer @Inject() {
+class PSRMemberDetailsTransformer @Inject()() {
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): Option[MemberDetailsResponse] =
     etmpResponse.memberAndTransactions.map(

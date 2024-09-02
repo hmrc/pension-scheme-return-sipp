@@ -16,33 +16,30 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.either._
 import cats.data.{EitherT, NonEmptyList}
 import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
+import io.scalaland.chimney.dsl._
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, MinimalDetailsError, PsrConnector}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  EtmpPsrStatus,
-  EtmpSippPsrDeclaration,
-  EtmpSippReportDetails,
-  MemberDetails,
-  PersonalDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
-import io.scalaland.chimney.dsl._
-import MemberDetails.compare
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,6 +49,7 @@ class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
   psrSubmissionTransformer: PSRSubmissionTransformer,
   memberDetailsTransformer: PSRMemberDetailsTransformer,
+  psrAssetsExistenceTransformer: PSRAssetsExistenceTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
@@ -323,6 +321,19 @@ class SippPsrSubmissionService @Inject()(
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.flatMap(memberDetailsTransformer.transform))
+
+  def getPsrAssetsExistence(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[PsrAssetCountsResponse]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map(_.flatMap(psrAssetsExistenceTransformer.transform))
 
   def updateMemberDetails(
     pstr: String,

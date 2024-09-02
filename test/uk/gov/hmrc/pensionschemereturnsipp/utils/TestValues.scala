@@ -26,11 +26,13 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   MemberDetailsResponse,
   PSRSubmissionResponse,
+  PsrAssetCountsResponse,
   ReportDetails,
   Version,
   Versions,
   MemberDetails => ApiMemberDetails
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
@@ -48,7 +50,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -341,4 +342,14 @@ trait TestValues {
       .message("customMessage")
     builder.build
   }
+
+  val samplePsrAssetsExistenceResponse: PsrAssetCountsResponse = PsrAssetCountsResponse(
+    interestInLandOrPropertyCount = 1,
+    landArmsLengthCount = 1,
+    assetsFromConnectedPartyCount = 1,
+    tangibleMoveablePropertyCount = 1,
+    outstandingLoansCount = 1,
+    unquotedSharesCount = 1
+  )
+
 }
