@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.api
+package uk.gov.hmrc.pensionschemereturnsipp.models.api.common
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
+import play.api.libs.json.{Format, Json}
 
-case class PsrSubmissionRequest(
-  pstr: String,
-  fbNumber: Option[String],
-  periodStartDate: Option[String],
-  psrVersion: Option[String],
-  isPsa: Boolean,
-  taxYear: DateRange,
-  schemeName: Option[String]
-)
+import java.time.LocalDate
 
-object PsrSubmissionRequest {
-  implicit val formats: OFormat[PsrSubmissionRequest] = Json.format[PsrSubmissionRequest]
+case class DateRange(from: LocalDate, to: LocalDate)
+
+object DateRange {
+
+  implicit val format: Format[DateRange] = Json.format[DateRange]
+
 }

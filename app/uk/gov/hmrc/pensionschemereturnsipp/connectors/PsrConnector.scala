@@ -26,6 +26,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -53,7 +54,9 @@ class PsrConnector @Inject()(
     pstr: String,
     pensionSchemeId: PensionSchemeId,
     minimalDetails: MinimalDetails,
-    request: SippPsrSubmissionEtmpRequest
+    request: SippPsrSubmissionEtmpRequest,
+    maybeTaxYear: Option[DateRange],
+    maybeSchemeName: Option[String]
   )(
     implicit headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
@@ -88,6 +91,18 @@ class PsrConnector @Inject()(
               pensionSchemeId,
               minimalDetails,
               request.auditDetailPsrStatus.some
+            )
+        )
+        .andThen(
+          apiAuditUtil
+            .firePSRSubmissionEvent(
+              pstr,
+              jsonRequest,
+              pensionSchemeId,
+              minimalDetails,
+              maybeSchemeName,
+              maybeTaxYear,
+              request
             )
         )
     }

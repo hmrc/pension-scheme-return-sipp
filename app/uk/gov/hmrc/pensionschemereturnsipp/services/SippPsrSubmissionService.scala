@@ -16,33 +16,27 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.either._
 import cats.data.{EitherT, NonEmptyList}
 import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
+import io.scalaland.chimney.dsl._
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, MinimalDetailsError, PsrConnector}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpMemberAndTransactions,
-  EtmpPsrStatus,
-  EtmpSippPsrDeclaration,
-  EtmpSippReportDetails,
-  MemberDetails,
-  PersonalDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
-import io.scalaland.chimney.dsl._
-import MemberDetails.compare
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -190,14 +184,16 @@ class SippPsrSubmissionService @Inject()(
   private def submitWithRequest(
     pstr: String,
     pensionSchemeId: PensionSchemeId,
-    thunk: => Future[SippPsrSubmissionEtmpRequest]
+    thunk: => Future[SippPsrSubmissionEtmpRequest],
+    maybeTaxYear: Option[DateRange] = None,
+    maybeSchemeName: Option[String] = None
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader) = {
     val response = for {
       submissionRequest <- EitherT(thunk.map(_.asRight[MinimalDetailsError]))
       details <- EitherT(getMinimalDetails(pensionSchemeId))
       result <- EitherT(
         psrConnector
-          .submitSippPsr(pstr, pensionSchemeId, details, submissionRequest)
+          .submitSippPsr(pstr, pensionSchemeId, details, submissionRequest, maybeTaxYear, maybeSchemeName)
           .map(_.asRight[MinimalDetailsError])
       )
     } yield result
@@ -291,7 +287,9 @@ class SippPsrSubmissionService @Inject()(
           submitWithRequest(
             pstr,
             pensionSchemeId,
-            Future.successful(updateRequest)
+            Future.successful(updateRequest),
+            maybeTaxYear = submission.taxYear.some,
+            maybeSchemeName = submission.schemeName
           ).map(_ => response)
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
