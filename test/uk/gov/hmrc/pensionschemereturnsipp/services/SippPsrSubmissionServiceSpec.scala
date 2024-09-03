@@ -29,6 +29,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.Generators.minimalDetailsGen
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, PsrConnector}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   LandOrConnectedPropertyRequest,
   PSRSubmissionResponse,
@@ -114,7 +115,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List())
 
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(response))
 
       val request = LandOrConnectedPropertyRequest(
@@ -126,7 +127,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         result mustBe response
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), mockitoEq(etmpRequest))(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), mockitoEq(etmpRequest), any(), any())(
+          any(),
+          any()
+        )
       }
 
     }
@@ -143,7 +147,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       when(mockLandConnectedPartyTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
 
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(response))
 
       val request = LandOrConnectedPropertyRequest(
@@ -155,7 +159,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         result mustBe response
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), mockitoEq(etmpRequest))(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), mockitoEq(etmpRequest), any(), any())(
+          any(),
+          any()
+        )
       }
 
     }
@@ -194,7 +201,15 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     val submittedBy = PSA
     val submitterId = "submitterId"
     val psaPspId = samplePsaId
-    val req = PsrSubmissionRequest(pstr, "fb".some, "2024-04-06".some, "version".some, isPsa = true)
+    val req = PsrSubmissionRequest(
+      pstr,
+      "fb".some,
+      "2024-04-06".some,
+      "version".some,
+      isPsa = true,
+      taxYear = DateRange(LocalDate.now(), LocalDate.now()),
+      schemeName = None
+    )
     val etmpResponse = SippPsrSubmissionEtmpResponse(
       reportDetails = EtmpSippReportDetails(
         pstr,
@@ -205,8 +220,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         None,
         None
       ),
-      accountingPeriodDetails =
-        AccountingPeriodDetails("".some, NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now()))).some,
+      accountingPeriodDetails = AccountingPeriodDetails(
+        "".some,
+        NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now().plusMonths(12)))
+      ).some,
       memberAndTransactions = None,
       psrDeclaration = None
     )
@@ -216,21 +233,21 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(etmpResponse.some))
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
       when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
       whenReady(service.submitSippPsr(req, submittedBy, submitterId, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any())
       }
     }
 
     "throw exception when connector call not successful for submitSippPsr" in {
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(etmpResponse.some))
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.failed(new BadRequestException("invalid-request")))
 
       val thrown = intercept[BadRequestException] {
@@ -241,7 +258,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       thrown.message must include("invalid-request")
 
       verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any())(any(), any())
+      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any())
     }
   }
 
@@ -296,7 +313,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(sampleResponse)))
 
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(response))
 
       whenReady(
@@ -323,7 +340,9 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
               ),
               psrDeclaration = None
             )
-          )
+          ),
+          any(),
+          any()
         )(any(), any())
       }
     }

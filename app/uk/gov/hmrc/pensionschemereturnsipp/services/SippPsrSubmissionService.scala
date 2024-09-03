@@ -188,14 +188,16 @@ class SippPsrSubmissionService @Inject()(
   private def submitWithRequest(
     pstr: String,
     pensionSchemeId: PensionSchemeId,
-    thunk: => Future[SippPsrSubmissionEtmpRequest]
+    thunk: => Future[SippPsrSubmissionEtmpRequest],
+    maybeTaxYear: Option[DateRange] = None,
+    maybeSchemeName: Option[String] = None
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader) = {
     val response = for {
       submissionRequest <- EitherT(thunk.map(_.asRight[MinimalDetailsError]))
       details <- EitherT(getMinimalDetails(pensionSchemeId))
       result <- EitherT(
         psrConnector
-          .submitSippPsr(pstr, pensionSchemeId, details, submissionRequest)
+          .submitSippPsr(pstr, pensionSchemeId, details, submissionRequest, maybeTaxYear, maybeSchemeName)
           .map(_.asRight[MinimalDetailsError])
       )
     } yield result
@@ -289,7 +291,9 @@ class SippPsrSubmissionService @Inject()(
           submitWithRequest(
             pstr,
             pensionSchemeId,
-            Future.successful(updateRequest)
+            Future.successful(updateRequest),
+            maybeTaxYear = submission.taxYear.some,
+            maybeSchemeName = submission.schemeName
           ).map(_ => response)
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))

@@ -24,6 +24,7 @@ import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -33,6 +34,44 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
+
+  def firePSRSubmissionEvent(
+    pstr: String,
+    data: JsValue,
+    pensionSchemeId: PensionSchemeId,
+    minimalDetails: MinimalDetails,
+    schemeName: Option[String],
+    taxYear: Option[DateRange],
+    psrRequest: SippPsrSubmissionEtmpRequest
+  )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
+
+    case Success(_) =>
+      Option
+        .when(psrRequest.psrDeclaration.isDefined) {
+          logger.info(s"PSRSubmissionEvent ->> Status: ${Status.OK}, Payload: ${Json.prettyPrint(data)}")
+          auditService.sendEventWithSource(
+            PSRSubmissionEvent(
+              pstr = pstr,
+              payload = data,
+              pensionSchemeId = pensionSchemeId,
+              minimalDetails = minimalDetails,
+              taxYear = taxYear,
+              schemeName = schemeName
+            ),
+            auditSource = "pension-scheme-return-sipp-frontend" //for auditing purposes this needs to be frontend
+          )
+        }
+        .getOrElse(logger.debug(s"PSRSubmissionEvent not sent. PSR Declaration not found in request"))
+
+    case Failure(error: HttpException) =>
+      logger.error(s"PSRSubmissionEvent not sent. PSR Submission failed with status: ${error.responseCode}")
+
+    case Failure(error: UpstreamErrorResponse) =>
+      logger.error(s"PSRSubmissionEvent not sent. PSR Submission failed with status: ${error.statusCode}")
+
+    case Failure(error: Throwable) =>
+      logger.error(s"PSRSubmissionEvent not sent. PSR Submission failed with error: ${Json.toJson(error.getMessage)}")
+  }
 
   def firePsrPostAuditEvent(
     pstr: String,
