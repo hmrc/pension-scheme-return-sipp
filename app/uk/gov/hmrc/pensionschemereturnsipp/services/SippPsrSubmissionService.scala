@@ -34,7 +34,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Dele
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 
@@ -58,10 +58,17 @@ class SippPsrSubmissionService @Inject()(
     extends Logging {
 
   def submitLandOrConnectedProperty(
+    journeyType: JourneyType,
     request: LandOrConnectedPropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, landConnectedPartyTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      request.reportDetails,
+      request.transactions,
+      landConnectedPartyTransformer,
+      pensionSchemeId
+    )
 
   def getLandOrConnectedProperty(
     pstr: String,
@@ -75,10 +82,17 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, landConnectedPartyTransformer)
 
   def submitOutstandingLoans(
+    journeyType: JourneyType,
     request: OutstandingLoansRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, outstandingLoansTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      request.reportDetails,
+      request.transactions,
+      outstandingLoansTransformer,
+      pensionSchemeId
+    )
 
   def getOutstandingLoans(
     pstr: String,
@@ -92,10 +106,11 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, outstandingLoansTransformer)
 
   def submitLandArmsLength(
+    journeyType: JourneyType,
     request: LandOrConnectedPropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, armsLengthTransformer, pensionSchemeId)
+    submitJourney(journeyType, request.reportDetails, request.transactions, armsLengthTransformer, pensionSchemeId)
 
   def getLandArmsLength(
     pstr: String,
@@ -109,10 +124,17 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, armsLengthTransformer)
 
   def submitAssetsFromConnectedParty(
+    journeyType: JourneyType,
     request: AssetsFromConnectedPartyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, assetsFromConnectedPartyTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      request.reportDetails,
+      request.transactions,
+      assetsFromConnectedPartyTransformer,
+      pensionSchemeId
+    )
 
   def getAssetsFromConnectedParty(
     pstr: String,
@@ -126,10 +148,17 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, assetsFromConnectedPartyTransformer)
 
   def submitTangibleMoveableProperty(
+    journeyType: JourneyType,
     request: TangibleMoveablePropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, tangibleMovablePropertyTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      request.reportDetails,
+      request.transactions,
+      tangibleMovablePropertyTransformer,
+      pensionSchemeId
+    )
 
   def getTangibleMoveableProperty(
     pstr: String,
@@ -143,10 +172,11 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, tangibleMovablePropertyTransformer)
 
   def submitUnquotedShares(
+    journeyType: JourneyType,
     request: UnquotedShareRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(request.reportDetails, request.transactions, unquotedSharesTransformer, pensionSchemeId)
+    submitJourney(journeyType, request.reportDetails, request.transactions, unquotedSharesTransformer, pensionSchemeId)
 
   def getUnquotedShares(
     pstr: String,
@@ -160,6 +190,7 @@ class SippPsrSubmissionService @Inject()(
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, unquotedSharesTransformer)
 
   private def submitJourney[A, V](
+    journeyType: JourneyType,
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V],
@@ -169,6 +200,7 @@ class SippPsrSubmissionService @Inject()(
     requestHeader: RequestHeader
   ): Future[HttpResponse] =
     submitWithRequest(
+      journeyType,
       reportDetails.pstr,
       pensionSchemeId,
       mergeWithExistingEtmpData(reportDetails, transactions, transformer).map { etmpDataAfterMerge =>
@@ -182,6 +214,7 @@ class SippPsrSubmissionService @Inject()(
     )
 
   private def submitWithRequest(
+    journeyType: JourneyType,
     pstr: String,
     pensionSchemeId: PensionSchemeId,
     thunk: => Future[SippPsrSubmissionEtmpRequest],
@@ -193,7 +226,7 @@ class SippPsrSubmissionService @Inject()(
       details <- EitherT(getMinimalDetails(pensionSchemeId))
       result <- EitherT(
         psrConnector
-          .submitSippPsr(pstr, pensionSchemeId, details, submissionRequest, maybeTaxYear, maybeSchemeName)
+          .submitSippPsr(journeyType, pstr, pensionSchemeId, details, submissionRequest, maybeTaxYear, maybeSchemeName)
           .map(_.asRight[MinimalDetailsError])
       )
     } yield result
@@ -250,17 +283,19 @@ class SippPsrSubmissionService @Inject()(
       }
 
   def submitSippPsr(
+    journeyType: JourneyType,
     submission: PsrSubmissionRequest,
     submittedBy: SubmittedBy,
     submitterId: String,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
     for {
-      response <- psrSubmission(submission, submittedBy, submitterId, pensionSchemeId)
+      response <- psrSubmission(journeyType, submission, submittedBy, submitterId, pensionSchemeId)
       emailResponse <- emailSubmissionService.submitEmail(response, pensionSchemeId)
     } yield emailResponse
 
   private def psrSubmission(
+    journeyType: JourneyType,
     submission: PsrSubmissionRequest,
     submittedBy: SubmittedBy,
     submitterId: String,
@@ -285,6 +320,7 @@ class SippPsrSubmissionService @Inject()(
             ).some
           )
           submitWithRequest(
+            journeyType,
             pstr,
             pensionSchemeId,
             Future.successful(updateRequest),
@@ -323,6 +359,7 @@ class SippPsrSubmissionService @Inject()(
       .map(_.flatMap(memberDetailsTransformer.transform))
 
   def updateMemberDetails(
+    journeyType: JourneyType,
     pstr: String,
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
@@ -353,7 +390,7 @@ class SippPsrSubmissionService @Inject()(
               },
               psrDeclaration = response.psrDeclaration
             )
-            submitWithRequest(pstr, pensionSchemeId, Future.successful(updateRequest)).as(true.some)
+            submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).as(true.some)
           } else
             Future.successful(false.some)
         case None =>
@@ -361,6 +398,7 @@ class SippPsrSubmissionService @Inject()(
       }
 
   def deleteMember(
+    journeyType: JourneyType,
     pstr: String,
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
@@ -401,7 +439,7 @@ class SippPsrSubmissionService @Inject()(
                 )
             )
           )
-          submitWithRequest(pstr, pensionSchemeId, Future.successful(updateRequest)).map(_ => ())
+          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_ => ())
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
       }

@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -43,14 +44,14 @@ class OutstandingLoansController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put: Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val outstandingLoansRequest = request.body.as[OutstandingLoansRequest]
       logger.debug(
         message = s"Submitting OutstandingLoan PSR details - Incoming payload: $outstandingLoansRequest"
       )
       service
-        .submitOutstandingLoans(outstandingLoansRequest, user.psaPspId)
+        .submitOutstandingLoans(journeyType, outstandingLoansRequest, user.psaPspId)
         .map { response =>
           logger.debug(
             message = s"Submit OutstandingLoan PSR details - response: ${response.status}, body: ${response.body}"

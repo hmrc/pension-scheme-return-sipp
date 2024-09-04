@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -43,14 +44,14 @@ class AssetsFromConnectedPartyController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put: Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
       logger.debug(
         s"Submitting AssetsFromConnectedParty PSR details - Incoming payload: $assetsFromConnectedPartySubmission"
       )
       service
-        .submitAssetsFromConnectedParty(assetsFromConnectedPartySubmission, user.psaPspId)
+        .submitAssetsFromConnectedParty(journeyType, assetsFromConnectedPartySubmission, user.psaPspId)
         .map { response =>
           logger
             .debug(

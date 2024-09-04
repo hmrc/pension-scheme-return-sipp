@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
+import cats.implicits.catsSyntaxOptionId
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status
@@ -27,7 +28,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 
 import scala.concurrent.ExecutionContext
@@ -216,10 +217,15 @@ object ApiAuditUtil {
 
   implicit class SippPsrSubmissionEtmpRequestOps(val sippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest)
       extends AnyVal {
-    def auditDetailPsrStatus: AuditDetailPsrStatus =
-      sippPsrSubmissionEtmpRequest.reportDetails.status match {
-        case EtmpPsrStatus.Compiled => ChangesCompiled
-        case EtmpPsrStatus.Submitted => ChangedSubmitted
+    def auditAmendDetailPsrStatus(journeyType: JourneyType): Option[AuditDetailPsrStatus] =
+      journeyType match {
+        case JourneyType.Standard => None
+        case JourneyType.Amend =>
+          (sippPsrSubmissionEtmpRequest.reportDetails.status match {
+            case EtmpPsrStatus.Compiled => ChangesCompiled
+            case EtmpPsrStatus.Submitted => ChangedSubmitted
+          }).some
       }
+
   }
 }

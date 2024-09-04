@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -43,14 +44,14 @@ class TangibleMoveablePropertyController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put: Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val tangibleMoveablePropertySubmission = request.body.as[TangibleMoveablePropertyRequest]
       logger.debug(
         s"Submitting TangibleMovableProperty PSR details - Incoming payload: $tangibleMoveablePropertySubmission"
       )
       service
-        .submitTangibleMoveableProperty(tangibleMoveablePropertySubmission, user.psaPspId)
+        .submitTangibleMoveableProperty(journeyType, tangibleMoveablePropertySubmission, user.psaPspId)
         .map { response =>
           logger
             .debug(s"Submit TangibleMovableProperty PSR details - response: ${response.status}, body: ${response.body}")

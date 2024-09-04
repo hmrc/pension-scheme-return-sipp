@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi.formatRes
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.formatReq
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -120,10 +121,10 @@ class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitOutstandingLoans(any(), any())(any(), any()))
+      when(mockService.submitOutstandingLoans(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
-      val result = controller.put(fakeRequestWithBody)
+      val result = controller.put(JourneyType.Standard)(fakeRequestWithBody)
 
       status(result) mustBe Status.NO_CONTENT
     }

@@ -39,6 +39,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.connectors.PsrConnectorSpec.{
   samplePsrVersionsResponseAsJsonString,
   sampleSippPsrResponseAsJsonString
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   OrganisationOrPartnershipDetails,
   PsaDetails,
@@ -73,6 +74,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, ok())
       whenReady(
         connector.submitSippPsr(
+          Standard,
           "testPstr",
           samplePensionSchemeId,
           minimalDetails,
@@ -93,7 +95,9 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
 
       whenReady(
-        connector.submitSippPsr("testPstr", samplePensionSchemeId, minimalDetails, largeRequest, None, None).failed
+        connector
+          .submitSippPsr(Standard, "testPstr", samplePensionSchemeId, minimalDetails, largeRequest, None, None)
+          .failed
       ) { exception =>
         exception mustBe a[RequestEntityTooLargeException]
         exception.getMessage mustBe errorMessage
@@ -106,6 +110,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       val thrown = intercept[NotFoundException] {
         await(
           connector.submitSippPsr(
+            Standard,
             "testPstr",
             samplePensionSchemeId,
             minimalDetails,
@@ -124,6 +129,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       val thrown = intercept[UpstreamErrorResponse] {
         await(
           connector.submitSippPsr(
+            Standard,
             "testPstr",
             samplePensionSchemeId,
             minimalDetails,

@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -43,14 +44,14 @@ class LandOrConnectedPropertyController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put: Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val landOrPropertySubmission = request.body.as[LandOrConnectedPropertyRequest]
       logger.debug(
         message = s"Submitting LandOrConnectedProperty PSR details - Incoming payload: $landOrPropertySubmission"
       )
       sippPsrSubmissionService
-        .submitLandOrConnectedProperty(landOrPropertySubmission, user.psaPspId)
+        .submitLandOrConnectedProperty(journeyType, landOrPropertySubmission, user.psaPspId)
         .map { response =>
           logger.debug(
             message =
