@@ -42,7 +42,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -78,11 +82,13 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
   private val mockEmailSubmissionService = mock[EmailSubmissionService]
   private val mockMinimalDetailsConnector = mock[MinimalDetailsConnector]
+  private val mockPsrExistenceTransformer = mock[PSRAssetsExistenceTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
     mockMemberDetailsTransformer,
+    mockPsrExistenceTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
@@ -131,10 +137,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             mockitoEq(etmpRequest),
             any(),
             any()
-          )(
-            any(),
-            any()
-          )
+          )(any(), any())
       }
 
     }
@@ -164,6 +167,9 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           result mustBe response
 
           verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(response))
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
           verify(mockPsrConnector, times(1)).submitSippPsr(
             any(),
             any(),
@@ -176,6 +182,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             any(),
             any()
           )
+          when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(response))
       }
 
     }
@@ -253,7 +261,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
+          any(),
+          any()
+        )
       }
     }
 
@@ -271,7 +282,10 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       thrown.message must include("invalid-request")
 
       verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any())
+      verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
+        any(),
+        any()
+      )
     }
   }
 
@@ -360,6 +374,19 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any()
         )(any(), any())
       }
+    }
+  }
+
+  "getAssetsExistence" should {
+    "successfully return Member Details" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockPsrExistenceTransformer.transform(any())).thenReturn(Some(samplePsrAssetsExistenceResponse))
+
+      val result = service.getPsrAssetsExistence(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(samplePsrAssetsExistenceResponse)
     }
   }
 }

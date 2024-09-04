@@ -179,4 +179,21 @@ class SippPsrSubmitController @Inject()(
         }
     }
   }
+
+  def getPsrAssetsExistence(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR Summary - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService.getPsrAssetsExistence(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
+        case None => NotFound
+        case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+      }
+    }
+  }
 }

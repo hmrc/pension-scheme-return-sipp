@@ -218,4 +218,34 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       status(result) mustBe Status.BAD_REQUEST
     }
   }
+
+  "GET Assets Existence" must {
+    "return 200" in {
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(samplePsrAssetsExistenceResponse)))
+
+      val result = controller.getPsrAssetsExistence("testPstr", Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.OK
+    }
+
+    "return 404" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result =
+        controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+      status(result) mustBe Status.NOT_FOUND
+    }
+  }
 }

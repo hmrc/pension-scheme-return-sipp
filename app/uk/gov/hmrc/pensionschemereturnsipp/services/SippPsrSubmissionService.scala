@@ -36,7 +36,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,6 +50,7 @@ class SippPsrSubmissionService @Inject()(
   psrConnector: PsrConnector,
   psrSubmissionTransformer: PSRSubmissionTransformer,
   memberDetailsTransformer: PSRMemberDetailsTransformer,
+  psrAssetsExistenceTransformer: PSRAssetsExistenceTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
@@ -357,6 +362,19 @@ class SippPsrSubmissionService @Inject()(
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map(_.flatMap(memberDetailsTransformer.transform))
+
+  def getPsrAssetsExistence(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(
+    implicit headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[PsrAssetCountsResponse]] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map(_.flatMap(psrAssetsExistenceTransformer.transform))
 
   def updateMemberDetails(
     journeyType: JourneyType,

@@ -31,6 +31,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
@@ -98,6 +99,18 @@ class PsrConnector @Inject()(
               pensionSchemeId,
               minimalDetails,
               request.auditAmendDetailPsrStatus(journeyType)
+            )
+        )
+        .andThen(
+          apiAuditUtil
+            .firePSRSubmissionEvent(
+              pstr,
+              jsonRequest,
+              pensionSchemeId,
+              minimalDetails,
+              maybeSchemeName,
+              maybeTaxYear,
+              request
             )
         )
         .andThen(
