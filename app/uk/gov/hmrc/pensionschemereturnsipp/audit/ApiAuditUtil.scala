@@ -217,8 +217,8 @@ object ApiAuditUtil {
     def name: String
   }
 
-  case object ChangesCompiled extends AuditDetailPsrStatus {
-    override def name: String = "ChangesCompiled"
+  case object ChangedCompiled extends AuditDetailPsrStatus {
+    override def name: String = "ChangedCompiled"
   }
 
   case object ChangedSubmitted extends AuditDetailPsrStatus {
@@ -232,7 +232,7 @@ object ApiAuditUtil {
         case JourneyType.Standard => None
         case JourneyType.Amend =>
           (sippPsrSubmissionEtmpRequest.reportDetails.status match {
-            case EtmpPsrStatus.Compiled => ChangesCompiled
+            case EtmpPsrStatus.Compiled => ChangedCompiled
             case EtmpPsrStatus.Submitted => ChangedSubmitted
           }).some
       }
