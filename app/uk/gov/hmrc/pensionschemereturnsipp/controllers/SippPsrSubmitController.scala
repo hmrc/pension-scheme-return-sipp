@@ -22,7 +22,6 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,
@@ -171,6 +170,23 @@ class SippPsrSubmitController @Inject()(
           case Some(false) => NotModified
           case None => NotFound(s"No record found for pstr $pstr")
         }
+    }
+  }
+
+  def getPsrAssetsExistence(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { _ =>
+      logger.debug(
+        s"Retrieving SIPP PSR Summary - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService.getPsrAssetsExistence(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
+        case None => NotFound
+        case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+      }
     }
   }
 }

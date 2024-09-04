@@ -41,7 +41,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -77,11 +81,13 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockTangibleMovablePropertyTransformer = mock[TangibleMoveablePropertyTransformer]
   private val mockEmailSubmissionService = mock[EmailSubmissionService]
   private val mockMinimalDetailsConnector = mock[MinimalDetailsConnector]
+  private val mockPsrExistenceTransformer = mock[PSRAssetsExistenceTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
     mockMemberDetailsTransformer,
+    mockPsrExistenceTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
@@ -339,6 +345,19 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any()
         )(any(), any())
       }
+    }
+  }
+
+  "getAssetsExistence" should {
+    "successfully return Member Details" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockPsrExistenceTransformer.transform(any())).thenReturn(Some(samplePsrAssetsExistenceResponse))
+
+      val result = service.getPsrAssetsExistence(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(samplePsrAssetsExistenceResponse)
     }
   }
 }
