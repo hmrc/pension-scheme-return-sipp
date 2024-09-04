@@ -167,9 +167,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           result mustBe response
 
           verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-          when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-            .thenReturn(Future.successful(response))
-          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
           verify(mockPsrConnector, times(1)).submitSippPsr(
             any(),
             any(),
@@ -182,8 +179,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             any(),
             any()
           )
-          when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-            .thenReturn(Future.successful(response))
       }
 
     }

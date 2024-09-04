@@ -79,7 +79,9 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
     data: JsValue,
     pensionSchemeId: PensionSchemeId,
     minimalDetails: MinimalDetails,
-    auditDetailPsrStatus: Option[AuditDetailPsrStatus]
+    auditDetailPsrStatus: Option[AuditDetailPsrStatus],
+    schemeName: Option[String],
+    taxYear: Option[DateRange]
   )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
     case Success(httpResponse) =>
       logger.info(s"PsrPostAuditEvent ->> Status: ${Status.OK}, Payload: ${Json.prettyPrint(data)}")
@@ -90,6 +92,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(Status.OK),
           response = Some(httpResponse.json),
           errorMessage = None,
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -104,6 +108,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.statusCode),
           response = None,
           errorMessage = Some(error.message),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -118,6 +124,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.responseCode),
           response = None,
           errorMessage = Some(error.message),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -132,6 +140,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = None,
           response = None,
           errorMessage = Some(error.getMessage),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]

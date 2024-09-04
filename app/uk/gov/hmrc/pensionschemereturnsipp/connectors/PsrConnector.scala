@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
-import cats.implicits.catsSyntaxOptionId
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status._
@@ -31,7 +30,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
@@ -79,7 +77,9 @@ class PsrConnector @Inject()(
           jsonRequest,
           pensionSchemeId,
           minimalDetails,
-          request.auditAmendDetailPsrStatus(journeyType)
+          request.auditAmendDetailPsrStatus(journeyType),
+          maybeSchemeName,
+          maybeTaxYear
         )
         .apply(Failure(new Throwable(errorMessage)))
 
@@ -98,19 +98,9 @@ class PsrConnector @Inject()(
               jsonRequest,
               pensionSchemeId,
               minimalDetails,
-              request.auditAmendDetailPsrStatus(journeyType)
-            )
-        )
-        .andThen(
-          apiAuditUtil
-            .firePSRSubmissionEvent(
-              pstr,
-              jsonRequest,
-              pensionSchemeId,
-              minimalDetails,
+              request.auditAmendDetailPsrStatus(journeyType),
               maybeSchemeName,
-              maybeTaxYear,
-              request
+              maybeTaxYear
             )
         )
         .andThen(
