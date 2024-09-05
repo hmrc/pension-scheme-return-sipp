@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
+import cats.implicits.catsSyntaxOptionId
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status
@@ -23,11 +24,11 @@ import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 
 import scala.concurrent.ExecutionContext
@@ -78,7 +79,9 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
     data: JsValue,
     pensionSchemeId: PensionSchemeId,
     minimalDetails: MinimalDetails,
-    auditDetailPsrStatus: Option[AuditDetailPsrStatus]
+    auditDetailPsrStatus: Option[AuditDetailPsrStatus],
+    schemeName: Option[String],
+    taxYear: Option[DateRange]
   )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
     case Success(httpResponse) =>
       logger.info(s"PsrPostAuditEvent ->> Status: ${Status.OK}, Payload: ${Json.prettyPrint(data)}")
@@ -89,6 +92,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(Status.OK),
           response = Some(httpResponse.json),
           errorMessage = None,
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -103,6 +108,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.statusCode),
           response = None,
           errorMessage = Some(error.message),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -117,6 +124,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = Some(error.responseCode),
           response = None,
           errorMessage = Some(error.message),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -131,6 +140,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
           status = None,
           response = None,
           errorMessage = Some(error.getMessage),
+          schemeName,
+          taxYear,
           pensionSchemeId: PensionSchemeId,
           minimalDetails: MinimalDetails,
           auditDetailPsrStatus: Option[AuditDetailPsrStatus]
@@ -148,7 +159,6 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
     request: RequestHeader
   ): PartialFunction[Try[Option[SippPsrSubmissionEtmpResponse]], Unit] = {
     case Success(optResponse) =>
-      logger.info(s"PsrGetAuditEvent ->> Status: ${Status.OK}, Response: ${Json.toJson(optResponse)}")
       auditService.sendEvent(
         PsrGetAuditEvent(
           pstr = pstr,
@@ -207,8 +217,8 @@ object ApiAuditUtil {
     def name: String
   }
 
-  case object ChangesCompiled extends AuditDetailPsrStatus {
-    override def name: String = "ChangesCompiled"
+  case object ChangedCompiled extends AuditDetailPsrStatus {
+    override def name: String = "ChangedCompiled"
   }
 
   case object ChangedSubmitted extends AuditDetailPsrStatus {
@@ -217,12 +227,15 @@ object ApiAuditUtil {
 
   implicit class SippPsrSubmissionEtmpRequestOps(val sippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest)
       extends AnyVal {
-    def auditDetailPsrStatus: Option[AuditDetailPsrStatus] =
-      Option.when(sippPsrSubmissionEtmpRequest.reportDetails.psrVersion.nonEmpty) {
-        sippPsrSubmissionEtmpRequest.reportDetails.status match {
-          case EtmpPsrStatus.Compiled => ChangesCompiled
-          case EtmpPsrStatus.Submitted => ChangedSubmitted
-        }
+    def auditAmendDetailPsrStatus(journeyType: JourneyType): Option[AuditDetailPsrStatus] =
+      journeyType match {
+        case JourneyType.Standard => None
+        case JourneyType.Amend =>
+          (sippPsrSubmissionEtmpRequest.reportDetails.status match {
+            case EtmpPsrStatus.Compiled => ChangedCompiled
+            case EtmpPsrStatus.Submitted => ChangedSubmitted
+          }).some
       }
+
   }
 }

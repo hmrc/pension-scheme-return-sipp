@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,
@@ -54,13 +55,15 @@ class SippPsrSubmitController @Inject()(
   private def requiredBody(implicit request: Request[AnyContent]): JsValue =
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
 
-  def submitSippPsr: Action[AnyContent] = Action.async { implicit request =>
+  def submitSippPsr(journeyType: JourneyType): Action[AnyContent] = Action.async { implicit request =>
     authorisedAsPsrUser { user =>
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
+      logger.error("This is a test error message " + journeyType)
+
       sippPsrSubmissionService
-        .submitSippPsr(submissionRequest, PSA /* todo */, user.externalId, user.psaPspId)
+        .submitSippPsr(journeyType, submissionRequest, PSA /* todo */, user.externalId, user.psaPspId)
         .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }
@@ -85,6 +88,7 @@ class SippPsrSubmitController @Inject()(
 
   def deleteMember(
     pstr: String,
+    journeyType: JourneyType,
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
@@ -97,6 +101,7 @@ class SippPsrSubmitController @Inject()(
           )
           sippPsrSubmissionService
             .deleteMember(
+              journeyType,
               pstr,
               optFbNumber,
               optPeriodStartDate,
@@ -150,6 +155,7 @@ class SippPsrSubmitController @Inject()(
 
   def updateMember(
     pstr: String,
+    journeyType: JourneyType,
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
@@ -158,6 +164,7 @@ class SippPsrSubmitController @Inject()(
       val updateMemberDetailsRequest = request.body.as[UpdateMemberDetailsRequest]
       sippPsrSubmissionService
         .updateMemberDetails(
+          journeyType,
           pstr,
           optFbNumber,
           optPeriodStartDate,

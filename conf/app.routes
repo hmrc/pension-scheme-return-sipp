@@ -1,29 +1,29 @@
 # microservice specific routes
 
-POST   /psr/sipp                                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.submitSippPsr
+POST   /psr/sipp                                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.submitSippPsr(journeyType: JourneyType)
 GET    /psr/sipp/:pstr                           uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getSippPsr(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
 GET    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getMemberDetails(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
-PUT    /psr/delete-member/:pstr                  uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.deleteMember(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
-PUT    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.updateMember(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
+PUT    /psr/delete-member/:pstr                  uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.deleteMember(pstr: String, journeyType: JourneyType, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
+PUT    /psr/member-details/:pstr                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.updateMember(pstr: String, journeyType: JourneyType, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 GET    /psr/asset-counts/:pstr                   uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrAssetsExistence(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/land-or-connected-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put
+PUT    /psr/land-or-connected-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.put(journeyType: JourneyType)
 GET    /psr/land-or-connected-property/:pstr     uk.gov.hmrc.pensionschemereturnsipp.controllers.LandOrConnectedPropertyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/land-arms-length                     uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.put
+PUT    /psr/land-arms-length                     uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.put(journeyType: JourneyType)
 GET    /psr/land-arms-length/:pstr               uk.gov.hmrc.pensionschemereturnsipp.controllers.LandArmsLengthController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/outstanding-loans                    uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.put
+PUT    /psr/outstanding-loans                    uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.put(journeyType: JourneyType)
 GET    /psr/outstanding-loans/:pstr              uk.gov.hmrc.pensionschemereturnsipp.controllers.OutstandingLoansController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/assets-from-connected-party          uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put
+PUT    /psr/assets-from-connected-party          uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.put(journeyType: JourneyType)
 GET    /psr/assets-from-connected-party/:pstr    uk.gov.hmrc.pensionschemereturnsipp.controllers.AssetsFromConnectedPartyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/tangible-moveable-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.put
+PUT    /psr/tangible-moveable-property           uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.put(journeyType: JourneyType)
 GET    /psr/tangible-moveable-property/:pstr     uk.gov.hmrc.pensionschemereturnsipp.controllers.TangibleMoveablePropertyController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
-PUT    /psr/unquoted-shares                      uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.put
+PUT    /psr/unquoted-shares                      uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.put(journeyType: JourneyType)
 GET    /psr/unquoted-shares/:pstr                uk.gov.hmrc.pensionschemereturnsipp.controllers.UnquotedSharesController.get(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
 GET    /psr/versions/:pstr                       uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getPsrVersions(pstr: String, startDate: String)

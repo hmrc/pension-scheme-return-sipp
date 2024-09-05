@@ -22,6 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -43,14 +44,14 @@ class UnquotedSharesController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put: Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val unquotedSharesSubmission = request.body.as[UnquotedShareRequest]
       logger.debug(
         s"Submitting UnquotedShares PSR details - Incoming payload: $unquotedSharesSubmission"
       )
       service
-        .submitUnquotedShares(unquotedSharesSubmission, user.psaPspId)
+        .submitUnquotedShares(journeyType, unquotedSharesSubmission, user.psaPspId)
         .map { response =>
           logger
             .debug(

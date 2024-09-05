@@ -29,6 +29,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
@@ -85,12 +86,12 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       val thrown = intercept[AuthorisationException] {
-        await(controller.submitSippPsr(fakeRequest))
+        await(controller.submitSippPsr(Standard)(fakeRequest))
       }
 
       thrown.reason mustBe "Bearer token expired"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -102,12 +103,12 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       val thrown = intercept[AuthorisationException] {
-        await(controller.submitSippPsr(fakeRequest))
+        await(controller.submitSippPsr(Standard)(fakeRequest))
       }
 
       thrown.reason mustBe "Bearer token not supplied"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -117,10 +118,10 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(().asRight))
 
-      val result = controller.submitSippPsr(fakeRequest.withJsonBody(requestJson))
+      val result = controller.submitSippPsr(Standard)(fakeRequest.withJsonBody(requestJson))
       status(result) mustBe CREATED
     }
   }
@@ -196,10 +197,10 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(()))
 
-      val result = controller.deleteMember("testPstr", Some("fbNumber"), None, None)(fakeRequest)
+      val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
       status(result) mustBe Status.NO_CONTENT
     }
 
@@ -209,10 +210,11 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.failed(new Exception(s"Submission with pstr $pstr not found")))
 
-      val result = controller.deleteMember("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+      val result =
+        controller.deleteMember("testPstr", Standard, None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
       status(result) mustBe Status.BAD_REQUEST
     }
   }

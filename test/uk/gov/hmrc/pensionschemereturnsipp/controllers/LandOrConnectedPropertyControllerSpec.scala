@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi.{formatReq, formatRes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   LandOrConnectedPropertyRequest,
@@ -119,10 +120,10 @@ class LandOrConnectedPropertyControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitLandOrConnectedProperty(any(), any())(any(), any()))
+      when(mockService.submitLandOrConnectedProperty(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
-      val result = controller.put(fakeRequestWithBody)
+      val result = controller.put(JourneyType.Standard)(fakeRequestWithBody)
 
       status(result) mustBe Status.NO_CONTENT
     }

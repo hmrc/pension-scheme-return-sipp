@@ -30,7 +30,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 
 import java.time.LocalDate
@@ -50,6 +50,7 @@ class PsrConnector @Inject()(
     with Logging {
 
   def submitSippPsr(
+    journeyType: JourneyType,
     pstr: String,
     pensionSchemeId: PensionSchemeId,
     minimalDetails: MinimalDetails,
@@ -71,7 +72,15 @@ class PsrConnector @Inject()(
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
       // Fire the audit event for the size limit exceeded case
       apiAuditUtil
-        .firePsrPostAuditEvent(pstr, jsonRequest, pensionSchemeId, minimalDetails, request.auditDetailPsrStatus)
+        .firePsrPostAuditEvent(
+          pstr,
+          jsonRequest,
+          pensionSchemeId,
+          minimalDetails,
+          request.auditAmendDetailPsrStatus(journeyType),
+          maybeSchemeName,
+          maybeTaxYear
+        )
         .apply(Failure(new Throwable(errorMessage)))
 
       Future.failed(new RequestEntityTooLargeException(errorMessage))
@@ -84,7 +93,15 @@ class PsrConnector @Inject()(
         }
         .andThen(
           apiAuditUtil
-            .firePsrPostAuditEvent(pstr, jsonRequest, pensionSchemeId, minimalDetails, request.auditDetailPsrStatus)
+            .firePsrPostAuditEvent(
+              pstr,
+              jsonRequest,
+              pensionSchemeId,
+              minimalDetails,
+              request.auditAmendDetailPsrStatus(journeyType),
+              maybeSchemeName,
+              maybeTaxYear
+            )
         )
         .andThen(
           apiAuditUtil
