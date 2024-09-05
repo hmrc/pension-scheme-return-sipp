@@ -44,14 +44,26 @@ class UnquotedSharesController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[JsValue] = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val unquotedSharesSubmission = request.body.as[UnquotedShareRequest]
       logger.debug(
         s"Submitting UnquotedShares PSR details - Incoming payload: $unquotedSharesSubmission"
       )
       service
-        .submitUnquotedShares(journeyType, unquotedSharesSubmission, user.psaPspId)
+        .submitUnquotedShares(
+          journeyType,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          unquotedSharesSubmission,
+          user.psaPspId
+        )
         .map { response =>
           logger
             .debug(

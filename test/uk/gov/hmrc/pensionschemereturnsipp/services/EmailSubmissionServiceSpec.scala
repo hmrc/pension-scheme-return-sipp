@@ -51,7 +51,7 @@ class EmailSubmissionServiceSpec
       when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(minimumDetails.asRight))
       val reportDetails = sampleSippPsrSubmissionEtmpResponse.reportDetails
       val psaName = minimumDetails.individualDetails.map(_.fullName).getOrElse("")
-      val schemeName = reportDetails.schemeName.getOrElse("")
+      val schemeName = "SchemeName"
 
       val templateParams = Map(
         "psaName" -> psaName,
@@ -78,6 +78,7 @@ class EmailSubmissionServiceSpec
 
       emailSubmissionService
         .submitEmail(
+          Some(schemeName),
           sampleSippPsrSubmissionEtmpResponse,
           psaId
         )
@@ -90,6 +91,7 @@ class EmailSubmissionServiceSpec
 
       emailSubmissionService
         .submitEmail(
+          None,
           sampleSippPsrSubmissionEtmpResponse,
           psaId
         )

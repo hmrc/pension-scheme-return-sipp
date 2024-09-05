@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp;
+package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import cats.data.NonEmptyList
 import org.mockito.ArgumentMatchers.any
@@ -39,7 +39,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
 class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues {
 
@@ -82,7 +82,7 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
         Compiled,
         LocalDate.parse("2022-04-06"),
         LocalDate.parse("2023-04-05"),
-        Some("PSR Scheme"),
+        None,
         Some("001")
       )
 

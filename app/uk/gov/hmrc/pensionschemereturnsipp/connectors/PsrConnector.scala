@@ -30,8 +30,15 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{
+  JourneyType,
+  MinimalDetails,
+  PensionSchemeId,
+  PensionSchemeReturnValidationFailureException
+}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
+import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
+import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -41,6 +48,7 @@ import scala.util.{Failure, Try}
 
 class PsrConnector @Inject()(
   config: AppConfig,
+  jsonPayloadSchemaValidator: JSONSchemaValidator,
   http: HttpClient,
   apiAuditUtil: ApiAuditUtil
 )(
@@ -85,36 +93,44 @@ class PsrConnector @Inject()(
 
       Future.failed(new RequestEntityTooLargeException(errorMessage))
     } else {
-      http
-        .POST(url, request, integrationFrameworkHeaders)
-        .map {
-          case response if response.status == OK => response
-          case response => handleErrorResponse("POST", url)(response)
-        }
-        .andThen(
-          apiAuditUtil
-            .firePsrPostAuditEvent(
-              pstr,
-              jsonRequest,
-              pensionSchemeId,
-              minimalDetails,
-              request.auditAmendDetailPsrStatus(journeyType),
-              maybeSchemeName,
-              maybeTaxYear
-            )
+      val validationResult = jsonPayloadSchemaValidator.validatePayload(API_1997, jsonRequest)
+      if (validationResult.hasErrors) {
+        logger.error(s"Validation has errors: $validationResult")
+        throw PensionSchemeReturnValidationFailureException(
+          s"Invalid payload when submitSippPsr :-\n${validationResult.toString}"
         )
-        .andThen(
-          apiAuditUtil
-            .firePSRSubmissionEvent(
-              pstr,
-              jsonRequest,
-              pensionSchemeId,
-              minimalDetails,
-              maybeSchemeName,
-              maybeTaxYear,
-              request
-            )
-        )
+      } else {
+        http
+          .POST(url, request, integrationFrameworkHeaders)
+          .map {
+            case response if response.status == OK => response
+            case response => handleErrorResponse("POST", url)(response)
+          }
+          .andThen(
+            apiAuditUtil
+              .firePsrPostAuditEvent(
+                pstr,
+                jsonRequest,
+                pensionSchemeId,
+                minimalDetails,
+                request.auditAmendDetailPsrStatus(journeyType),
+                maybeSchemeName,
+                maybeTaxYear
+              )
+          )
+          .andThen(
+            apiAuditUtil
+              .firePSRSubmissionEvent(
+                pstr,
+                jsonRequest,
+                pensionSchemeId,
+                minimalDetails,
+                maybeSchemeName,
+                maybeTaxYear,
+                request
+              )
+          )
+      }
     }
   }
 

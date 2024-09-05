@@ -16,12 +16,18 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
-import cats.syntax.traverse._
 import cats.data.NonEmptyList
+import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
+import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.{Transformer => ChimneyTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PSRSubmissionResponse, ReportDetails, Version, Versions}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, VersionedAsset}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpMemberAndTransactions,
+  EtmpSippReportDetails,
+  VersionedAsset
+}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   AssetsFromConnectedPartyTransformer,
   LandArmsLengthTransformer,
@@ -30,7 +36,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   TangibleMoveablePropertyTransformer,
   UnquotedSharesTransformer
 }
-import io.scalaland.chimney.dsl._
 
 @Singleton()
 class PSRSubmissionTransformer @Inject()(
@@ -41,6 +46,8 @@ class PSRSubmissionTransformer @Inject()(
   tangibleMoveablePropertyTransformer: TangibleMoveablePropertyTransformer,
   unquotedSharesTransformer: UnquotedSharesTransformer
 ) {
+
+  import PSRSubmissionTransformer._
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): PSRSubmissionResponse = {
     val version = versionOrPsrVersion(_, etmpResponse.reportDetails.psrVersion)
@@ -81,4 +88,9 @@ class PSRSubmissionTransformer @Inject()(
 
     version.map(Version(_))
   }
+}
+
+object PSRSubmissionTransformer {
+  implicit val reportDetailsEtmpToApi: ChimneyTransformer[EtmpSippReportDetails, ReportDetails] =
+    _.into[ReportDetails].enableOptionDefaultsToNone.transform
 }

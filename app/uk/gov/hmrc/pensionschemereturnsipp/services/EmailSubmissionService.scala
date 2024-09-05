@@ -38,6 +38,7 @@ class EmailSubmissionService @Inject()(
   clock: Clock
 )(implicit executionContext: ExecutionContext) {
   def submitEmail(
+    schemeName: Option[String],
     sippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse,
     pensionSchemeId: PensionSchemeId
   )(
@@ -52,7 +53,7 @@ class EmailSubmissionService @Inject()(
         reportDetails.pstr,
         minimumDetails.individualDetails.map(_.fullName),
         minimumDetails.email,
-        reportDetails.schemeName,
+        schemeName,
         reportDetails.periodStart,
         reportDetails.periodEnd,
         reportDetails.psrVersion.getOrElse("")

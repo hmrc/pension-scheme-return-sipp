@@ -120,10 +120,10 @@ class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitAssetsFromConnectedParty(any(), any(), any())(any(), any()))
+      when(mockService.submitAssetsFromConnectedParty(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
-      val result = controller.put(Standard)(fakeRequestWithBody)
+      val result = controller.put(Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)
 
       status(result) mustBe Status.NO_CONTENT
     }
