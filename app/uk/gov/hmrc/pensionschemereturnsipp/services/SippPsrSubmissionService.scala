@@ -393,7 +393,7 @@ class SippPsrSubmissionService @Inject()(
             .exists(t => compare(t.memberDetails.personalDetails, request.current))
           if (recordFound) {
             val updateRequest = SippPsrSubmissionEtmpRequest(
-              reportDetails = response.reportDetails,
+              reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled),
               accountingPeriodDetails = response.accountingPeriodDetails,
               memberAndTransactions = response.memberAndTransactions.flatMap { memberAndTransactions =>
                 val updatedMemberAndTransactions = memberAndTransactions.map { memberAndTransactions =>
