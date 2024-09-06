@@ -17,5 +17,5 @@
 package uk.gov.hmrc.pensionschemereturnsipp.validators
 
 object SchemaPaths {
-  val API_1997 = "/resources/schemas/api-1997-submit-sipp-pension-scheme-return-request-schema-v1.0.3.json"
+  val API_1997 = "/schemas/api-1997-submit-sipp-pension-scheme-return-request-schema-v1.2.0.json"
 }

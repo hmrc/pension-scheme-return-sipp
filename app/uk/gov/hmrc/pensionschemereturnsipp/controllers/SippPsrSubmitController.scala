@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,

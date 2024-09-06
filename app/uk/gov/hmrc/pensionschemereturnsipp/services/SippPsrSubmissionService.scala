@@ -64,11 +64,17 @@ class SippPsrSubmissionService @Inject()(
 
   def submitLandOrConnectedProperty(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: LandOrConnectedPropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(
       journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
       request.reportDetails,
       request.transactions,
       landConnectedPartyTransformer,
@@ -88,11 +94,17 @@ class SippPsrSubmissionService @Inject()(
 
   def submitOutstandingLoans(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: OutstandingLoansRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(
       journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
       request.reportDetails,
       request.transactions,
       outstandingLoansTransformer,
@@ -112,10 +124,22 @@ class SippPsrSubmissionService @Inject()(
 
   def submitLandArmsLength(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: LandOrConnectedPropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(journeyType, request.reportDetails, request.transactions, armsLengthTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
+      request.reportDetails,
+      request.transactions,
+      armsLengthTransformer,
+      pensionSchemeId
+    )
 
   def getLandArmsLength(
     pstr: String,
@@ -130,11 +154,17 @@ class SippPsrSubmissionService @Inject()(
 
   def submitAssetsFromConnectedParty(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: AssetsFromConnectedPartyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(
       journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
       request.reportDetails,
       request.transactions,
       assetsFromConnectedPartyTransformer,
@@ -154,11 +184,17 @@ class SippPsrSubmissionService @Inject()(
 
   def submitTangibleMoveableProperty(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: TangibleMoveablePropertyRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
     submitJourney(
       journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
       request.reportDetails,
       request.transactions,
       tangibleMovablePropertyTransformer,
@@ -178,10 +214,22 @@ class SippPsrSubmissionService @Inject()(
 
   def submitUnquotedShares(
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     request: UnquotedShareRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] =
-    submitJourney(journeyType, request.reportDetails, request.transactions, unquotedSharesTransformer, pensionSchemeId)
+    submitJourney(
+      journeyType,
+      optFbNumber,
+      optPeriodStartDate,
+      optPsrVersion,
+      request.reportDetails,
+      request.transactions,
+      unquotedSharesTransformer,
+      pensionSchemeId
+    )
 
   def getUnquotedShares(
     pstr: String,
@@ -196,6 +244,9 @@ class SippPsrSubmissionService @Inject()(
 
   private def submitJourney[A, V](
     journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V],
@@ -208,7 +259,14 @@ class SippPsrSubmissionService @Inject()(
       journeyType,
       reportDetails.pstr,
       pensionSchemeId,
-      mergeWithExistingEtmpData(reportDetails, transactions, transformer).map { etmpDataAfterMerge =>
+      mergeWithExistingEtmpData(
+        optFbNumber,
+        optPeriodStartDate,
+        optPsrVersion,
+        reportDetails,
+        transactions,
+        transformer
+      ).map { etmpDataAfterMerge =>
         SippPsrSubmissionEtmpRequest(
           reportDetails = reportDetails.transformInto[EtmpSippReportDetails],
           accountingPeriodDetails = None,
@@ -267,6 +325,9 @@ class SippPsrSubmissionService @Inject()(
       }
 
   private def mergeWithExistingEtmpData[A, V](
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V]
@@ -275,7 +336,7 @@ class SippPsrSubmissionService @Inject()(
     requestHeader: RequestHeader
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
-      .getSippPsr(reportDetails.pstr, None, Some("2024-06-03"), Some("001"))
+      .getSippPsr(reportDetails.pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .map {
         case Some(existingEtmpData) =>
           val merged = for {
@@ -296,7 +357,7 @@ class SippPsrSubmissionService @Inject()(
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
     for {
       response <- psrSubmission(journeyType, submission, submittedBy, submitterId, pensionSchemeId)
-      emailResponse <- emailSubmissionService.submitEmail(response, pensionSchemeId)
+      emailResponse <- emailSubmissionService.submitEmail(submission.schemeName, response, pensionSchemeId)
     } yield emailResponse
 
   private def psrSubmission(

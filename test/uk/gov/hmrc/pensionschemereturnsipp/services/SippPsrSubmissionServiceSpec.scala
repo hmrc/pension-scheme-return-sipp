@@ -124,20 +124,21 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         Some(NonEmptyList.one(landConnectedTransaction))
       )
 
-      whenReady(service.submitLandOrConnectedProperty(Standard, request, samplePensionSchemeId)) {
-        result: HttpResponse =>
-          result mustBe response
+      whenReady(
+        service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { result: HttpResponse =>
+        result mustBe response
 
-          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-          verify(mockPsrConnector, times(1)).submitSippPsr(
-            any(),
-            any(),
-            any(),
-            any(),
-            mockitoEq(etmpRequest),
-            any(),
-            any()
-          )(any(), any())
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
       }
 
     }
@@ -162,23 +163,24 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         Some(NonEmptyList.one(landConnectedTransaction))
       )
 
-      whenReady(service.submitLandOrConnectedProperty(Standard, request, samplePensionSchemeId)) {
-        result: HttpResponse =>
-          result mustBe response
+      whenReady(
+        service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { result: HttpResponse =>
+        result mustBe response
 
-          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-          verify(mockPsrConnector, times(1)).submitSippPsr(
-            any(),
-            any(),
-            any(),
-            any(),
-            mockitoEq(etmpRequest),
-            any(),
-            any()
-          )(
-            any(),
-            any()
-          )
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
       }
 
     }
@@ -233,7 +235,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         LocalDate.now(),
         LocalDate.now(),
         YesNo.Yes,
-        None,
         None
       ),
       accountingPeriodDetails = AccountingPeriodDetails(
@@ -251,7 +252,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(Future.successful(etmpResponse.some))
       when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
-      when(mockEmailSubmissionService.submitEmail(any(), any())(any()))
+      when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
       whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
@@ -324,7 +325,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
-          None,
           None
         ),
         accountingPeriodDetails = None,

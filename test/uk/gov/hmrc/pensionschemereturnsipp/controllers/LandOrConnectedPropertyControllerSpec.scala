@@ -120,10 +120,10 @@ class LandOrConnectedPropertyControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitLandOrConnectedProperty(any(), any(), any())(any(), any()))
+      when(mockService.submitLandOrConnectedProperty(any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(204, "")))
 
-      val result = controller.put(JourneyType.Standard)(fakeRequestWithBody)
+      val result = controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)
 
       status(result) mustBe Status.NO_CONTENT
     }

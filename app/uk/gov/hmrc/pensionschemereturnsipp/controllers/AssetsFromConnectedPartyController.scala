@@ -44,14 +44,29 @@ class AssetsFromConnectedPartyController @Inject()(
     with PsrAuth
     with Logging {
 
-  def put(journeyType: JourneyType): Action[JsValue] = Action(parse.json).async { implicit request =>
+  def put(
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[JsValue] = Action(parse.json).async { implicit request =>
+    println(optFbNumber)
+    println(optPeriodStartDate)
+    println(optPsrVersion)
     authorisedAsPsrUser { user =>
       val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
       logger.debug(
         s"Submitting AssetsFromConnectedParty PSR details - Incoming payload: $assetsFromConnectedPartySubmission"
       )
       service
-        .submitAssetsFromConnectedParty(journeyType, assetsFromConnectedPartySubmission, user.psaPspId)
+        .submitAssetsFromConnectedParty(
+          journeyType,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          assetsFromConnectedPartySubmission,
+          user.psaPspId
+        )
         .map { response =>
           logger
             .debug(
