@@ -36,8 +36,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PSRSubmissionResponse,
   PsrSubmissionRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -258,6 +259,70 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
+          any(),
+          any()
+        )
+      }
+    }
+
+    "successfully submit SIPP submission with correctly set declaration for PSA" in {
+      val submittedBy = PSA
+
+      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(etmpResponse.some))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(expectedResponse))
+      when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Right(())))
+
+      whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(submittedETMPRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+    }
+
+    "successfully submit SIPP submission with correctly set declaration for PSP" in {
+      val submittedBy = PSP
+
+      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(etmpResponse.some))
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(expectedResponse))
+      when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Right(())))
+
+      whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(
+            submittedETMPRequest
+              .copy(
+                psrDeclaration = submittedETMPRequest.psrDeclaration
+                  .map(_.copy(pspDeclaration = Some(Declaration(true, true)), psaDeclaration = None, submittedBy = PSP))
+              )
+          ),
+          any(),
+          any()
+        )(
           any(),
           any()
         )

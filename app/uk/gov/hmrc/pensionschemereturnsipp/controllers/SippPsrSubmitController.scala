@@ -60,10 +60,11 @@ class SippPsrSubmitController @Inject()(
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
-      logger.error("This is a test error message " + journeyType)
+      //TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
+      val submitterID = user.psaPspId
 
       sippPsrSubmissionService
-        .submitSippPsr(journeyType, submissionRequest, PSA /* todo */, user.externalId, user.psaPspId)
+        .submitSippPsr(journeyType, submissionRequest, PSA /* todo */, submitterID.value, submitterID)
         .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }
