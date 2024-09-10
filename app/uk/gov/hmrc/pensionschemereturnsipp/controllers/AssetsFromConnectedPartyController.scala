@@ -50,9 +50,6 @@ class AssetsFromConnectedPartyController @Inject()(
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[JsValue] = Action(parse.json).async { implicit request =>
-    println(optFbNumber)
-    println(optPeriodStartDate)
-    println(optPsrVersion)
     authorisedAsPsrUser { user =>
       val assetsFromConnectedPartySubmission = request.body.as[AssetsFromConnectedPartyRequest]
       logger.debug(

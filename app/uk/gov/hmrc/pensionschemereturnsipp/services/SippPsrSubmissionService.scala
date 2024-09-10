@@ -374,15 +374,17 @@ class SippPsrSubmissionService @Inject()(
       .flatMap {
         case Some(response) =>
           val updateRequest = SippPsrSubmissionEtmpRequest(
-            response.reportDetails.copy(status = EtmpPsrStatus.Submitted),
+            response.reportDetails.copy(status = EtmpPsrStatus.Submitted, psrVersion = None),
             response.accountingPeriodDetails,
             response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             EtmpSippPsrDeclaration(
               submittedBy = submittedBy,
               submitterID = submitterId,
               psaID = pensionSchemeId.value.some,
-              psaDeclaration = Option.when(isPsa)(Declaration(declaration1 = true, declaration2 = true)),
-              pspDeclaration = Option.unless(!isPsa)(Declaration(declaration1 = true, declaration2 = true))
+              psaDeclaration =
+                Option.when(SubmittedBy.PSA == submittedBy)(Declaration(declaration1 = true, declaration2 = true)),
+              pspDeclaration =
+                Option.when(SubmittedBy.PSP == submittedBy)(Declaration(declaration1 = true, declaration2 = true))
             ).some
           )
           submitWithRequest(
@@ -454,7 +456,7 @@ class SippPsrSubmissionService @Inject()(
             .exists(t => compare(t.memberDetails.personalDetails, request.current))
           if (recordFound) {
             val updateRequest = SippPsrSubmissionEtmpRequest(
-              reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled),
+              reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, psrVersion = None),
               accountingPeriodDetails = response.accountingPeriodDetails,
               memberAndTransactions = response.memberAndTransactions.flatMap { memberAndTransactions =>
                 val updatedMemberAndTransactions = memberAndTransactions.map { memberAndTransactions =>
@@ -494,7 +496,7 @@ class SippPsrSubmissionService @Inject()(
         case Some(response) =>
           val updateRequest = SippPsrSubmissionEtmpRequest(
             // Declaration changed to Compiled state back
-            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled),
+            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, psrVersion = None),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = {
               response.memberAndTransactions.flatMap { members =>

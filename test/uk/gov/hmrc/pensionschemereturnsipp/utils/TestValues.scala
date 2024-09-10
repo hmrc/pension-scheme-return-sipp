@@ -22,7 +22,7 @@ import com.networknt.schema.ValidationMessage
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
-import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
+import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   MemberDetailsResponse,
   PSRSubmissionResponse,
@@ -34,7 +34,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   AccountingPeriod,
@@ -47,7 +47,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   UnquotedShareDisposalDetails,
   YesNo
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.{Compiled, Submitted}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
@@ -65,6 +65,7 @@ trait TestValues {
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
 
   val samplePsaId: PsaId = PsaId("PSA")
+  val samplePspId: PspId = PspId("PSP")
   val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
 
   val enrolments: Enrolments = Enrolments(
@@ -349,6 +350,33 @@ trait TestValues {
     tangibleMoveablePropertyCount = 1,
     outstandingLoansCount = 1,
     unquotedSharesCount = 1
+  )
+
+  val submittedETMPRequest = SippPsrSubmissionEtmpRequest(
+    EtmpSippReportDetails(
+      "testPstr",
+      Submitted,
+      LocalDate.parse("2024-09-09"),
+      LocalDate.parse("2024-09-09"),
+      Yes,
+      None
+    ),
+    Some(
+      AccountingPeriodDetails(
+        Some(""),
+        NonEmptyList(AccountingPeriod(LocalDate.parse("2024-09-09"), LocalDate.parse("2025-09-09")), List())
+      )
+    ),
+    None,
+    Some(
+      EtmpSippPsrDeclaration(
+        PSA,
+        samplePensionSchemeId.value,
+        Some("PSA"),
+        psaDeclaration = Some(Declaration(true, true)),
+        pspDeclaration = None
+      )
+    )
   )
 
 }
