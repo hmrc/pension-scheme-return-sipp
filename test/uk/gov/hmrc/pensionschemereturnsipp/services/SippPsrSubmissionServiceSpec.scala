@@ -224,7 +224,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       pstr,
       "fb".some,
       "2024-04-06".some,
-      "version".some,
+      psrVersion = None,
       isPsa = true,
       taxYear = DateRange(LocalDate.now(), LocalDate.now()),
       schemeName = None
@@ -233,14 +233,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       reportDetails = EtmpSippReportDetails(
         pstr,
         EtmpPsrStatus.Compiled,
-        LocalDate.now(),
-        LocalDate.now(),
+        LocalDate.parse("2024-09-09"),
+        LocalDate.parse("2024-09-09"),
         YesNo.Yes,
         None
       ),
       accountingPeriodDetails = AccountingPeriodDetails(
         "".some,
-        NonEmptyList.one(AccountingPeriod(LocalDate.now(), LocalDate.now().plusMonths(12)))
+        NonEmptyList.one(AccountingPeriod(LocalDate.parse("2024-09-09"), LocalDate.parse("2025-09-09")))
       ).some,
       memberAndTransactions = None,
       psrDeclaration = None
@@ -277,7 +277,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
-      whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
+      whenReady(service.submitSippPsr(Standard, req, submittedBy, samplePensionSchemeId.value, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
           any(),
@@ -306,7 +306,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
-      whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
+      whenReady(service.submitSippPsr(Standard, req, submittedBy, psaPspId.value, psaPspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
           any(),
@@ -422,7 +422,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any(),
           mockitoEq(
             SippPsrSubmissionEtmpRequest(
-              reportDetails = sampleResponse.reportDetails,
+              reportDetails = sampleResponse.reportDetails.copy(psrVersion = None),
               accountingPeriodDetails = None,
               memberAndTransactions = Some(
                 NonEmptyList.one(etmpDataWithLandConnectedTx.copy(status = SectionStatus.Deleted, version = None))

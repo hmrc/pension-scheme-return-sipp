@@ -371,7 +371,7 @@ trait TestValues {
     Some(
       EtmpSippPsrDeclaration(
         PSA,
-        "submitterId",
+        samplePensionSchemeId.value,
         Some("PSA"),
         psaDeclaration = Some(Declaration(true, true)),
         pspDeclaration = None
