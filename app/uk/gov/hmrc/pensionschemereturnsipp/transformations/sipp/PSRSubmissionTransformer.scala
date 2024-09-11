@@ -50,7 +50,7 @@ class PSRSubmissionTransformer @Inject()(
   import PSRSubmissionTransformer._
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): PSRSubmissionResponse = {
-    val version = versionOrPsrVersion(_, etmpResponse.reportDetails.psrVersion)
+    val version = versionOrPsrVersion(_, etmpResponse.reportDetails.version)
     val membTxs: List[EtmpMemberAndTransactions] = etmpResponse.memberAndTransactions.sequence.flatten
 
     PSRSubmissionResponse(

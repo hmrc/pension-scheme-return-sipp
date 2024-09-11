@@ -29,7 +29,7 @@ package object transformations {
   implicit val reportDetailsApiToEtmp: ChimneyTransformer[ReportDetails, EtmpSippReportDetails] =
     _.into[EtmpSippReportDetails]
       .withFieldConst(_.memberTransactions, Yes)
-      .withFieldConst(_.psrVersion, None) // Always None while sending to ETMP
+      .withFieldConst(_.version, None) // Always None while sending to ETMP
       .transform
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =

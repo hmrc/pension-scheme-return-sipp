@@ -422,7 +422,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any(),
           mockitoEq(
             SippPsrSubmissionEtmpRequest(
-              reportDetails = sampleResponse.reportDetails.copy(psrVersion = None),
+              reportDetails = sampleResponse.reportDetails.copy(version = None),
               accountingPeriodDetails = None,
               memberAndTransactions = Some(
                 NonEmptyList.one(etmpDataWithLandConnectedTx.copy(status = SectionStatus.Deleted, version = None))

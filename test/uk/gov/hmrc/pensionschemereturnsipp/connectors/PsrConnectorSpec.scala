@@ -906,7 +906,7 @@ object PsrConnectorSpec {
       |  "reportDetails": {
       |    "pstr": "12345678AA",
       |    "schemeName": "PSR Scheme",
-      |    "psrVersion": "001",
+      |    "version": "001",
       |    "status": "Compiled",
       |    "periodStart": "2022-04-06",
       |    "periodEnd": "2023-04-05",

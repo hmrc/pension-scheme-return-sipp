@@ -56,7 +56,7 @@ class EmailSubmissionService @Inject()(
         schemeName,
         reportDetails.periodStart,
         reportDetails.periodEnd,
-        reportDetails.psrVersion.getOrElse("")
+        reportDetails.version.getOrElse("")
       )
     } yield email).value
   }

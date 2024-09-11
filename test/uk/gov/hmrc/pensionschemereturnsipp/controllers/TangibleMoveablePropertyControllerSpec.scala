@@ -110,7 +110,7 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
             periodStart = LocalDate.now,
             periodEnd = LocalDate.now,
             schemeName = Some("Schema Name"),
-            psrVersion = Some("001")
+            version = Some("001")
           ),
           transactions = None
         )
