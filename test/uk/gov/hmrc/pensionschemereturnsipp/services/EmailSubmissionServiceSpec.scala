@@ -72,7 +72,7 @@ class EmailSubmissionServiceSpec
           psaName,
           templateParams,
           s"${reportDetails.periodStart.getYear}-${reportDetails.periodEnd.getYear}",
-          reportDetails.psrVersion.getOrElse("")
+          reportDetails.version.getOrElse("")
         )
       ).thenReturn(Future.successful(().asRight))
 

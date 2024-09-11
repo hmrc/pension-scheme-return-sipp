@@ -150,7 +150,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
-      val result = controller.getSippPsr("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+      val result = controller.getSippPsr("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
     }
   }
@@ -180,7 +180,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .thenReturn(Future.successful(None))
 
       val result =
-        controller.getMemberDetails("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+        controller.getMemberDetails("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
     }
   }
@@ -214,7 +214,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .thenReturn(Future.failed(new Exception(s"Submission with pstr $pstr not found")))
 
       val result =
-        controller.deleteMember("testPstr", Standard, None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+        controller.deleteMember("testPstr", Standard, None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.BAD_REQUEST
     }
   }
@@ -244,7 +244,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .thenReturn(Future.successful(None))
 
       val result =
-        controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("psrVersion"))(fakeRequest)
+        controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
     }
   }

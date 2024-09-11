@@ -374,7 +374,7 @@ class SippPsrSubmissionService @Inject()(
       .flatMap {
         case Some(response) =>
           val updateRequest = SippPsrSubmissionEtmpRequest(
-            response.reportDetails.copy(status = EtmpPsrStatus.Submitted, psrVersion = None),
+            response.reportDetails.copy(status = EtmpPsrStatus.Submitted, version = None),
             response.accountingPeriodDetails,
             response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             EtmpSippPsrDeclaration(
@@ -456,7 +456,7 @@ class SippPsrSubmissionService @Inject()(
             .exists(t => compare(t.memberDetails.personalDetails, request.current))
           if (recordFound) {
             val updateRequest = SippPsrSubmissionEtmpRequest(
-              reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, psrVersion = None),
+              reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
               accountingPeriodDetails = response.accountingPeriodDetails,
               memberAndTransactions = response.memberAndTransactions.flatMap { memberAndTransactions =>
                 val updatedMemberAndTransactions = memberAndTransactions.map { memberAndTransactions =>
@@ -496,7 +496,7 @@ class SippPsrSubmissionService @Inject()(
         case Some(response) =>
           val updateRequest = SippPsrSubmissionEtmpRequest(
             // Declaration changed to Compiled state back
-            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, psrVersion = None),
+            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = {
               response.memberAndTransactions.flatMap { members =>
