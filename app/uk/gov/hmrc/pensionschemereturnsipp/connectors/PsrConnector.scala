@@ -164,7 +164,7 @@ class PsrConnector @Inject()(
             val updatedResponse = etmpResponse.copy(memberAndTransactions = filteredMembers)
             Some(updatedResponse)
           case _ if isNotFound(response) =>
-            logger.warn(s"$logMessage and returned ${response.status}")
+            logger.warn(s"$logMessage and returned (PSR_NOT_FOUND) ${response.status} ")
             None
           case _ => handleErrorResponse("GET", url)(response)
         }
