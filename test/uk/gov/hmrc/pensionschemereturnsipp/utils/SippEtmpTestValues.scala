@@ -36,8 +36,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   LesseeDetails,
   RegistryDetails,
   SharesCompanyDetails,
-  UnquotedShareDisposalDetails,
-  YesNo
+  UnquotedShareDisposalDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus._
@@ -286,7 +285,7 @@ trait SippEtmpTestValues {
       nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
       nino = NinoType(nino = Some("nino"), reasonNoNino = None),
       acquisitionDate = LocalDate.of(2020, 1, 1),
-      landOrPropertyInUK = YesNo.Yes,
+      landOrPropertyInUK = Yes,
       addressDetails = AddressDetails(
         addressLine1 = "addressLine1",
         addressLine2 = "addressLine2",
@@ -296,18 +295,17 @@ trait SippEtmpTestValues {
         ukPostCode = None,
         countryCode = "UK"
       ),
-      registryDetails =
-        RegistryDetails(registryRefExist = YesNo.No, registryReference = None, noRegistryRefReason = None),
+      registryDetails = RegistryDetails(registryRefExist = No, registryReference = None, noRegistryRefReason = None),
       acquiredFromName = "acquiredFromName",
       totalCost = 10,
-      independentValuation = YesNo.Yes,
-      jointlyHeld = YesNo.Yes,
+      independentValuation = Yes,
+      jointlyHeld = Yes,
       noOfPersons = None,
-      residentialSchedule29A = YesNo.Yes,
-      isLeased = YesNo.Yes,
+      residentialSchedule29A = Yes,
+      isLeased = Yes,
       lesseeDetails = None,
       totalIncomeOrReceipts = 10,
-      isPropertyDisposed = YesNo.Yes,
+      isPropertyDisposed = Yes,
       disposalDetails = None,
       transactionCount = None
     )
@@ -330,19 +328,19 @@ trait SippEtmpTestValues {
           List(
             SippLandConnectedParty.TransactionDetail(
               LocalDate.of(2020, 1, 1),
-              YesNo.Yes,
+              Yes,
               AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
-              RegistryDetails(YesNo.No, None, None),
+              RegistryDetails(No, None, None),
               "acquiredFromName",
               10.0,
-              YesNo.Yes,
-              YesNo.Yes,
+              Yes,
+              Yes,
               None,
-              YesNo.Yes,
-              YesNo.Yes,
+              Yes,
+              Yes,
               None,
               10.0,
-              YesNo.Yes,
+              Yes,
               None
             )
           )
@@ -374,19 +372,19 @@ trait SippEtmpTestValues {
           List(
             SippLandConnectedParty.TransactionDetail(
               LocalDate.of(2020, 1, 1),
-              YesNo.Yes,
+              Yes,
               AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
-              RegistryDetails(YesNo.No, None, None),
+              RegistryDetails(No, None, None),
               "acquiredFromName",
               10.0,
-              YesNo.Yes,
-              YesNo.Yes,
+              Yes,
+              Yes,
               None,
-              YesNo.Yes,
-              YesNo.Yes,
+              Yes,
+              Yes,
               None,
               10.0,
-              YesNo.Yes,
+              Yes,
               None
             )
           )
@@ -434,11 +432,11 @@ trait SippEtmpTestValues {
     assetDescription = "Asset Description",
     acquiredFromName = "acquiredFromName",
     totalCost = 20.0,
-    independentValuation = YesNo.Yes,
+    independentValuation = Yes,
     totalIncomeOrReceipts = 20.0,
     costOrMarket = MarketValue,
     costMarketValue = 20.0,
-    isPropertyDisposed = YesNo.No,
+    isPropertyDisposed = No,
     disposalDetails = None,
     transactionCount = None
   )
@@ -457,7 +455,7 @@ trait SippEtmpTestValues {
     totalCost = 1.0,
     independentValuation = Yes,
     totalDividendsIncome = 1.00,
-    sharesDisposed = YesNo.Yes,
+    sharesDisposed = Yes,
     sharesDisposalDetails = None,
     transactionCount = None
   )
@@ -468,12 +466,12 @@ trait SippEtmpTestValues {
     loanRecipientName = "test",
     dateOfLoan = LocalDate.of(2020, 1, 1),
     amountOfLoan = 1,
-    loanConnectedParty = YesNo.Yes,
+    loanConnectedParty = Yes,
     repayDate = LocalDate.of(2020, 1, 1),
     interestRate = 1,
-    loanSecurity = YesNo.Yes,
+    loanSecurity = Yes,
     capitalRepayments = 1,
-    arrearsOutstandingPrYears = YesNo.Yes,
+    arrearsOutstandingPrYears = Yes,
     arrearsOutstandingPrYearsAmt = Some(1),
     outstandingYearEndAmount = 1,
     transactionCount = None
