@@ -478,8 +478,8 @@
 											"$ref": "#/definitions/currencyType"
 										},
 										"loanConnectedParty": {
-											"description": "Question 9D: is the loan to a connected party?Possible values:01 - Connected party02 - Unconnected",
-											"$ref": "#/definitions/connectionStatusType"
+											"description": "Question 9D: is the loan to a connected party?Possible values:Yes - Connected / No - Unconnected",
+											"$ref": "#/definitions/yesOrNoType"
 										},
 										"repayDate": {
 											"description": "Question 9E:",

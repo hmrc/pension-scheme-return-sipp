@@ -1067,7 +1067,7 @@ object PsrConnectorSpec {
       |            "loanRecipientName": "Loyds Ltd",
       |            "dateOfLoan": "2023-03-14",
       |            "amountOfLoan": 999.99,
-      |            "loanConnectedParty": "01",
+      |            "loanConnectedParty": "Yes",
       |            "repayDate": "2023-03-14",
       |            "interestRate": 10,
       |            "loanSecurity": "No",

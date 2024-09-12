@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp
 
+import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.{Transformer => ChimneyTransformer}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{ConnectionStatus, YesNo}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
-import io.scalaland.chimney.{Transformer => ChimneyTransformer}
-import io.scalaland.chimney.dsl._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpSippReportDetails, MemberDetails}
 
 package object transformations {
 
@@ -50,8 +49,4 @@ package object transformations {
 
   def toNinoType(memberDetails: MemberDetails): NinoType =
     NinoType(memberDetails.nino, memberDetails.reasonNoNINO)
-
-  implicit val connectionTypeToYesNo: ChimneyTransformer[ConnectionStatus, YesNo] = status => YesNo(status.toBoolean)
-  implicit val yesNoToConnectionType: ChimneyTransformer[YesNo, ConnectionStatus] = yesNo =>
-    ConnectionStatus(yesNo.boolean)
 }
