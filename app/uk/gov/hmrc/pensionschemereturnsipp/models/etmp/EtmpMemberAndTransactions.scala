@@ -19,7 +19,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   AddressDetails,
-  ConnectionStatus,
   CostOrMarketType,
   DisposalDetails,
   LesseeDetails,
@@ -204,7 +203,7 @@ object SippLoanOutstanding {
     loanRecipientName: String,
     dateOfLoan: LocalDate,
     amountOfLoan: Double,
-    loanConnectedParty: ConnectionStatus,
+    loanConnectedParty: YesNo,
     repayDate: LocalDate,
     interestRate: Double,
     loanSecurity: YesNo,
