@@ -57,9 +57,9 @@ object EtmpMemberAndTransactionsUpdater {
         val updatedList = update.asList
 
         if (extracted.diff(updatedList).nonEmpty || updatedList.diff(extracted).nonEmpty) {
-          modifier(update, etmpTxsByMember)
+          modifier(update, etmpTxsByMember.copy(status = SectionStatus.Changed)) // Changes to transactions, updating `status` to `Changed`
         } else {
-          etmpTxsByMember
+          etmpTxsByMember // No changes to transactions, leaving `status` as is
         }
     }.toList
 

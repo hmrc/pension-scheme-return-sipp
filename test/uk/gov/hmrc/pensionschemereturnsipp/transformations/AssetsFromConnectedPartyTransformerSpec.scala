@@ -112,6 +112,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
@@ -164,6 +165,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
@@ -207,7 +209,8 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
       val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(otherAssetsConnectedParty = None), // No more tx for first member :/
+        etmpData
+          .copy(otherAssetsConnectedParty = None, status = SectionStatus.Changed), // No more tx for first member :/
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

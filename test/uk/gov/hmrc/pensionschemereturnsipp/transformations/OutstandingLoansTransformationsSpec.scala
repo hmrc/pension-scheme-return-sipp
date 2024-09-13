@@ -90,13 +90,14 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
   )
 
   "merge" should {
-    "update data for a single member when member match is found" in {
+    "add data for a single member when member match is found" in {
       val testData = etmpData.copy(loanOutstanding = None)
 
       val result = transformer.merge(NonEmptyList.of(sippOutstandingLoansApi), List(testData))
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           loanOutstanding = Some(
             SippLoanOutstanding(
               1,
@@ -132,6 +133,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           loanOutstanding = Some(
             SippLoanOutstanding(
               1,
@@ -172,7 +174,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(loanOutstanding = None),
+        etmpData.copy(loanOutstanding = None, status = SectionStatus.Changed),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

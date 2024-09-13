@@ -20,6 +20,7 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -30,13 +31,14 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
   private val transformer: LandConnectedPartyTransformer = new LandConnectedPartyTransformer()
 
   "merge" should {
-    "update LandArms data for a single member when member match is found" in {
+    "add LandArms data for a single member when member match is found" in {
       val testEtmpData = etmpDataWithLandConnectedTx.copy(landConnectedParty = None)
 
       val result = transformer.merge(NonEmptyList.of(landConnectedTransaction), List(testEtmpData))
 
       result mustBe List(
         etmpDataWithLandConnectedTx.copy(
+          status = SectionStatus.Changed,
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
@@ -69,13 +71,14 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
 
     }
 
-    "replace LandArms data for a single member when member match is found" in {
+    "update LandArms data for a single member when member match is found" in {
 
       val testLandArmsDataRow1 = landConnectedTransaction.copy(acquiredFromName = "test2")
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
         etmpDataWithLandConnectedTx.copy(
+          status = SectionStatus.Changed,
           landConnectedParty = Some(
             SippLandConnectedParty(
               1,
@@ -122,8 +125,9 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
-        etmpDataWithLandConnectedTx.copy(landConnectedParty = None),
+        etmpDataWithLandConnectedTx.copy(landConnectedParty = None, status = SectionStatus.Changed),
         etmpDataWithLandConnectedTx.copy(
+          status = SectionStatus.New,
           memberDetails = MemberDetails(
             firstName = "firstName",
             lastName = "lastName",

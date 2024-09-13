@@ -71,12 +71,13 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
   "merge" should {
     "put new member data if there is no previous data" in {
-      val testEtmpData = etmpData.copy(otherAssetsConnectedParty = None)
+      val testEtmpData = etmpData.copy(tangibleProperty = None)
 
       val result = transformer.merge(NonEmptyList.of(sippTangibleApi), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           tangibleProperty = Some(
             SippTangibleProperty(
               1,
@@ -104,7 +105,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     }
 
-    "replace data for a single member when member match is found" in {
+    "update data for a single member when member match is found" in {
       val updateValues = sippTangibleApi.copy(
         acquiredFromName = "test2"
       )
@@ -112,6 +113,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           tangibleProperty = Some(
             SippTangibleProperty(
               1,
@@ -144,7 +146,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
       val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(tangibleProperty = None), // No more tx for first member :/
+        etmpData.copy(tangibleProperty = None, status = SectionStatus.Changed), // No more tx for first member :/
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
