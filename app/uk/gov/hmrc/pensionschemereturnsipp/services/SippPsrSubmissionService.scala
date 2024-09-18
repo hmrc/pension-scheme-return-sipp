@@ -400,6 +400,26 @@ class SippPsrSubmissionService @Inject()(
       }
   }
 
+  def createEmptySippPsr(
+    reportDetails: ReportDetails,
+    pensionSchemeId: PensionSchemeId
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] = {
+    val request = SippPsrSubmissionEtmpRequest(
+      reportDetails = reportDetails.transformInto[EtmpSippReportDetails],
+      accountingPeriodDetails = None,
+      memberAndTransactions = None,
+      psrDeclaration = None
+    )
+    submitWithRequest(
+      JourneyType.Standard,
+      pstr = reportDetails.pstr,
+      pensionSchemeId = pensionSchemeId,
+      thunk = Future.successful(request),
+      maybeTaxYear = Some(reportDetails.taxYearDateRange),
+      maybeSchemeName = reportDetails.schemeName
+    )
+  }
+
   def getSippPsr(
     pstr: String,
     optFbNumber: Option[String],
