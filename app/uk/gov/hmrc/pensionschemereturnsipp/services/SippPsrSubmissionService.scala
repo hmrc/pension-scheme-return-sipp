@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, MinimalDetailsError, PsrConnector}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api._
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
@@ -405,7 +405,7 @@ class SippPsrSubmissionService @Inject()(
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[HttpResponse] = {
     val request = SippPsrSubmissionEtmpRequest(
-      reportDetails = reportDetails.transformInto[EtmpSippReportDetails],
+      reportDetails = reportDetails.transformInto[EtmpSippReportDetails].copy(memberTransactions = YesNo.No),
       accountingPeriodDetails = None,
       memberAndTransactions = None,
       psrDeclaration = None
