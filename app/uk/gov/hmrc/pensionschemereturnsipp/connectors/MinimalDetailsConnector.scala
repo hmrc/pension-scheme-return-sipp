@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
-import cats.implicits.toFlatMapOps
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.http.Status.{FORBIDDEN, NOT_FOUND}
@@ -59,20 +58,6 @@ class MinimalDetailsConnectorImpl @Inject()(appConfig: AppConfig, http: HttpClie
           Left(DetailsNotFound)
         case e @ WithStatusCode(FORBIDDEN) if e.message.contains(Constants.delimitedPSA) =>
           Left(DelimitedAdmin)
-      }
-      .flatTap {
-        case Left(err) =>
-          Future.successful(logger.error(s"Failed to fetch minimal details with error $err"))
-        case Right(minimalDetails) =>
-          Future.successful(
-            logger.info(s"""Fetched minimal details:
-               |  individualDetails: ${minimalDetails.individualDetails.mkString}
-               |  email: ${minimalDetails.email}
-               |  organisationName: ${minimalDetails.organisationName.mkString}
-               |  rlsFlag: ${minimalDetails.rlsFlag}
-               |  deceasedFlag: ${minimalDetails.deceasedFlag}
-               |  isPsaSuspended: ${minimalDetails.isPsaSuspended}""".stripMargin)
-          )
       }
       .tapError(t => Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}")))
 }
