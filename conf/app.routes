@@ -1,5 +1,6 @@
 # microservice specific routes
 
+POST   /psr/empty/sipp                           uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.createEmptySippPsr()
 POST   /psr/sipp                                 uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.submitSippPsr(journeyType: JourneyType)
 GET    /psr/sipp/:pstr                           uk.gov.hmrc.pensionschemereturnsipp.controllers.SippPsrSubmitController.getSippPsr(pstr: String, fbNumber: Option[String], periodStartDate: Option[String], psrVersion: Option[String])
 
