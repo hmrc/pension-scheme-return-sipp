@@ -18,9 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 

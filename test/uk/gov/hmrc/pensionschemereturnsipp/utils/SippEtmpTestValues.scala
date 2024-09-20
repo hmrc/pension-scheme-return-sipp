@@ -204,7 +204,7 @@ trait SippEtmpTestValues {
     loanRecipientName = "Long Loan Recipient Name",
     dateOfLoan = sampleDate,
     amountOfLoan = 9999999.99,
-    loanConnectedParty = YesNo.Yes,
+    loanConnectedParty = Yes,
     repayDate = sampleDate,
     interestRate = 11.1,
     loanSecurity = Yes,
