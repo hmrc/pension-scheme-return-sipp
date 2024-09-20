@@ -228,20 +228,34 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(Some(samplePsrAssetsExistenceResponse)))
+        .thenReturn(Future.successful(Some(samplePsrAssetsExistenceResponse).asRight[Unit]))
 
       val result = controller.getPsrAssetsExistence("testPstr", Some("fbNumber"), None, None)(fakeRequest)
       status(result) mustBe Status.OK
     }
 
-    "return 404" in {
+    "return 200 when the PSR exists but has no members or transactions" in {
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
         .thenReturn(
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(Future.successful(None.asRight[Unit]))
+
+      val result =
+        controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
+      status(result) mustBe Status.OK
+    }
+
+    "return 404 when the PSR does not exist" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(().asLeft))
 
       val result =
         controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)

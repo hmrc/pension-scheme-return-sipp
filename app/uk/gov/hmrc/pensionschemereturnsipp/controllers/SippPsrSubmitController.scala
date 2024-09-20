@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
+import cats.implicits.toFunctorOps
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -26,6 +27,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,
+  ReportDetails,
   UpdateMemberDetailsRequest
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
@@ -54,6 +56,17 @@ class SippPsrSubmitController @Inject()(
 
   private def requiredBody(implicit request: Request[AnyContent]): JsValue =
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
+
+  def createEmptySippPsr() = Action.async { implicit request =>
+    authorisedAsPsrUser { user =>
+      val submissionRequest = requiredBody.as[ReportDetails]
+      logger.debug(s"Submitting empty SIPP PSR - $request")
+
+      sippPsrSubmissionService
+        .createEmptySippPsr(submissionRequest, user.psaPspId)
+        .as(Created)
+    }
+  }
 
   def submitSippPsr(journeyType: JourneyType): Action[AnyContent] = Action.async { implicit request =>
     authorisedAsPsrUser { user =>
@@ -192,8 +205,8 @@ class SippPsrSubmitController @Inject()(
         s"Retrieving SIPP PSR Summary - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
       sippPsrSubmissionService.getPsrAssetsExistence(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
-        case None => NotFound
-        case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+        case Left(_) => NotFound
+        case Right(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
       }
     }
   }

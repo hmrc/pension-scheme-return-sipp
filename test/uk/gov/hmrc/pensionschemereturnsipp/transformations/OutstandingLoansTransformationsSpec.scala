@@ -21,7 +21,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -36,7 +35,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       loanRecipientName = "test",
       dateOfLoan = LocalDate.of(2020, 1, 1),
       amountOfLoan = 1,
-      loanConnectedParty = Connected,
+      loanConnectedParty = Yes,
       repayDate = LocalDate.of(2020, 1, 1),
       interestRate = 1,
       loanSecurity = Yes,
@@ -108,7 +107,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     loanRecipientName = "test",
                     dateOfLoan = LocalDate.of(2020, 1, 1),
                     amountOfLoan = 1,
-                    loanConnectedParty = Connected,
+                    loanConnectedParty = Yes,
                     repayDate = LocalDate.of(2020, 1, 1),
                     interestRate = 1,
                     loanSecurity = Yes,
@@ -143,7 +142,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     loanRecipientName = "test2",
                     dateOfLoan = LocalDate.of(2020, 1, 1),
                     amountOfLoan = 1,
-                    loanConnectedParty = Connected,
+                    loanConnectedParty = Yes,
                     repayDate = LocalDate.of(2020, 1, 1),
                     interestRate = 1,
                     loanSecurity = Yes,
