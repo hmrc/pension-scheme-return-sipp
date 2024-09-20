@@ -30,6 +30,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.PsrAssetCountsResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
@@ -232,6 +234,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       val result = controller.getPsrAssetsExistence("testPstr", Some("fbNumber"), None, None)(fakeRequest)
       status(result) mustBe Status.OK
+
+      val response = contentAsJson(result).as[OptionalResponse[PsrAssetCountsResponse]](OptionalResponse.formatter())
+      response.response mustBe Some(samplePsrAssetsExistenceResponse)
     }
 
     "return 200 when the PSR exists but has no members or transactions" in {
@@ -246,6 +251,8 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result =
         controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.OK
+      val response = contentAsJson(result).as[OptionalResponse[PsrAssetCountsResponse]](OptionalResponse.formatter())
+      response.response mustBe None
     }
 
     "return 404 when the PSR does not exist" in {
