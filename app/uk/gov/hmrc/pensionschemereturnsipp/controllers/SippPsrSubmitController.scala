@@ -205,8 +205,8 @@ class SippPsrSubmitController @Inject()(
         s"Retrieving SIPP PSR Summary - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
       sippPsrSubmissionService.getPsrAssetsExistence(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
-        case None => NotFound
-        case Some(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+        case Left(_) => NotFound
+        case Right(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
       }
     }
   }

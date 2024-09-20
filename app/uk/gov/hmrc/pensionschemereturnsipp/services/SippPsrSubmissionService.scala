@@ -454,10 +454,15 @@ class SippPsrSubmissionService @Inject()(
   )(
     implicit headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
-  ): Future[Option[PsrAssetCountsResponse]] =
-    psrConnector
-      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(_.flatMap(psrAssetsExistenceTransformer.transform))
+  ): Future[Either[Unit, Option[PsrAssetCountsResponse]]] =
+    (for {
+      psr <- EitherT(
+        psrConnector
+          .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+          .map(_.toRight(()))
+      )
+      counts <- EitherT.pure[Future, Unit](psrAssetsExistenceTransformer.transform(psr))
+    } yield counts).value
 
   def updateMemberDetails(
     journeyType: JourneyType,
