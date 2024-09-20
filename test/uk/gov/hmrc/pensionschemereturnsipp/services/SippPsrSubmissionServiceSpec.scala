@@ -438,7 +438,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   }
 
   "getAssetsExistence" should {
-    "successfully return Member Details" in {
+    "successfully return assets" in {
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
 
@@ -446,7 +446,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       val result = service.getPsrAssetsExistence(pstr, Some("test"), None, None).futureValue
 
-      result mustBe Some(samplePsrAssetsExistenceResponse)
+      result mustBe Right(Some(samplePsrAssetsExistenceResponse))
     }
   }
 }
