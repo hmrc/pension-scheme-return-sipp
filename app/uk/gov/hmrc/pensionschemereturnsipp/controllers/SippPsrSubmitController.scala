@@ -24,6 +24,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
   PsrSubmittedResponse,
@@ -206,7 +207,8 @@ class SippPsrSubmitController @Inject()(
       )
       sippPsrSubmissionService.getPsrAssetsExistence(pstr, optFbNumber, optPeriodStartDate, optPsrVersion).map {
         case Left(_) => NotFound
-        case Right(sippPsrSubmission) => Ok(Json.toJson(sippPsrSubmission))
+        case Right(sippPsrSubmission) =>
+          Ok(Json.toJson(OptionalResponse(sippPsrSubmission))(OptionalResponse.formatter()))
       }
     }
   }
