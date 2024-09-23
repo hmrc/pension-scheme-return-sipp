@@ -30,11 +30,12 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
-import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
   PSRAssetsExistenceTransformer,
@@ -549,4 +550,112 @@ class SippPsrSubmissionService @Inject()(
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
       }
+
+  def deleteAssets(
+    journey: Journey,
+    journeyType: JourneyType,
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    pensionSchemeId: PensionSchemeId
+  )(
+    implicit hc: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Unit] =
+    psrConnector
+      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .flatMap {
+        case Some(response) =>
+          val updatedMembers = response.memberAndTransactions.flatMap { mTxs =>
+            NonEmptyList.fromList(mTxs.map(mTx => deleteAssetForJourney(journey, mTx)))
+          }
+
+          val updateRequest = SippPsrSubmissionEtmpRequest(
+            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
+            accountingPeriodDetails = response.accountingPeriodDetails,
+            memberAndTransactions = updatedMembers,
+            psrDeclaration = response.psrDeclaration.map(
+              declaration =>
+                declaration.copy(
+                  psaDeclaration =
+                    declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
+                  pspDeclaration =
+                    declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
+                )
+            )
+          )
+
+          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_ => ())
+
+        case None =>
+          Future.failed(new Exception(s"Submission with pstr $pstr not found"))
+      }
+
+  private def deleteAssetForJourney(journey: Journey, member: EtmpMemberAndTransactions): EtmpMemberAndTransactions = {
+    var assetDeleted = false
+    if (member.status == Deleted)
+      member
+    else {
+      // First, delete the specific asset based on the journey
+      val updatedMember = journey match {
+        case Journey.InterestInLandOrProperty =>
+          if (member.landConnectedParty.isDefined) {
+            assetDeleted = true
+            member.copy(landConnectedParty = None)
+          } else member
+
+        case Journey.ArmsLengthLandOrProperty =>
+          if (member.landArmsLength.isDefined) {
+            assetDeleted = true
+            member.copy(landArmsLength = None)
+          } else member
+
+        case Journey.TangibleMoveableProperty =>
+          if (member.tangibleProperty.isDefined) {
+            assetDeleted = true
+            member.copy(tangibleProperty = None)
+          } else member
+
+        case Journey.OutstandingLoans =>
+          if (member.loanOutstanding.isDefined) {
+            assetDeleted = true
+            member.copy(loanOutstanding = None)
+          } else member
+
+        case Journey.UnquotedShares =>
+          if (member.unquotedShares.isDefined) {
+            assetDeleted = true
+            member.copy(unquotedShares = None)
+          } else member
+
+        case Journey.AssetFromConnectedParty =>
+          if (member.otherAssetsConnectedParty.isDefined) {
+            assetDeleted = true
+            member.copy(otherAssetsConnectedParty = None)
+          } else member
+      }
+
+      // If no asset was actually deleted, return the original member unchanged
+      if (!assetDeleted) member
+      else {
+        // If all assets are None, mark as Deleted, otherwise mark as Changed
+        if (noRemainingAssets(updatedMember)) {
+          updatedMember.copy(status = SectionStatus.Deleted, version = None)
+        } else {
+          updatedMember.copy(status = SectionStatus.Changed, version = None)
+        }
+      }
+    }
+
+  }
+
+  private def noRemainingAssets(updatedMember: EtmpMemberAndTransactions): Boolean =
+    updatedMember.landConnectedParty.isEmpty &&
+      updatedMember.landArmsLength.isEmpty &&
+      updatedMember.tangibleProperty.isEmpty &&
+      updatedMember.loanOutstanding.isEmpty &&
+      updatedMember.unquotedShares.isEmpty &&
+      updatedMember.otherAssetsConnectedParty.isEmpty
+
 }

@@ -255,7 +255,7 @@ trait SippEtmpTestValues {
     transactionDetails = Some(List(sippLoanOutstandingTransactionalDetail))
   )
 
-  private val sippUnquotedShares = SippUnquotedShares(
+  val sippUnquotedShares = SippUnquotedShares(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippUnquotedSharesTransactionalDetail))

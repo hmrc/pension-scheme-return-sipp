@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.config
 import cats.implicits.toBifunctorOps
 import play.api.mvc.QueryStringBindable
-import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 
 object Binders {
 
@@ -32,5 +32,18 @@ object Binders {
 
     def unbind(key: String, journeyType: JourneyType): String =
       stringBinder.unbind(key, journeyType.entryName)
+  }
+
+  implicit def journeyBindable(
+    implicit stringBinder: QueryStringBindable[String]
+  ): QueryStringBindable[Journey] = new QueryStringBindable[Journey] {
+    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Journey]] =
+      stringBinder.bind(key, params).map {
+        case Right(value) => Journey.withNameInsensitiveEither(value).leftMap(_ => s"Invalid journey: $value")
+        case Left(error) => Left(error)
+      }
+
+    def unbind(key: String, journey: Journey): String =
+      stringBinder.unbind(key, journey.entryName)
   }
 }
