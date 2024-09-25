@@ -41,7 +41,10 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, Acco
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.{
+  SippPsrJourneySubmissionEtmpResponse,
+  SippPsrSubmissionEtmpResponse
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
   PSRAssetsExistenceTransformer,
@@ -108,7 +111,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
   "submitLandOrConnectedProperty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
-      val response = HttpResponse(200, "OK")
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
         fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
 
@@ -127,8 +131,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(
         service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
-      ) { result: HttpResponse =>
-        result mustBe response
+      ) { result: SippPsrJourneySubmissionEtmpResponse =>
+        result mustBe sippResponse
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
@@ -145,7 +149,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
 
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
-      val response = HttpResponse(200, "OK")
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
         memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
         accountingPeriodDetails = None
@@ -166,8 +171,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(
         service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
-      ) { result: HttpResponse =>
-        result mustBe response
+      ) { result: SippPsrJourneySubmissionEtmpResponse =>
+        result mustBe sippResponse
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
@@ -247,7 +252,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     )
 
     "successfully submit only minimal required SIPP submission details" in {
-      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val expectedResponse = HttpResponse(200, sippResponse)
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(etmpResponse.some))
@@ -267,8 +273,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
     "successfully submit SIPP submission with correctly set declaration for PSA" in {
       val submittedBy = PSA
-
-      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val expectedResponse = HttpResponse(200, sippResponse)
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(etmpResponse.some))
@@ -297,7 +303,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "successfully submit SIPP submission with correctly set declaration for PSP" in {
       val submittedBy = PSP
 
-      val expectedResponse = HttpResponse(200, Json.obj(), Map.empty)
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val expectedResponse = HttpResponse(200, sippResponse)
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(etmpResponse.some))
@@ -382,7 +389,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
   "delete member" should {
     "successfully delete" in {
-      val response = HttpResponse(200, "OK")
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val response = HttpResponse(200, sippResponse)
       val sampleResponse = SippPsrSubmissionEtmpResponse(
         reportDetails = EtmpSippReportDetails(
           pstr,

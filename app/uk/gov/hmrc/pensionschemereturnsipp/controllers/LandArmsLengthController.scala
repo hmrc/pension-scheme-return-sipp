@@ -57,9 +57,9 @@ class LandArmsLengthController @Inject()(
         )
         .map { response =>
           logger.debug(
-            message = s"Submit Land Arms Length PSR details - response: ${response.status}, body: ${response.body}"
+            message = s"Submit Land Arms Length PSR details - new form bundle number: ${response.formBundleNumber}"
           )
-          NoContent
+          Created(Json.toJson(response))
         }
     }
   }
