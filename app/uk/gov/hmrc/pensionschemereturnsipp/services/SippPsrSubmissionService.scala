@@ -37,11 +37,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
-  PSRAssetsExistenceTransformer,
-  PSRMemberDetailsTransformer,
-  PSRSubmissionTransformer
-}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRAssetsExistenceTransformer, PSRMemberDetailsTransformer, PSRSubmissionTransformer}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -593,60 +589,41 @@ class SippPsrSubmissionService @Inject()(
       }
 
   private def deleteAssetForJourney(journey: Journey, member: EtmpMemberAndTransactions): EtmpMemberAndTransactions = {
-    var assetDeleted = false
-    if (member.status == Deleted)
-      member
-    else {
-      // First, delete the specific asset based on the journey
-      val updatedMember = journey match {
-        case Journey.InterestInLandOrProperty =>
-          if (member.landConnectedParty.isDefined) {
-            assetDeleted = true
-            member.copy(landConnectedParty = None)
-          } else member
+    if (member.status == Deleted) return member
 
-        case Journey.ArmsLengthLandOrProperty =>
-          if (member.landArmsLength.isDefined) {
-            assetDeleted = true
-            member.copy(landArmsLength = None)
-          } else member
+    // Attempt to delete the specific asset based on the journey
+    val updatedMember = journey match {
+      case Journey.InterestInLandOrProperty =>
+        member.landConnectedParty.map(_ => member.copy(landConnectedParty = None))
 
-        case Journey.TangibleMoveableProperty =>
-          if (member.tangibleProperty.isDefined) {
-            assetDeleted = true
-            member.copy(tangibleProperty = None)
-          } else member
+      case Journey.ArmsLengthLandOrProperty =>
+        member.landArmsLength.map(_ => member.copy(landArmsLength = None))
 
-        case Journey.OutstandingLoans =>
-          if (member.loanOutstanding.isDefined) {
-            assetDeleted = true
-            member.copy(loanOutstanding = None)
-          } else member
+      case Journey.TangibleMoveableProperty =>
+        member.tangibleProperty.map(_ => member.copy(tangibleProperty = None))
 
-        case Journey.UnquotedShares =>
-          if (member.unquotedShares.isDefined) {
-            assetDeleted = true
-            member.copy(unquotedShares = None)
-          } else member
+      case Journey.OutstandingLoans =>
+        member.loanOutstanding.map(_ => member.copy(loanOutstanding = None))
 
-        case Journey.AssetFromConnectedParty =>
-          if (member.otherAssetsConnectedParty.isDefined) {
-            assetDeleted = true
-            member.copy(otherAssetsConnectedParty = None)
-          } else member
-      }
+      case Journey.UnquotedShares =>
+        member.unquotedShares.map(_ => member.copy(unquotedShares = None))
 
-      // If no asset was actually deleted, return the original member unchanged
-      if (!assetDeleted) member
-      else {
-        // If all assets are None, mark as Deleted, otherwise mark as Changed
-        if (noRemainingAssets(updatedMember)) {
-          updatedMember.copy(status = SectionStatus.Deleted, version = None)
-        } else {
-          updatedMember.copy(status = SectionStatus.Changed, version = None)
-        }
-      }
+      case Journey.AssetFromConnectedParty =>
+        member.otherAssetsConnectedParty.map(_ => member.copy(otherAssetsConnectedParty = None))
     }
+
+    // Check if an asset was deleted
+    updatedMember match {
+      case Some(m) if noRemainingAssets(m) =>
+        m.copy(status = SectionStatus.Deleted, version = None)
+
+      case Some(m) =>
+        m.copy(status = SectionStatus.Changed, version = None)
+
+      case None =>
+        member // No changes were made, return the original member
+    }
+  }
 
   }
 
