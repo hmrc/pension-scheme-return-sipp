@@ -613,13 +613,15 @@ class SippPsrSubmissionService @Inject()(
     }
 
     // Check if an asset was deleted and determine the status
-    updatedMember.map { m =>
-      if (noRemainingAssets(m)) {
-        m.copy(status = SectionStatus.Deleted, version = None)
-      } else {
-        m.copy(status = SectionStatus.Changed, version = None)
+    updatedMember
+      .map { m =>
+        if (noRemainingAssets(m)) {
+          m.copy(status = SectionStatus.Deleted, version = None)
+        } else {
+          m.copy(status = SectionStatus.Changed, version = None)
+        }
       }
-    }.getOrElse(member) // Return original member if no asset was deleted
+      .getOrElse(member) // Return original member if no asset was deleted
   }
 
   private def noRemainingAssets(updatedMember: EtmpMemberAndTransactions): Boolean =
