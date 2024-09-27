@@ -622,8 +622,6 @@ class SippPsrSubmissionService @Inject()(
     }.getOrElse(member) // Return original member if no asset was deleted
   }
 
-  }
-
   private def noRemainingAssets(updatedMember: EtmpMemberAndTransactions): Boolean =
     updatedMember.landConnectedParty.isEmpty &&
       updatedMember.landArmsLength.isEmpty &&
