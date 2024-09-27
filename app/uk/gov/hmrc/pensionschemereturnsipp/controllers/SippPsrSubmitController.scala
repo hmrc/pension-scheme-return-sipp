@@ -23,7 +23,6 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
@@ -33,6 +32,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -135,6 +135,39 @@ class SippPsrSubmitController @Inject()(
         case None =>
           Future.successful(BadRequest("Invalid personal details"))
       }
+    }
+  }
+
+  def deleteAssets(
+    pstr: String,
+    journey: Journey,
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { user =>
+      logger.debug(
+        s"Deleting assets for $journey - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService
+        .deleteAssets(
+          journey,
+          journeyType,
+          pstr,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          user.psaPspId
+        )
+        .map { _ =>
+          NoContent
+        }
+        .recover {
+          case ex: Exception =>
+            logger.error(s"Failed to delete assets for $journey with pstr: $pstr", ex)
+            BadRequest("Invalid delete asset request")
+        }
     }
   }
 
