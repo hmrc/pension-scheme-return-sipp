@@ -612,17 +612,14 @@ class SippPsrSubmissionService @Inject()(
         member.otherAssetsConnectedParty.map(_ => member.copy(otherAssetsConnectedParty = None))
     }
 
-    // Check if an asset was deleted
-    updatedMember match {
-      case Some(m) if noRemainingAssets(m) =>
+    // Check if an asset was deleted and determine the status
+    updatedMember.map { m =>
+      if (noRemainingAssets(m)) {
         m.copy(status = SectionStatus.Deleted, version = None)
-
-      case Some(m) =>
+      } else {
         m.copy(status = SectionStatus.Changed, version = None)
-
-      case None =>
-        member // No changes were made, return the original member
-    }
+      }
+    }.getOrElse(member) // Return original member if no asset was deleted
   }
 
   }
