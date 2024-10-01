@@ -41,8 +41,8 @@ class OutstandingLoansTransformer @Inject()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            loanOutstanding = maybeTransactions.map(
-              transactions => SippLoanOutstanding(transactions.length, None, Some(transactions.toList))
+            loanOutstanding = maybeTransactions.map(transactions =>
+              SippLoanOutstanding(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -54,11 +54,10 @@ class OutstandingLoansTransformer @Inject()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.loanOutstanding
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(loans => transformTransactionDetails(member, transaction.noOfTransactions, loans))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(loans => transformTransactionDetails(member, transaction.noOfTransactions, loans))
           )
           .getOrElse(List.empty)
       }

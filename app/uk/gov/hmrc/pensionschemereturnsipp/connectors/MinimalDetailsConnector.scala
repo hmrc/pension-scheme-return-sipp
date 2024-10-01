@@ -31,7 +31,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.utils.FutureUtils.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class MinimalDetailsConnectorImpl @Inject()(appConfig: AppConfig, http: HttpClient) extends MinimalDetailsConnector {
+class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpClient) extends MinimalDetailsConnector {
 
   private val url = s"${appConfig.pensionsAdministrator}/pension-administrator/get-minimal-psa"
 

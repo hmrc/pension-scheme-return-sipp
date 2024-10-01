@@ -37,38 +37,35 @@ object EtmpMemberAndTransactionsUpdater {
   ): List[EtmpMemberAndTransactions] = {
     implicit val localDateOrder: Order[LocalDate] = (x, y) => x.compareTo(y)
 
-    val updatesByMember = updates.groupBy(
-      k => (k.nameDOB.firstName, k.nameDOB.lastName, k.nameDOB.dob, k.nino.nino)
-    )
+    val updatesByMember = updates.groupBy(k => (k.nameDOB.firstName, k.nameDOB.lastName, k.nameDOB.dob, k.nino.nino))
 
     val etmpDataByMember =
       etmpData
-        .groupBy(
-          k => (k.memberDetails.firstName, k.memberDetails.lastName, k.memberDetails.dateOfBirth, k.memberDetails.nino)
+        .groupBy(k =>
+          (k.memberDetails.firstName, k.memberDetails.lastName, k.memberDetails.dateOfBirth, k.memberDetails.nino)
         )
         .view
         .mapValues(_.head)
 
-    val updatedEtmpDataByMember = etmpDataByMember.map {
-      case (memberKey, etmpTxsByMember) =>
-        val update: Option[NonEmptyList[EtmpType]] = updatesByMember
-          .get(memberKey)
-          .map(_.map(transformer))
+    val updatedEtmpDataByMember = etmpDataByMember.map { case (memberKey, etmpTxsByMember) =>
+      val update: Option[NonEmptyList[EtmpType]] = updatesByMember
+        .get(memberKey)
+        .map(_.map(transformer))
 
-        val extracted = extractor(etmpTxsByMember)
-        val updatedList = update.asList
+      val extracted = extractor(etmpTxsByMember)
+      val updatedList = update.asList
 
-        if (extracted.diff(updatedList).nonEmpty || updatedList.diff(extracted).nonEmpty) {
-          modifier(update, etmpTxsByMember)
-            .pipe { modified =>
-              if (areJourneysEmpty(modified))
-                modified.copy(status = Deleted, version = None)
-              else
-                modified.copy(status = Changed, version = None)
-            }
-        } else {
-          etmpTxsByMember // No changes to transactions, leaving `status` as is
-        }
+      if (extracted.diff(updatedList).nonEmpty || updatedList.diff(extracted).nonEmpty) {
+        modifier(update, etmpTxsByMember)
+          .pipe { modified =>
+            if (areJourneysEmpty(modified))
+              modified.copy(status = Deleted, version = None)
+            else
+              modified.copy(status = Changed, version = None)
+          }
+      } else {
+        etmpTxsByMember // No changes to transactions, leaving `status` as is
+      }
     }.toList
 
     val newMembers = updatesByMember.keySet.diff(etmpDataByMember.keySet)

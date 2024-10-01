@@ -43,12 +43,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
-class SippPsrSubmitController @Inject()(
+class SippPsrSubmitController @Inject() (
   cc: ControllerComponents,
   sippPsrSubmissionService: SippPsrSubmissionService,
   val authConnector: AuthConnector
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
@@ -74,7 +74,7 @@ class SippPsrSubmitController @Inject()(
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
-      //TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
+      // TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
       val submitterID = user.psaPspId
 
       sippPsrSubmissionService
@@ -127,10 +127,9 @@ class SippPsrSubmitController @Inject()(
             .map { _ =>
               NoContent
             }
-            .recover {
-              case ex: Exception =>
-                logger.error(s"Failed to delete member with pstr $pstr", ex)
-                BadRequest("Invalid personal details")
+            .recover { case ex: Exception =>
+              logger.error(s"Failed to delete member with pstr $pstr", ex)
+              BadRequest("Invalid personal details")
             }
         case None =>
           Future.successful(BadRequest("Invalid personal details"))
@@ -163,10 +162,9 @@ class SippPsrSubmitController @Inject()(
         .map { _ =>
           NoContent
         }
-        .recover {
-          case ex: Exception =>
-            logger.error(s"Failed to delete assets for $journey with pstr: $pstr", ex)
-            BadRequest("Invalid delete asset request")
+        .recover { case ex: Exception =>
+          logger.error(s"Failed to delete assets for $journey with pstr: $pstr", ex)
+          BadRequest("Invalid delete asset request")
         }
     }
   }

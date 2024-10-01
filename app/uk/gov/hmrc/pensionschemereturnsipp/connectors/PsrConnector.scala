@@ -46,13 +46,13 @@ import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-class PsrConnector @Inject()(
+class PsrConnector @Inject() (
   config: AppConfig,
   jsonPayloadSchemaValidator: JSONSchemaValidator,
   http: HttpClient,
   apiAuditUtil: ApiAuditUtil
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends HttpErrorFunctions
     with HttpResponseHelper
     with Logging {
@@ -65,8 +65,8 @@ class PsrConnector @Inject()(
     request: SippPsrSubmissionEtmpRequest,
     maybeTaxYear: Option[DateRange],
     maybeSchemeName: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[HttpResponse] = {
 
@@ -139,8 +139,8 @@ class PsrConnector @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[SippPsrSubmissionEtmpResponse]] = {
 
