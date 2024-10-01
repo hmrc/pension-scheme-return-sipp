@@ -32,7 +32,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   Versions,
   MemberDetails => ApiMemberDetails
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
@@ -269,7 +268,7 @@ trait TestValues {
               "Loyds Ltd",
               LocalDate.parse("2023-03-14"),
               999.99,
-              Connected,
+              Yes,
               LocalDate.parse("2023-03-14"),
               10,
               No,

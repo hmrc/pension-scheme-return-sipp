@@ -51,7 +51,7 @@ class EmailSubmissionService @Inject()(
       email <- sendEmail(
         pensionSchemeId,
         reportDetails.pstr,
-        minimumDetails.individualDetails.map(_.fullName),
+        minimumDetails.individualDetails.map(_.fullName).orElse(minimumDetails.organisationName),
         minimumDetails.email,
         schemeName,
         reportDetails.periodStart,

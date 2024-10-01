@@ -30,12 +30,13 @@ trait HttpResponseHelper extends HttpErrorFunctions {
   def handleErrorResponse(httpMethod: String, url: String)(response: HttpResponse): Nothing =
     response.status match {
       case BAD_REQUEST =>
-        if (response.body.contains("INVALID_PAYLOAD"))
-          logger.warn(s"INVALID_PAYLOAD returned from url $url")
+        logger.error(s"BAD_REQUEST returned from url $url")
         throw new BadRequestException(badRequestMessage(httpMethod, url, response.body))
       case NOT_FOUND =>
+        logger.error(s"NOT_FOUND returned from url $url")
         throw new NotFoundException(notFoundMessage(httpMethod, url, response.body))
       case status if is4xx(status) =>
+        logger.error(s"$status returned from url $url")
         throw UpstreamErrorResponse(
           upstreamResponseMessage(httpMethod, url, status, response.body),
           status,
@@ -43,6 +44,7 @@ trait HttpResponseHelper extends HttpErrorFunctions {
           response.headers
         )
       case status if is5xx(status) =>
+        logger.error(s"$status returned from url $url")
         throw UpstreamErrorResponse(
           upstreamResponseMessage(httpMethod, url, status, response.body),
           status,

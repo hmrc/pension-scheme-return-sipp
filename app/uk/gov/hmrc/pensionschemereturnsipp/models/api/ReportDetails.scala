@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 
 import java.time.LocalDate
@@ -28,7 +29,9 @@ case class ReportDetails(
   periodEnd: LocalDate,
   schemeName: Option[String],
   version: Option[String]
-)
+) {
+  def taxYearDateRange: DateRange = DateRange(periodStart, periodEnd)
+}
 
 object ReportDetails {
   implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]

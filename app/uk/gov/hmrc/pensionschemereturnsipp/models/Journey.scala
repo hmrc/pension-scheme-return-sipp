@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.common
+package uk.gov.hmrc.pensionschemereturnsipp.models
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus.Connected
 
-sealed abstract class ConnectionStatus(override val entryName: String) extends EnumEntry {
-  def toBoolean: Boolean = this == Connected
-}
+sealed abstract class Journey extends EnumEntry
 
-object ConnectionStatus extends Enum[ConnectionStatus] with PlayJsonEnum[ConnectionStatus] {
-  def apply(connected: Boolean): ConnectionStatus = if (connected) Connected else Unconnected
+object Journey extends Enum[Journey] with PlayJsonEnum[Journey] {
+  case object InterestInLandOrProperty extends Journey
 
-  case object Connected extends ConnectionStatus("01")
-  case object Unconnected extends ConnectionStatus("02")
+  case object ArmsLengthLandOrProperty extends Journey
 
-  override def values: IndexedSeq[ConnectionStatus] = findValues
+  case object TangibleMoveableProperty extends Journey
+
+  case object OutstandingLoans extends Journey
+
+  case object UnquotedShares extends Journey
+
+  case object AssetFromConnectedParty extends Journey
+
+  override def values: IndexedSeq[Journey] = findValues
 }

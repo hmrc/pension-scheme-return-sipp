@@ -40,7 +40,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   YesNo
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.ConnectionStatus._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -206,7 +205,7 @@ trait SippEtmpTestValues {
     loanRecipientName = "Long Loan Recipient Name",
     dateOfLoan = sampleDate,
     amountOfLoan = 9999999.99,
-    loanConnectedParty = Connected,
+    loanConnectedParty = YesNo.Yes,
     repayDate = sampleDate,
     interestRate = 11.1,
     loanSecurity = Yes,
@@ -256,7 +255,7 @@ trait SippEtmpTestValues {
     transactionDetails = Some(List(sippLoanOutstandingTransactionalDetail))
   )
 
-  private val sippUnquotedShares = SippUnquotedShares(
+  val sippUnquotedShares = SippUnquotedShares(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippUnquotedSharesTransactionalDetail))

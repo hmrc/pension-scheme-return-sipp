@@ -50,7 +50,8 @@ class EmailSubmissionServiceSpec
     "compose minimum details with email template parameters and send the request to the email api returning unit on success" in new TestScope {
       when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(minimumDetails.asRight))
       val reportDetails = sampleSippPsrSubmissionEtmpResponse.reportDetails
-      val psaName = minimumDetails.individualDetails.map(_.fullName).getOrElse("")
+      val psaName =
+        minimumDetails.individualDetails.map(_.fullName).orElse(minimumDetails.organisationName).getOrElse("")
       val schemeName = "SchemeName"
 
       val templateParams = Map(
