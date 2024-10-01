@@ -41,7 +41,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val getSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-sipp-psr")}"
   val getPsrVersionsUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-psr-versions")}"
 
-  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionsSchemeReturn")
+  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionSchemeReturn")
 
   val emailApiUrl: String = servicesConfig.baseUrl("email")
   val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
