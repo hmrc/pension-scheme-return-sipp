@@ -19,7 +19,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.LandOrConnectedPropertyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -45,19 +47,19 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                 List(
                   SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
-                    YesNo.Yes,
+                    Yes,
                     AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    RegistryDetails(YesNo.No, None, None),
+                    RegistryDetails(No, None, None),
                     "acquiredFromName",
                     10.0,
-                    YesNo.Yes,
-                    YesNo.Yes,
+                    Yes,
+                    Yes,
                     None,
-                    YesNo.Yes,
-                    YesNo.Yes,
+                    Yes,
+                    Yes,
                     None,
                     10.0,
-                    YesNo.Yes,
+                    Yes,
                     None
                   )
                 )
@@ -84,19 +86,19 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
                 List(
                   SippLandConnectedParty.TransactionDetail(
                     LocalDate.of(2020, 1, 1),
-                    YesNo.Yes,
+                    Yes,
                     AddressDetails("addressLine1", "addressLine2", None, None, None, None, "UK"),
-                    RegistryDetails(YesNo.No, None, None),
+                    RegistryDetails(No, None, None),
                     "test2",
                     10.0,
-                    YesNo.Yes,
-                    YesNo.Yes,
+                    Yes,
+                    Yes,
                     None,
-                    YesNo.Yes,
-                    YesNo.Yes,
+                    Yes,
+                    Yes,
                     None,
                     10.0,
-                    YesNo.Yes,
+                    Yes,
                     None
                   )
                 )
@@ -122,7 +124,7 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
-        etmpDataWithLandConnectedTx.copy(landConnectedParty = None),
+        etmpDataWithLandConnectedTx.copy(landConnectedParty = None, status = Deleted),
         etmpDataWithLandConnectedTx.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

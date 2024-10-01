@@ -18,8 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -34,12 +35,12 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       loanRecipientName = "test",
       dateOfLoan = LocalDate.of(2020, 1, 1),
       amountOfLoan = 1,
-      loanConnectedParty = YesNo.Yes,
+      loanConnectedParty = Yes,
       repayDate = LocalDate.of(2020, 1, 1),
       interestRate = 1,
-      loanSecurity = YesNo.Yes,
+      loanSecurity = Yes,
       capitalRepayments = 1,
-      arrearsOutstandingPrYears = YesNo.Yes,
+      arrearsOutstandingPrYears = Yes,
       arrearsOutstandingPrYearsAmt = Some(1),
       outstandingYearEndAmount = 1
     )
@@ -106,12 +107,12 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     loanRecipientName = "test",
                     dateOfLoan = LocalDate.of(2020, 1, 1),
                     amountOfLoan = 1,
-                    loanConnectedParty = YesNo.Yes,
+                    loanConnectedParty = Yes,
                     repayDate = LocalDate.of(2020, 1, 1),
                     interestRate = 1,
-                    loanSecurity = YesNo.Yes,
+                    loanSecurity = Yes,
                     capitalRepayments = 1,
-                    arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYears = Yes,
                     arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
@@ -141,12 +142,12 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
                     loanRecipientName = "test2",
                     dateOfLoan = LocalDate.of(2020, 1, 1),
                     amountOfLoan = 1,
-                    loanConnectedParty = YesNo.Yes,
+                    loanConnectedParty = Yes,
                     repayDate = LocalDate.of(2020, 1, 1),
                     interestRate = 1,
-                    loanSecurity = YesNo.Yes,
+                    loanSecurity = Yes,
                     capitalRepayments = 1,
-                    arrearsOutstandingPrYears = YesNo.Yes,
+                    arrearsOutstandingPrYears = Yes,
                     arrearsOutstandingPrYearsAmt = Some(1),
                     outstandingYearEndAmount = 1
                   )
@@ -171,7 +172,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(loanOutstanding = None),
+        etmpData.copy(loanOutstanding = None, status = Deleted),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
