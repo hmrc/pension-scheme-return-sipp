@@ -20,6 +20,7 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -173,7 +174,7 @@ class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTes
       val result = transformer.merge(NonEmptyList.of(testDataWithDifferentRow), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(loanOutstanding = None, status = SectionStatus.Changed),
+        etmpData.copy(loanOutstanding = None, status = Deleted),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

@@ -23,6 +23,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.TransactionDetail
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -191,7 +192,7 @@ class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValue
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(landArmsLength = None, status = SectionStatus.Changed),
+        etmpData.copy(landArmsLength = None, status = Deleted),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

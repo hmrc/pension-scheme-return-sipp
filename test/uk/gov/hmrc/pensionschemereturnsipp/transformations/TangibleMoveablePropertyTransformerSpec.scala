@@ -21,6 +21,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -146,7 +147,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
       val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(tangibleProperty = None, status = SectionStatus.Changed), // No more tx for first member :/
+        etmpData.copy(tangibleProperty = None, status = Deleted), // No more tx for first member :/
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

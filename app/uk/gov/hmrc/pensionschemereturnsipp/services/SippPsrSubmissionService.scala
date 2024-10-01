@@ -37,7 +37,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations._
-import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{PSRAssetsExistenceTransformer, PSRMemberDetailsTransformer, PSRSubmissionTransformer}
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetsExistenceTransformer,
+  PSRMemberDetailsTransformer,
+  PSRSubmissionTransformer
+}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}

@@ -22,6 +22,7 @@ import cats.implicits.{catsKernelStdOrderForOption, catsKernelStdOrderForString,
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.MemberKey
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.{Changed, Deleted}
 
 import java.time.LocalDate
 import scala.util.chaining.scalaUtilChainingOps
@@ -61,9 +62,9 @@ object EtmpMemberAndTransactionsUpdater {
           modifier(update, etmpTxsByMember)
             .pipe { modified =>
               if (areJourneysEmpty(modified))
-                modified.copy(status = SectionStatus.Changed, version = None)
+                modified.copy(status = Deleted, version = None)
               else
-                modified
+                modified.copy(status = Changed, version = None)
             }
         } else {
           etmpTxsByMember // No changes to transactions, leaving `status` as is

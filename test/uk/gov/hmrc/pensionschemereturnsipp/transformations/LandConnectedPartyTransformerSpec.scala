@@ -22,6 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, RegistryDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
@@ -126,9 +127,8 @@ class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestV
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpDataWithLandConnectedTx))
 
       result mustBe List(
-        etmpDataWithLandConnectedTx.copy(landConnectedParty = None, status = SectionStatus.Changed),
+        etmpDataWithLandConnectedTx.copy(landConnectedParty = None, status = Deleted),
         etmpDataWithLandConnectedTx.copy(
-          status = SectionStatus.New,
           memberDetails = MemberDetails(
             firstName = "firstName",
             lastName = "lastName",
