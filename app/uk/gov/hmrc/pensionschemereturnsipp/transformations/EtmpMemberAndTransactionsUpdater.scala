@@ -24,6 +24,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpMemberAndTransactions
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 
 import java.time.LocalDate
+import scala.util.chaining.scalaUtilChainingOps
 
 object EtmpMemberAndTransactionsUpdater {
   def merge[T <: MemberKey, EtmpType](
@@ -57,7 +58,13 @@ object EtmpMemberAndTransactionsUpdater {
         val updatedList = update.asList
 
         if (extracted.diff(updatedList).nonEmpty || updatedList.diff(extracted).nonEmpty) {
-          modifier(update, etmpTxsByMember.copy(status = SectionStatus.Changed)) // Changes to transactions, updating `status` to `Changed`
+          modifier(update, etmpTxsByMember)
+            .pipe { modified =>
+              if (areJourneysEmpty(modified))
+                modified.copy(status = SectionStatus.Changed, version = None)
+              else
+                modified
+            }
         } else {
           etmpTxsByMember // No changes to transactions, leaving `status` as is
         }
@@ -79,6 +86,14 @@ object EtmpMemberAndTransactionsUpdater {
 
     updatedEtmpDataByMember ++ newEtmpDataByMember
   }
+
+  private def areJourneysEmpty(trx: EtmpMemberAndTransactions): Boolean =
+    trx.landConnectedParty.forall(_.noOfTransactions == 0) &&
+      trx.landArmsLength.forall(_.noOfTransactions == 0) &&
+      trx.loanOutstanding.forall(_.noOfTransactions == 0) &&
+      trx.tangibleProperty.forall(_.noOfTransactions == 0) &&
+      trx.unquotedShares.forall(_.noOfTransactions == 0) &&
+      trx.otherAssetsConnectedParty.forall(_.noOfTransactions == 0)
 
   implicit class FlattenOps[A](val maybeNonEmptyList: Option[NonEmptyList[A]]) {
     def asList: List[A] = maybeNonEmptyList.toList.flatMap(_.toList)

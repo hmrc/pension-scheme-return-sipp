@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.MarketValue
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
@@ -54,11 +54,11 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
               assetDescription = "Asset Description",
               acquiredFromName = "acquiredFromName",
               totalCost = 20.0,
-              independentValuation = YesNo.Yes,
+              independentValuation = Yes,
               totalIncomeOrReceipts = 20.0, // Updated
               costOrMarket = MarketValue,
               costMarketValue = 20.0,
-              isPropertyDisposed = YesNo.No,
+              isPropertyDisposed = No,
               disposalDetails = None
             )
           )
@@ -89,11 +89,11 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
+                    independentValuation = Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
-                    isPropertyDisposed = YesNo.No,
+                    isPropertyDisposed = No,
                     disposalDetails = None
                   )
                 )
@@ -125,11 +125,11 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "test2",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
+                    independentValuation = Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
-                    isPropertyDisposed = YesNo.No,
+                    isPropertyDisposed = No,
                     disposalDetails = None
                   )
                 )
@@ -166,11 +166,11 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
                     assetDescription = "Asset Description",
                     acquiredFromName = "acquiredFromName",
                     totalCost = 20.0,
-                    independentValuation = YesNo.Yes,
+                    independentValuation = Yes,
                     totalIncomeOrReceipts = 20.0,
                     costOrMarket = MarketValue,
                     costMarketValue = 20.0,
-                    isPropertyDisposed = YesNo.No,
+                    isPropertyDisposed = No,
                     disposalDetails = None
                   )
                 )
