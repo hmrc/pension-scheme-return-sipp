@@ -65,7 +65,7 @@ class EmailConnector @Inject()(
     val encryptedUserName =
       URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(userName)).value, StandardCharsets.UTF_8.toString)
 
-    appConfig.emailCallback(
+    val emailCallback = appConfig.emailCallback(
       pensionSchemeId,
       requestId,
       encryptedEmail,
@@ -76,6 +76,8 @@ class EmailConnector @Inject()(
       taxYear,
       reportVersion
     )
+    logger.info(s"Callback URL: $emailCallback")
+    emailCallback
   }
 
   //scalastyle:off parameter.number
