@@ -23,13 +23,13 @@ import com.softwaremill.diffx.generic.AutoDerivation
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.time.{Millis, Span}
 import play.api.libs.json.Writes
-import uk.gov.hmrc.http.test.{HttpClientSupport, WireMockSupport}
+import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 
 abstract class BaseConnectorSpec
     extends BaseSpec
     with WireMockSupport
-    with HttpClientSupport
+    with HttpClientV2Support
     with DiffShouldMatcher
     with AutoDerivation {
 

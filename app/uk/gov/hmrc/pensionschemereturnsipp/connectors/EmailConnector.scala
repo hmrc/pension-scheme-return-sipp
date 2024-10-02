@@ -20,10 +20,11 @@ import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.crypto.{ApplicationCrypto, PlainText}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeId, SendEmailRequest}
 
@@ -33,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class EmailConnector @Inject() (
   appConfig: AppConfig,
-  http: HttpClient,
+  http: HttpClientV2,
   crypto: ApplicationCrypto
 ) {
 
@@ -105,7 +106,9 @@ class EmailConnector @Inject() (
     val jsonData = Json.toJson(sendEmailReq)
 
     http
-      .POST[JsValue, HttpResponse](emailServiceUrl, jsonData)
+      .post(url"$emailServiceUrl")
+      .withBody(jsonData)
+      .execute[HttpResponse]
       .map { response =>
         response.status match {
           case ACCEPTED =>

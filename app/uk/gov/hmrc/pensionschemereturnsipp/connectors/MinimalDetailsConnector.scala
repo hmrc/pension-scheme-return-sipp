@@ -21,7 +21,8 @@ import play.api.Logger
 import play.api.http.Status.{FORBIDDEN, NOT_FOUND}
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.pensionschemereturnsipp.config.{AppConfig, Constants}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.MinimalDetailsError.{DelimitedAdmin, DetailsNotFound}
 import uk.gov.hmrc.pensionschemereturnsipp.models.MinimalDetails
@@ -31,7 +32,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.utils.FutureUtils.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpClient) extends MinimalDetailsConnector {
+class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpClientV2) extends MinimalDetailsConnector {
 
   private val url = s"${appConfig.pensionsAdministrator}/pension-administrator/get-minimal-psa"
 
@@ -51,7 +52,12 @@ class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpCli
     idValue: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
     http
-      .GET[MinimalDetails](url, headers = Seq(idType -> idValue))
+      .get(url"$url")
+      .setHeader(idType -> idValue)
+      .execute[MinimalDetails]
+      .tapError(t =>
+        Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}", t))
+      )
       .map(Right(_))
       .recover {
         case e @ WithStatusCode(NOT_FOUND) if e.message.contains(Constants.detailsNotFound) =>
@@ -59,7 +65,6 @@ class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpCli
         case e @ WithStatusCode(FORBIDDEN) if e.message.contains(Constants.delimitedPSA) =>
           Left(DelimitedAdmin)
       }
-      .tapError(t => Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}")))
 }
 
 @ImplementedBy(classOf[MinimalDetailsConnectorImpl])
