@@ -29,6 +29,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.Generators.minimalDetailsGen
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, PsrConnector}
+import uk.gov.hmrc.pensionschemereturnsipp.models.Journey
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -434,6 +435,137 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
               accountingPeriodDetails = None,
               memberAndTransactions = Some(
                 NonEmptyList.one(etmpDataWithLandConnectedTx.copy(status = SectionStatus.Deleted, version = None))
+              ),
+              psrDeclaration = None
+            )
+          ),
+          any(),
+          any()
+        )(any(), any())
+      }
+    }
+  }
+
+  "delete assets" should {
+    "successfully delete a assets and mark member is changed if there is still some assets" in {
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val response = HttpResponse(200, sippResponse)
+      val sampleResponse = SippPsrSubmissionEtmpResponse(
+        reportDetails = EtmpSippReportDetails(
+          pstr,
+          EtmpPsrStatus.Compiled,
+          LocalDate.now(),
+          LocalDate.now(),
+          YesNo.Yes,
+          None
+        ),
+        accountingPeriodDetails = None,
+        memberAndTransactions = Some(
+          List(
+            etmpDataWithLandConnectedTx.copy(
+              unquotedShares = Some(sippUnquotedShares)
+            )
+          )
+        ),
+        psrDeclaration = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleResponse)))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      whenReady(
+        service.deleteAssets(
+          Journey.InterestInLandOrProperty,
+          Standard,
+          pstr,
+          None,
+          None,
+          None,
+          samplePensionSchemeId
+        )
+      ) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(
+            SippPsrSubmissionEtmpRequest(
+              reportDetails = sampleResponse.reportDetails.copy(version = None),
+              accountingPeriodDetails = None,
+              memberAndTransactions = Some(
+                NonEmptyList.one(
+                  etmpDataWithLandConnectedTx
+                    .copy(
+                      status = SectionStatus.Changed,
+                      version = None,
+                      landConnectedParty = None,
+                      unquotedShares = Some(sippUnquotedShares)
+                    )
+                )
+              ),
+              psrDeclaration = None
+            )
+          ),
+          any(),
+          any()
+        )(any(), any())
+      }
+    }
+
+    "successfully delete a member if no assets left" in {
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val response = HttpResponse(200, sippResponse)
+      val sampleResponse = SippPsrSubmissionEtmpResponse(
+        reportDetails = EtmpSippReportDetails(
+          pstr,
+          EtmpPsrStatus.Compiled,
+          LocalDate.now(),
+          LocalDate.now(),
+          YesNo.Yes,
+          None
+        ),
+        accountingPeriodDetails = None,
+        memberAndTransactions = Some(List(etmpDataWithLandConnectedTx)),
+        psrDeclaration = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleResponse)))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      whenReady(
+        service.deleteAssets(
+          Journey.InterestInLandOrProperty,
+          Standard,
+          pstr,
+          None,
+          None,
+          None,
+          samplePensionSchemeId
+        )
+      ) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(
+            SippPsrSubmissionEtmpRequest(
+              reportDetails = sampleResponse.reportDetails.copy(version = None),
+              accountingPeriodDetails = None,
+              memberAndTransactions = Some(
+                NonEmptyList.one(
+                  etmpDataWithLandConnectedTx
+                    .copy(status = SectionStatus.Deleted, version = None, landConnectedParty = None)
+                )
               ),
               psrDeclaration = None
             )

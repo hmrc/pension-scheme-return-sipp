@@ -31,7 +31,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmailConnector @Inject()(
+class EmailConnector @Inject() (
   appConfig: AppConfig,
   http: HttpClient,
   crypto: ApplicationCrypto
@@ -65,7 +65,7 @@ class EmailConnector @Inject()(
     val encryptedUserName =
       URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(userName)).value, StandardCharsets.UTF_8.toString)
 
-    appConfig.emailCallback(
+    val emailCallback = appConfig.emailCallback(
       pensionSchemeId,
       requestId,
       encryptedEmail,
@@ -76,9 +76,11 @@ class EmailConnector @Inject()(
       taxYear,
       reportVersion
     )
+    logger.info(s"Callback URL: $emailCallback")
+    emailCallback
   }
 
-  //scalastyle:off parameter.number
+  // scalastyle:off parameter.number
   def sendEmail(
     pensionSchemeId: PensionSchemeId,
     requestId: String,
@@ -117,9 +119,8 @@ class EmailConnector @Inject()(
       .recoverWith(logExceptions)
   }
 
-  private def logExceptions: PartialFunction[Throwable, Future[Either[String, Unit]]] = {
-    case t: Throwable =>
-      logger.warn("Unable to connect to Email Service", t)
-      Future.successful("Could not connect to email service".asLeft)
+  private def logExceptions: PartialFunction[Throwable, Future[Either[String, Unit]]] = { case t: Throwable =>
+    logger.warn("Unable to connect to Email Service", t)
+    Future.successful("Could not connect to email service".asLeft)
   }
 }

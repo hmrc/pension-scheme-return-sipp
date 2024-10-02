@@ -42,8 +42,8 @@ class TangibleMoveablePropertyTransformer @Inject()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            tangibleProperty = maybeTransactions.map(
-              transactions => SippTangibleProperty(transactions.length, None, Some(transactions.toList))
+            tangibleProperty = maybeTransactions.map(transactions =>
+              SippTangibleProperty(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -55,11 +55,10 @@ class TangibleMoveablePropertyTransformer @Inject()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.tangibleProperty
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(tangible => transformTransactionDetails(member, transaction.noOfTransactions, tangible))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(tangible => transformTransactionDetails(member, transaction.noOfTransactions, tangible))
           )
           .getOrElse(List.empty)
       }

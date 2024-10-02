@@ -22,7 +22,7 @@ import play.api.Configuration
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 
 @Singleton
-class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig, runModeConfiguration: Configuration) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig, runModeConfiguration: Configuration) {
 
   val appName: String = config.get[String]("appName")
 
@@ -41,7 +41,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
   val getSippPsrUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-sipp-psr")}"
   val getPsrVersionsUrl: String = s"$ifURL${config.get[String]("serviceUrls.get-psr-versions")}"
 
-  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionsSchemeReturn")
+  val pensionsSchemeReturnUrl: String = servicesConfig.baseUrl("pensionSchemeReturn")
 
   val emailApiUrl: String = servicesConfig.baseUrl("email")
   val emailCallbackUrl: String = config.get[String](path = "serviceUrls.email-callback")
@@ -61,18 +61,18 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig,
     reportVersion: String
   ) =
     s"$pensionsSchemeReturnUrl${emailCallbackUrl
-      .format(
-        pensionSchemeId match {
-          case PensionSchemeId.PspId(_) => "PSP"
-          case PensionSchemeId.PsaId(_) => "PSA"
-        },
-        requestId,
-        encryptedEmail,
-        encryptedPsaId,
-        encryptedPstr,
-        encryptedSchemeName,
-        encryptedUserName,
-        taxYear,
-        reportVersion
-      )}"
+        .format(
+          pensionSchemeId match {
+            case PensionSchemeId.PspId(_) => "PSP"
+            case PensionSchemeId.PsaId(_) => "PSA"
+          },
+          requestId,
+          encryptedEmail,
+          encryptedPsaId,
+          encryptedPstr,
+          encryptedSchemeName,
+          encryptedUserName,
+          taxYear,
+          reportVersion
+        )}"
 }

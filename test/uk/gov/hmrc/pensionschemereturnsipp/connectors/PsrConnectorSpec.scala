@@ -253,7 +253,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
     "handle error correctly in case of an ETMP exception" in {
       stubGet(url, serviceUnavailable())
-      intercept[UpstreamErrorResponse] { await(connector.getPsrVersions(pstr, date)) }
+      intercept[UpstreamErrorResponse](await(connector.getPsrVersions(pstr, date)))
       WireMock.verify(getRequestedFor(urlEqualTo(url)))
     }
   }

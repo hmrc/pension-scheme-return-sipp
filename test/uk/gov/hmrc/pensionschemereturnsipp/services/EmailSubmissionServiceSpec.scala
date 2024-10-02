@@ -58,7 +58,7 @@ class EmailSubmissionServiceSpec
         "psaName" -> psaName,
         "schemeName" -> schemeName,
         "periodOfReturn" -> s"${reportDetails.periodStart.format(SubmissionDateFormatter)} to ${reportDetails.periodEnd
-          .format(SubmissionDateFormatter)}",
+            .format(SubmissionDateFormatter)}",
         "dateSubmitted" -> ZonedDateTime.now(clock).format(SubmissionDateTimeFormatter)
       )
 

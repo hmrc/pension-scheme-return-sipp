@@ -24,13 +24,13 @@ import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, ps
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  MemberDetails => ApiMemberDetails,
   MemberDetailsResponse,
   PSRSubmissionResponse,
   PsrAssetCountsResponse,
   ReportDetails,
   Version,
-  Versions,
-  MemberDetails => ApiMemberDetails
+  Versions
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType.CostValue
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}

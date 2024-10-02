@@ -46,8 +46,8 @@ class LandConnectedPartyTransformer @Inject()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            landConnectedParty = maybeTransactions.map(
-              transactions => SippLandConnectedParty(transactions.length, None, Some(transactions.toList))
+            landConnectedParty = maybeTransactions.map(transactions =>
+              SippLandConnectedParty(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -59,11 +59,10 @@ class LandConnectedPartyTransformer @Inject()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.landConnectedParty
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(property => transformTransactionDetails(member, transaction.noOfTransactions, property))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(property => transformTransactionDetails(member, transaction.noOfTransactions, property))
           )
           .getOrElse(List.empty)
       }

@@ -38,7 +38,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
 }
 
 @Singleton()
-class PSRSubmissionTransformer @Inject()(
+class PSRSubmissionTransformer @Inject() (
   assetsFromConnectedPartyTransformer: AssetsFromConnectedPartyTransformer,
   landArmsLengthTransformer: LandArmsLengthTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,

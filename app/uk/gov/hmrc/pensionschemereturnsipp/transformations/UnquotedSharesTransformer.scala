@@ -42,8 +42,8 @@ class UnquotedSharesTransformer @Inject()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            unquotedShares = maybeTransactions.map(
-              transactions => SippUnquotedShares(transactions.length, None, Some(transactions.toList))
+            unquotedShares = maybeTransactions.map(transactions =>
+              SippUnquotedShares(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -55,11 +55,10 @@ class UnquotedSharesTransformer @Inject()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.unquotedShares
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(shares => transformTransactionDetails(member, transaction.noOfTransactions, shares))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(shares => transformTransactionDetails(member, transaction.noOfTransactions, shares))
           )
           .getOrElse(List.empty)
       }

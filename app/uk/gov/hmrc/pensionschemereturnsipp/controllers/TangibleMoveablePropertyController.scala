@@ -32,12 +32,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class TangibleMoveablePropertyController @Inject()(
+class TangibleMoveablePropertyController @Inject() (
   cc: ControllerComponents,
   service: SippPsrSubmissionService,
   override val authConnector: AuthConnector
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results

@@ -45,8 +45,8 @@ class AssetsFromConnectedPartyTransformer @Inject()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            otherAssetsConnectedParty = maybeTransactions.map(
-              transactions => SippOtherAssetsConnectedParty(transactions.length, None, Some(transactions.toList))
+            otherAssetsConnectedParty = maybeTransactions.map(transactions =>
+              SippOtherAssetsConnectedParty(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -58,11 +58,10 @@ class AssetsFromConnectedPartyTransformer @Inject()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.otherAssetsConnectedParty
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(assets => transformTransactionDetails(member, transaction.noOfTransactions, assets))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(assets => transformTransactionDetails(member, transaction.noOfTransactions, assets))
           )
           .getOrElse(List.empty)
       }

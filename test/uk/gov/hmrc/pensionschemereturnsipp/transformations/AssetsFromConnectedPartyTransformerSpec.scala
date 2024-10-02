@@ -19,9 +19,10 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SharesCompanyDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   EtmpMemberAndTransactions,
   MemberDetails,
@@ -112,6 +113,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
@@ -164,6 +166,7 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
       result mustBe List(
         etmpData.copy(
+          status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
               1,
@@ -207,7 +210,8 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
       val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(otherAssetsConnectedParty = None), // No more tx for first member :/
+        etmpData
+          .copy(otherAssetsConnectedParty = None, status = Deleted), // No more tx for first member :/
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",

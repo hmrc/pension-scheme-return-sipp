@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext
 
-class EmailResponseController @Inject()(
+class EmailResponseController @Inject() (
   cc: ControllerComponents,
   crypto: ApplicationCrypto,
   parser: PlayBodyParsers,

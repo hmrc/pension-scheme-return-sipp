@@ -23,7 +23,6 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
-import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrSubmissionRequest,
@@ -33,6 +32,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -43,12 +43,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
-class SippPsrSubmitController @Inject()(
+class SippPsrSubmitController @Inject() (
   cc: ControllerComponents,
   sippPsrSubmissionService: SippPsrSubmissionService,
   val authConnector: AuthConnector
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results
@@ -74,7 +74,7 @@ class SippPsrSubmitController @Inject()(
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
-      //TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
+      // TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
       val submitterID = user.psaPspId
 
       sippPsrSubmissionService
@@ -127,14 +127,43 @@ class SippPsrSubmitController @Inject()(
             .map { _ =>
               NoContent
             }
-            .recover {
-              case ex: Exception =>
-                logger.error(s"Failed to delete member with pstr $pstr", ex)
-                BadRequest("Invalid personal details")
+            .recover { case ex: Exception =>
+              logger.error(s"Failed to delete member with pstr $pstr", ex)
+              BadRequest("Invalid personal details")
             }
         case None =>
           Future.successful(BadRequest("Invalid personal details"))
       }
+    }
+  }
+
+  def deleteAssets(
+    pstr: String,
+    journey: Journey,
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ): Action[AnyContent] = Action.async { implicit request =>
+    authorisedAsPsrUser { user =>
+      logger.debug(
+        s"Deleting assets for $journey - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+      )
+      sippPsrSubmissionService
+        .deleteAssets(
+          journey,
+          journeyType,
+          pstr,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          user.psaPspId
+        )
+        .map(response => Ok(Json.toJson(response)))
+        .recover { case ex: Exception =>
+          logger.error(s"Failed to delete assets for $journey with pstr: $pstr", ex)
+          BadRequest("Invalid delete asset request")
+        }
     }
   }
 

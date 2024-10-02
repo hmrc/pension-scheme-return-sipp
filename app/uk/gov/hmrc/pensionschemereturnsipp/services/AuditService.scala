@@ -35,14 +35,14 @@ trait AuditService {
 
   def sendEvent[T <: AuditEvent](event: T)(implicit rh: RequestHeader, ec: ExecutionContext): Unit
 
-  def sendEventWithSource[T <: AuditEvent](event: T, auditSource: String)(
-    implicit rh: RequestHeader,
+  def sendEventWithSource[T <: AuditEvent](event: T, auditSource: String)(implicit
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Unit
 
 }
 
-class AuditServiceImpl @Inject()(config: AppConfig, connector: AuditConnector) extends AuditService with Logging {
+class AuditServiceImpl @Inject() (config: AppConfig, connector: AuditConnector) extends AuditService with Logging {
 
   private implicit def toHc(request: RequestHeader): AuditHeaderCarrier =
     auditHeaderCarrier(HeaderCarrierConverter.fromRequest(request))

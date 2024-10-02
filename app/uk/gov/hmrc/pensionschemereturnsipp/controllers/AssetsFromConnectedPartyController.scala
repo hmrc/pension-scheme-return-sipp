@@ -32,12 +32,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class AssetsFromConnectedPartyController @Inject()(
+class AssetsFromConnectedPartyController @Inject() (
   cc: ControllerComponents,
   service: SippPsrSubmissionService,
   val authConnector: AuthConnector
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends BackendController(cc)
     with HttpErrorFunctions
     with Results

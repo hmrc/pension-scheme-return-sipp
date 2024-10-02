@@ -30,12 +30,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class LandArmsLengthController @Inject()(
+class LandArmsLengthController @Inject() (
   cc: ControllerComponents,
   service: SippPsrSubmissionService,
   val authConnector: AuthConnector
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends BackendController(cc)
     with PsrAuth {
   def put(
