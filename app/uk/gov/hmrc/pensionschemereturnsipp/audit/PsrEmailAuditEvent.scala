@@ -38,7 +38,7 @@ case class PsrEmailAuditEvent(
       Json.obj(
         fields = "EmailInitiationRequestId" -> requestId,
         "EmailAddress" -> emailAddress,
-        "Event" -> event.toString,
+        "Event" -> event.event.entryName,
         "SubmittedBy" -> submittedBy,
         "ReportVersion" -> reportVersion,
         "PensionSchemeTaxReference" -> pstr,
