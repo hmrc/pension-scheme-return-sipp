@@ -21,7 +21,15 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{
+  BadRequestException,
+  HeaderCarrier,
+  HttpErrorFunctions,
+  HttpResponse,
+  RequestEntityTooLargeException,
+  StringContextOps
+}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
@@ -49,7 +57,7 @@ import scala.util.{Failure, Try}
 class PsrConnector @Inject() (
   config: AppConfig,
   jsonPayloadSchemaValidator: JSONSchemaValidator,
-  http: HttpClient,
+  http: HttpClientV2,
   apiAuditUtil: ApiAuditUtil
 )(implicit
   ec: ExecutionContext
@@ -101,7 +109,10 @@ class PsrConnector @Inject() (
         )
       } else {
         http
-          .POST(url, request, integrationFrameworkHeaders)
+          .post(url"$url")
+          .withBody(Json.toJson(request))
+          .setHeader(integrationFrameworkHeaders: _*)
+          .execute[HttpResponse]
           .map {
             case response if response.status == OK => response
             case response => handleErrorResponse("POST", url)(response)
@@ -155,7 +166,9 @@ class PsrConnector @Inject() (
         (response.status == UNPROCESSABLE_ENTITY && response.body.contains("PSR_NOT_FOUND"))
 
     http
-      .GET[HttpResponse](url, headers = integrationFrameworkHeaders)
+      .get(url"$url")
+      .setHeader(integrationFrameworkHeaders: _*)
+      .execute[HttpResponse]
       .map { response =>
         response.status match {
           case OK =>
@@ -177,16 +190,18 @@ class PsrConnector @Inject() (
     startDate: LocalDate
   )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Seq[PsrVersionsResponse]] = {
     val startDateStr = startDate.format(DateTimeFormatter.ISO_DATE)
-    val url = config.getPsrVersionsUrl.format(pstr)
+    val url = url"${config.getPsrVersionsUrl.format(pstr)}?startDate=$startDateStr"
     http
-      .GET[HttpResponse](url, queryParams = Seq("startDate" -> startDateStr), integrationFrameworkHeaders)
+      .get(url)
+      .setHeader(integrationFrameworkHeaders: _*)
+      .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 =>
           Future.fromTry(Try(response.json.as[Seq[PsrVersionsResponse]]))
         case response if response.status == 404 =>
           Future.successful(Seq.empty)
         case response =>
-          handleErrorResponse("GET", url)(response)
+          handleErrorResponse("GET", url.toString)(response)
       }
   }
 
