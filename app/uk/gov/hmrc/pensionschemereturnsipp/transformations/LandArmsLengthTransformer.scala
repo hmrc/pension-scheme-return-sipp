@@ -26,7 +26,7 @@ import io.scalaland.chimney.dsl._
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class LandArmsLengthTransformer @Inject()()
+class LandArmsLengthTransformer @Inject() ()
     extends Transformer[LandOrConnectedPropertyApi.TransactionDetails, LandOrConnectedPropertyResponse] {
   def merge(
     landArmsData: NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails],
@@ -41,8 +41,8 @@ class LandArmsLengthTransformer @Inject()()
         (maybeTransactions, etmpMemberAndTransactions) =>
           etmpMemberAndTransactions.copy(
             version = None,
-            landArmsLength = maybeTransactions.map(
-              transactions => SippLandArmsLength(transactions.length, None, Some(transactions.toList))
+            landArmsLength = maybeTransactions.map(transactions =>
+              SippLandArmsLength(transactions.length, None, Some(transactions.toList))
             )
           )
       )
@@ -54,11 +54,10 @@ class LandArmsLengthTransformer @Inject()()
       memberAndTransactions.flatMap { memberAndTransaction =>
         val member = memberAndTransaction.memberDetails
         memberAndTransaction.landArmsLength
-          .map(
-            transaction =>
-              transaction.transactionDetails
-                .getOrElse(List.empty)
-                .map(armsLength => transformTransactionDetails(member, transaction.noOfTransactions, armsLength))
+          .map(transaction =>
+            transaction.transactionDetails
+              .getOrElse(List.empty)
+              .map(armsLength => transformTransactionDetails(member, transaction.noOfTransactions, armsLength))
           )
           .getOrElse(List.empty)
       }

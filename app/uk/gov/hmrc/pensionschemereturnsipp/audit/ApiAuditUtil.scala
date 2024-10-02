@@ -34,7 +34,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
+class ApiAuditUtil @Inject() (auditService: AuditService) extends Logging {
 
   def firePSRSubmissionEvent(
     pstr: String,
@@ -59,7 +59,7 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
               taxYear = taxYear,
               schemeName = schemeName
             ),
-            auditSource = "pension-scheme-return-sipp-frontend" //for auditing purposes this needs to be frontend
+            auditSource = "pension-scheme-return-sipp-frontend" // for auditing purposes this needs to be frontend
           )
         }
         .getOrElse(logger.debug(s"PSRSubmissionEvent not sent. PSR Declaration not found in request"))
@@ -154,8 +154,8 @@ class ApiAuditUtil @Inject()(auditService: AuditService) extends Logging {
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit ec: ExecutionContext,
+  )(implicit
+    ec: ExecutionContext,
     request: RequestHeader
   ): PartialFunction[Try[Option[SippPsrSubmissionEtmpResponse]], Unit] = {
     case Success(optResponse) =>

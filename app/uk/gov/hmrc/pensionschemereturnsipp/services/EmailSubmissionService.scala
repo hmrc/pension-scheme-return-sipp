@@ -32,7 +32,7 @@ import java.time.{Clock, LocalDate, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailSubmissionService @Inject()(
+class EmailSubmissionService @Inject() (
   minimalDetailsConnector: MinimalDetailsConnector,
   emailConnector: EmailConnector,
   clock: Clock
@@ -41,8 +41,8 @@ class EmailSubmissionService @Inject()(
     schemeName: Option[String],
     sippPsrSubmissionEtmpResponse: SippPsrSubmissionEtmpResponse,
     pensionSchemeId: PensionSchemeId
-  )(
-    implicit headerCarrier: HeaderCarrier
+  )(implicit
+    headerCarrier: HeaderCarrier
   ): Future[Either[String, Unit]] = {
     val reportDetails = sippPsrSubmissionEtmpResponse.reportDetails
 

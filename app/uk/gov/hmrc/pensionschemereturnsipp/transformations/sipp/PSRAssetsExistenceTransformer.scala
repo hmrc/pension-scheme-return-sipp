@@ -22,7 +22,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 
 @Singleton
-class PSRAssetsExistenceTransformer @Inject()() {
+class PSRAssetsExistenceTransformer @Inject() () {
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): Option[PsrAssetCountsResponse] =
     etmpResponse.memberAndTransactions.map { transactions =>
       val filteredTxs = transactions.filter(_.status != SectionStatus.Deleted)

@@ -47,7 +47,7 @@ import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class SippPsrSubmissionService @Inject()(
+class SippPsrSubmissionService @Inject() (
   psrConnector: PsrConnector,
   psrSubmissionTransformer: PSRSubmissionTransformer,
   memberDetailsTransformer: PSRMemberDetailsTransformer,
@@ -87,8 +87,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[LandOrConnectedPropertyResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, landConnectedPartyTransformer)
@@ -117,8 +117,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[OutstandingLoansResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, outstandingLoansTransformer)
@@ -147,8 +147,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[LandOrConnectedPropertyResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, armsLengthTransformer)
@@ -177,8 +177,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[AssetsFromConnectedPartyResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, assetsFromConnectedPartyTransformer)
@@ -207,8 +207,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[TangibleMoveablePropertyResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, tangibleMovablePropertyTransformer)
@@ -237,8 +237,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[UnquotedShareResponse]] =
     getJourney(pstr, optFbNumber, optPeriodStartDate, optPsrVersion, unquotedSharesTransformer)
@@ -252,8 +252,8 @@ class SippPsrSubmissionService @Inject()(
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V],
     pensionSchemeId: PensionSchemeId
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[HttpResponse] =
     submitWithRequest(
@@ -312,8 +312,8 @@ class SippPsrSubmissionService @Inject()(
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     transformer: Transformer[A, V]
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[V]] =
     psrConnector
@@ -332,8 +332,8 @@ class SippPsrSubmissionService @Inject()(
     reportDetails: ReportDetails,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V]
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[List[EtmpMemberAndTransactions]] =
     psrConnector
@@ -452,8 +452,8 @@ class SippPsrSubmissionService @Inject()(
     optFbNumber: Option[String],
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
-  )(
-    implicit headerCarrier: HeaderCarrier,
+  )(implicit
+    headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Either[Unit, Option[PsrAssetCountsResponse]]] =
     (for {
@@ -512,8 +512,8 @@ class SippPsrSubmissionService @Inject()(
     optPsrVersion: Option[String],
     personalDetails: PersonalDetails,
     pensionSchemeId: PensionSchemeId
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Unit] =
     psrConnector
@@ -524,26 +524,23 @@ class SippPsrSubmissionService @Inject()(
             // Declaration changed to Compiled state back
             reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
             accountingPeriodDetails = response.accountingPeriodDetails,
-            memberAndTransactions = {
-              response.memberAndTransactions.flatMap { members =>
-                val updatedMembers = members.map { member =>
-                  if (MemberDetails.compare(member.memberDetails.personalDetails, personalDetails)) {
-                    member.copy(status = Deleted, version = None) // Soft delete
-                  } else {
-                    member
-                  }
+            memberAndTransactions = response.memberAndTransactions.flatMap { members =>
+              val updatedMembers = members.map { member =>
+                if (MemberDetails.compare(member.memberDetails.personalDetails, personalDetails)) {
+                  member.copy(status = Deleted, version = None) // Soft delete
+                } else {
+                  member
                 }
-                NonEmptyList.fromList(updatedMembers)
               }
+              NonEmptyList.fromList(updatedMembers)
             },
-            psrDeclaration = response.psrDeclaration.map(
-              declaration => // Declaration changed to Compiled state back
-                declaration.copy(
-                  psaDeclaration =
-                    declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
-                  pspDeclaration =
-                    declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
-                )
+            psrDeclaration = response.psrDeclaration.map(declaration => // Declaration changed to Compiled state back
+              declaration.copy(
+                psaDeclaration =
+                  declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
+                pspDeclaration =
+                  declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
+              )
             )
           )
           submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_ => ())
@@ -559,8 +556,8 @@ class SippPsrSubmissionService @Inject()(
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     pensionSchemeId: PensionSchemeId
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Unit] =
     psrConnector
@@ -575,14 +572,13 @@ class SippPsrSubmissionService @Inject()(
             reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = updatedMembers,
-            psrDeclaration = response.psrDeclaration.map(
-              declaration =>
-                declaration.copy(
-                  psaDeclaration =
-                    declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
-                  pspDeclaration =
-                    declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
-                )
+            psrDeclaration = response.psrDeclaration.map(declaration =>
+              declaration.copy(
+                psaDeclaration =
+                  declaration.psaDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false)),
+                pspDeclaration =
+                  declaration.pspDeclaration.map(current => current.copy(declaration1 = false, declaration2 = false))
+              )
             )
           )
 

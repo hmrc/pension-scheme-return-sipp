@@ -21,8 +21,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 
 object Binders {
 
-  implicit def journeyTypeBindable(
-    implicit stringBinder: QueryStringBindable[String]
+  implicit def journeyTypeBindable(implicit
+    stringBinder: QueryStringBindable[String]
   ): QueryStringBindable[JourneyType] = new QueryStringBindable[JourneyType] {
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, JourneyType]] =
       stringBinder.bind(key, params).map {
@@ -34,8 +34,8 @@ object Binders {
       stringBinder.unbind(key, journeyType.entryName)
   }
 
-  implicit def journeyBindable(
-    implicit stringBinder: QueryStringBindable[String]
+  implicit def journeyBindable(implicit
+    stringBinder: QueryStringBindable[String]
   ): QueryStringBindable[Journey] = new QueryStringBindable[Journey] {
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Journey]] =
       stringBinder.bind(key, params).map {
