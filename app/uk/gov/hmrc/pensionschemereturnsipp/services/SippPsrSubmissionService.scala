@@ -476,14 +476,14 @@ class SippPsrSubmissionService @Inject() (
   def updateMemberDetails(
     journeyType: JourneyType,
     pstr: String,
-    optFbNumber: Option[String],
+    fbNumber: String,
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: UpdateMemberDetailsRequest,
     pensionSchemeId: PensionSchemeId
-  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[Option[Boolean]] =
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[Option[SippPsrJourneySubmissionEtmpResponse]] =
     psrConnector
-      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .getSippPsr(pstr, fbNumber.some, optPeriodStartDate, optPsrVersion)
       .flatMap {
         case Some(response) =>
           val recordFound = response.memberAndTransactions.toList.flatten
@@ -505,9 +505,9 @@ class SippPsrSubmissionService @Inject() (
               },
               psrDeclaration = response.psrDeclaration
             )
-            submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).as(true.some)
+            submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_.some)
           } else
-            Future.successful(false.some)
+            Future.successful(SippPsrJourneySubmissionEtmpResponse(fbNumber).some)
         case None =>
           Future.successful(None)
       }
@@ -523,7 +523,7 @@ class SippPsrSubmissionService @Inject() (
   )(implicit
     hc: HeaderCarrier,
     requestHeader: RequestHeader
-  ): Future[Unit] =
+  ): Future[SippPsrJourneySubmissionEtmpResponse] =
     psrConnector
       .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
       .flatMap {
@@ -551,7 +551,7 @@ class SippPsrSubmissionService @Inject() (
               )
             )
           )
-          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_ => ())
+          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest))
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
       }

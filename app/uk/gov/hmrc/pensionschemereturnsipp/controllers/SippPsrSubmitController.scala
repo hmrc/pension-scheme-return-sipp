@@ -124,9 +124,7 @@ class SippPsrSubmitController @Inject() (
               personalDetails,
               user.psaPspId
             )
-            .map { _ =>
-              NoContent
-            }
+            .map(response => Ok(Json.toJson(response)))
             .recover { case ex: Exception =>
               logger.error(s"Failed to delete member with pstr $pstr", ex)
               BadRequest("Invalid personal details")
@@ -200,7 +198,7 @@ class SippPsrSubmitController @Inject() (
   def updateMember(
     pstr: String,
     journeyType: JourneyType,
-    optFbNumber: Option[String],
+    fbNumber: String,
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ) = Action(parse.json).async { implicit request =>
@@ -210,15 +208,14 @@ class SippPsrSubmitController @Inject() (
         .updateMemberDetails(
           journeyType,
           pstr,
-          optFbNumber,
+          fbNumber,
           optPeriodStartDate,
           optPsrVersion,
           updateMemberDetailsRequest,
           user.psaPspId
         )
         .map {
-          case Some(true) => Ok("")
-          case Some(false) => NotModified
+          case Some(response) => Created(Json.toJson(response))
           case None => NotFound(s"No record found for pstr $pstr")
         }
     }

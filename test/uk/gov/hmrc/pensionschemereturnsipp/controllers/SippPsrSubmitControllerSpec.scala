@@ -202,10 +202,10 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("000123456")))
 
       val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
-      status(result) mustBe Status.NO_CONTENT
+      status(result) mustBe Status.OK
     }
 
     "return bad request" in {
