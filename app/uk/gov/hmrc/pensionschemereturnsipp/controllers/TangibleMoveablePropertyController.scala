@@ -66,8 +66,8 @@ class TangibleMoveablePropertyController @Inject() (
         )
         .map { response =>
           logger
-            .debug(s"Submit TangibleMovableProperty PSR details - response: ${response.status}, body: ${response.body}")
-          NoContent
+            .debug(s"Submit TangibleMovableProperty PSR details - new form bundle number: ${response.formBundleNumber}")
+          Created(Json.toJson(response))
         }
     }
   }

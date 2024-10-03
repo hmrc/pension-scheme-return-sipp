@@ -36,6 +36,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   ReportDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
@@ -121,11 +122,11 @@ class LandArmsLengthControllerSpec extends BaseSpec with TestValues {
         .withBody(requestBody)
 
       when(mockService.submitLandArmsLength(any(), any(), any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(HttpResponse(204, "")))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
 
       val result = controller.put(Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)
 
-      status(result) mustBe Status.NO_CONTENT
+      status(result) mustBe Status.CREATED
     }
   }
 }

@@ -33,6 +33,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.PsrAssetCountsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
@@ -189,7 +190,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   }
 
   "Delete Member " must {
-    "return no content" in {
+    "return ok in" in {
       val personalDetails = PersonalDetails("John", "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
       val fakeRequest = FakeRequest(DELETE, "/")
         .withHeaders("Content-Type" -> "application/json")
@@ -201,10 +202,10 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("000123456")))
 
       val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
-      status(result) mustBe Status.NO_CONTENT
+      status(result) mustBe Status.OK
     }
 
     "return bad request" in {
@@ -223,7 +224,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   }
 
   "Delete Assets " must {
-    "return no content" in {
+    "return ok" in {
       val personalDetails = PersonalDetails("John", "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
       val fakeRequest = FakeRequest(DELETE, "/")
         .withHeaders("Content-Type" -> "application/json")
@@ -235,13 +236,13 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
 
       when(mockSippPsrSubmissionService.deleteAssets(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("000123456")))
 
       val result =
         controller.deleteAssets("testPstr", Journey.InterestInLandOrProperty, Standard, Some("fbNumber"), None, None)(
           fakeRequest
         )
-      status(result) mustBe Status.NO_CONTENT
+      status(result) mustBe Status.OK
     }
 
     "return bad request" in {

@@ -66,9 +66,9 @@ class OutstandingLoansController @Inject() (
         )
         .map { response =>
           logger.debug(
-            message = s"Submit OutstandingLoan PSR details - response: ${response.status}, body: ${response.body}"
+            message = s"Submit OutstandingLoan PSR details - new form bundle number: ${response.formBundleNumber}"
           )
-          NoContent
+          Created(Json.toJson(response))
         }
     }
   }

@@ -67,9 +67,9 @@ class LandOrConnectedPropertyController @Inject() (
         .map { response =>
           logger.debug(
             message =
-              s"Submit LandOrConnectedProperty PSR details - response: ${response.status}, body: ${response.body}"
+              s"Submit LandOrConnectedProperty PSR details - new form bundle number: ${response.formBundleNumber}"
           )
-          NoContent
+          Created(Json.toJson(response))
         }
     }
   }
