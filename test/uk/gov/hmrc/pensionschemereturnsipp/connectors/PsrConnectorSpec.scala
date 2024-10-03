@@ -189,7 +189,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("notFoundTestPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion"))) {
-        (result: Option[_]) =>
+        (result: Option[?]) =>
           WireMock.verify(
             getRequestedFor(
               urlEqualTo(

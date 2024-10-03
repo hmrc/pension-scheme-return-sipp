@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
-import cats.syntax.either._
+import cats.syntax.either.*
 import com.google.inject.Inject
-import play.api.Logger
-import play.api.http.Status._
+import play.api.Logging
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import uk.gov.hmrc.crypto.{ApplicationCrypto, PlainText}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
 import uk.gov.hmrc.pensionschemereturnsipp.models.{PensionSchemeId, SendEmailRequest}
+import play.api.libs.ws.writeableOf_JsValue
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -36,9 +37,7 @@ class EmailConnector @Inject() (
   appConfig: AppConfig,
   http: HttpClientV2,
   crypto: ApplicationCrypto
-) {
-
-  private val logger = Logger(classOf[EmailConnector])
+) extends Logging {
 
   private def callBackUrl(
     pensionSchemeId: PensionSchemeId,

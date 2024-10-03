@@ -53,6 +53,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
+import play.api.libs.ws.writeableOf_JsValue
 
 class PsrConnector @Inject() (
   config: AppConfig,
@@ -111,7 +112,7 @@ class PsrConnector @Inject() (
         http
           .post(url"$url")
           .withBody(Json.toJson(request))
-          .setHeader(integrationFrameworkHeaders: _*)
+          .setHeader(integrationFrameworkHeaders*)
           .execute[HttpResponse]
           .map {
             case response if response.status == OK => response
@@ -167,7 +168,7 @@ class PsrConnector @Inject() (
 
     http
       .get(url"$url")
-      .setHeader(integrationFrameworkHeaders: _*)
+      .setHeader(integrationFrameworkHeaders*)
       .execute[HttpResponse]
       .map { response =>
         response.status match {
@@ -193,7 +194,7 @@ class PsrConnector @Inject() (
     val url = url"${config.getPsrVersionsUrl.format(pstr)}?startDate=$startDateStr"
     http
       .get(url)
-      .setHeader(integrationFrameworkHeaders: _*)
+      .setHeader(integrationFrameworkHeaders*)
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 =>

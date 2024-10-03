@@ -68,7 +68,7 @@ class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
 
   val application: Application = new GuiceApplicationBuilder()
     .configure(conf = "auditing.enabled" -> false, "metrics.enabled" -> false, "metrics.jvm" -> false)
-    .overrides(modules: _*)
+    .overrides(modules*)
     .build()
 
   private val controller = application.injector.instanceOf[AssetsFromConnectedPartyController]

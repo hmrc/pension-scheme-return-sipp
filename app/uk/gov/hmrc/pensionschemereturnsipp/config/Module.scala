@@ -25,7 +25,7 @@ import java.time.{Clock, ZoneOffset}
 
 class Module extends play.api.inject.Module {
 
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[?]] =
     Seq(
       bind[AuthConnector].to(classOf[DefaultAuthConnector]).eagerly(),
       bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC)),
