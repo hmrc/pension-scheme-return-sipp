@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import io.scalaland.chimney.dsl.transformInto
