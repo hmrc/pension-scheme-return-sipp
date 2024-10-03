@@ -111,7 +111,7 @@ class PsrConnector @Inject() (
       } else {
         http
           .post(url"$url")
-          .withBody(Json.toJson(request))
+          .withBody(jsonRequest)
           .setHeader(integrationFrameworkHeaders*)
           .execute[HttpResponse]
           .map {
