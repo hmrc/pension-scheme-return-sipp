@@ -67,9 +67,9 @@ class AssetsFromConnectedPartyController @Inject() (
         .map { response =>
           logger
             .debug(
-              s"Submit AssetsFromConnectedParty PSR details - response: ${response.status}, body: ${response.body}"
+              s"Submit AssetsFromConnectedParty PSR details - new form bundle number: ${response.formBundleNumber}"
             )
-          NoContent
+          Created(Json.toJson(response))
         }
     }
   }
