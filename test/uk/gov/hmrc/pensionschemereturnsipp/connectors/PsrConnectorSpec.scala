@@ -72,7 +72,6 @@ class PsrConnectorSpec extends BaseConnectorSpec {
   "submitSippPsr" should {
     "return 200 - ok" in {
       val stub = stubPost("/pension-online/scheme-return/SIPP/testPstr", sampleSippPsrSubmissionEtmpRequest, ok())
-      println(s"stub: $stub")
       whenReady(
         connector.submitSippPsr(
           Standard,
