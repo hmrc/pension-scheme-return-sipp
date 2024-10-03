@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 import sbt.*
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "3.5.1"
 
 lazy val microservice = Project("pension-scheme-return-sipp", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)

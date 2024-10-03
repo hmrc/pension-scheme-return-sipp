@@ -82,7 +82,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
           None,
           None
         )
-      ) { result: HttpResponse =>
+      ) { (result: HttpResponse) =>
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
       }
@@ -153,7 +153,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("testPstr", Some("testFbNumber"), None, None)) {
-        result: Option[SippPsrSubmissionEtmpResponse] =>
+        (result: Option[SippPsrSubmissionEtmpResponse]) =>
           WireMock.verify(
             getRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr?psrFormBundleNumber=testFbNumber"))
           )
@@ -169,7 +169,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("testPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion"))) {
-        result: Option[SippPsrSubmissionEtmpResponse] =>
+        (result: Option[SippPsrSubmissionEtmpResponse]) =>
           WireMock.verify(
             getRequestedFor(
               urlEqualTo(
@@ -189,7 +189,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("notFoundTestPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion"))) {
-        result: Option[_] =>
+        (result: Option[_]) =>
           WireMock.verify(
             getRequestedFor(
               urlEqualTo(

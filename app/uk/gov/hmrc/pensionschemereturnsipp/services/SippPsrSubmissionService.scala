@@ -20,7 +20,7 @@ import cats.data.{EitherT, NonEmptyList}
 import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
-import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.dsl.transformInto
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}

@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
-import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.libs.json._
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}

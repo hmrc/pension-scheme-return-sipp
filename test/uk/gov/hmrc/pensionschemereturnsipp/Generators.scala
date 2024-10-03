@@ -41,8 +41,8 @@ object Generators {
       topDomain <- topLevelDomain
     } yield s"$username@$domain.$topDomain"
 
-  val psaIdGen: Gen[PsaId] = nonEmptyString.map(PsaId)
-  val pspIdGen: Gen[PspId] = nonEmptyString.map(PspId)
+  val psaIdGen: Gen[PsaId] = nonEmptyString.map(PsaId.apply)
+  val pspIdGen: Gen[PspId] = nonEmptyString.map(PspId.apply)
   val pensionSchemeIdGen: Gen[PensionSchemeId] = Gen.oneOf(psaIdGen, pspIdGen)
 
   lazy val minimalDetailsGen: Gen[MinimalDetails] =

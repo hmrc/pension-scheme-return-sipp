@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
 import cats.data.NonEmptyList
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyResponse,
   LandOrConnectedPropertyResponse,

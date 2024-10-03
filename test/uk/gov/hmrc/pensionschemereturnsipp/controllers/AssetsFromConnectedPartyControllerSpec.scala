@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{reset, when}
+import org.mockito.Mockito.{reset, when}
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind

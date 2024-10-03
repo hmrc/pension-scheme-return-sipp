@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import cats.implicits.catsSyntaxEitherId
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{never, reset, times, verify, when}
+import org.mockito.Mockito.{never, reset, times, verify, when}
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
