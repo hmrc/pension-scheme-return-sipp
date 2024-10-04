@@ -52,6 +52,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
+import scala.concurrent.duration.DurationInt
 
 class PsrConnectorSpec extends BaseConnectorSpec {
 
@@ -81,7 +82,9 @@ class PsrConnectorSpec extends BaseConnectorSpec {
           sampleSippPsrSubmissionEtmpRequest,
           None,
           None
-        )
+        ),
+        timeout(1.second),
+        interval(50.millis)
       ) { (result: HttpResponse) =>
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
@@ -92,7 +95,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       val largeRequest = sampleSippPsrSubmissionEtmpRequest.copy(
         memberAndTransactions = Some(NonEmptyList.of(memberAndTransactions))
       )
-      val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
+      val errorMessage = s"Request body size exceeds maximum limit of $maxRequestSize bytes"
 
       whenReady(
         connector
