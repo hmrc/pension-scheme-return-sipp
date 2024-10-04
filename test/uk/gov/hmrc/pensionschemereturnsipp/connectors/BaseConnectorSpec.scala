@@ -22,7 +22,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.softwaremill.diffx.generic.AutoDerivation
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher
 import org.scalatest.time.{Millis, Span}
-import play.api.libs.json.Writes
+import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 
@@ -46,7 +46,7 @@ abstract class BaseConnectorSpec
     wireMockServer.stubFor(
       post(urlEqualTo(url))
         .withHeader("Content-Type", equalTo("application/json"))
-        .withRequestBody(equalToJson(Writes.of[A].writes(requestBody).toString))
+        .withRequestBody(equalToJson(Json.toJson(requestBody).toString))
         .willReturn(response)
     )
 

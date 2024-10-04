@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{reset, when}
+import org.mockito.Mockito.{reset, when}
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi.{formatReq, formatRes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{ReportDetails, UnquotedShareRequest, UnquotedShareResponse}
@@ -65,7 +65,7 @@ class UnquotedSharesControllerSpec extends BaseSpec with TestValues {
 
   val application: Application = new GuiceApplicationBuilder()
     .configure(conf = "auditing.enabled" -> false, "metrics.enabled" -> false, "metrics.jvm" -> false)
-    .overrides(modules: _*)
+    .overrides(modules*)
     .build()
 
   private val controller = application.injector.instanceOf[UnquotedSharesController]

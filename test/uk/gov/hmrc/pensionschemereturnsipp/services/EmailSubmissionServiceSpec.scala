@@ -17,8 +17,8 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.syntax.either._
-import org.mockito.ArgumentMatchersSugar.*
-import org.mockito.MockitoSugar.when
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,7 +48,7 @@ class EmailSubmissionServiceSpec
 
   "submitEmail" should {
     "compose minimum details with email template parameters and send the request to the email api returning unit on success" in new TestScope {
-      when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(minimumDetails.asRight))
+      when(minimalDetailsConnector.fetch(any[PsaId])(any, any)).thenReturn(Future.successful(minimumDetails.asRight))
       val reportDetails = sampleSippPsrSubmissionEtmpResponse.reportDetails
       val psaName =
         minimumDetails.individualDetails.map(_.fullName).orElse(minimumDetails.organisationName).getOrElse("")
@@ -88,7 +88,7 @@ class EmailSubmissionServiceSpec
     }
 
     "proxy errors from minimum details connector" in new TestScope {
-      when(minimalDetailsConnector.fetch(*[PsaId])(*, *)).thenReturn(Future.successful(DelimitedAdmin.asLeft))
+      when(minimalDetailsConnector.fetch(any[PsaId])(any, any)).thenReturn(Future.successful(DelimitedAdmin.asLeft))
 
       emailSubmissionService
         .submitEmail(

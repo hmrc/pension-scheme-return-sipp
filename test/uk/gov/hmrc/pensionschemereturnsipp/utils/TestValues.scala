@@ -372,7 +372,7 @@ trait TestValues {
         PSA,
         samplePensionSchemeId.value,
         Some("PSA"),
-        psaDeclaration = Some(Declaration(true, true)),
+        psaDeclaration = Some(Declaration(declaration1 = true, declaration2 = true)),
         pspDeclaration = None
       )
     )

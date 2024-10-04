@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either._
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
-import org.mockito.MockitoSugar.{never, reset, times, verify, when}
+import org.mockito.Mockito.{never, reset, times, verify, when}
 import play.api.http.Status.BAD_REQUEST
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
@@ -132,7 +132,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(
         service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
-      ) { result: SippPsrJourneySubmissionEtmpResponse =>
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
         result mustBe sippResponse
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
@@ -172,7 +172,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(
         service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
-      ) { result: SippPsrJourneySubmissionEtmpResponse =>
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
         result mustBe sippResponse
 
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
@@ -199,11 +199,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
-      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[PSRSubmissionResponse] =>
-        result mustBe None
+      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) {
+        (result: Option[PSRSubmissionResponse]) =>
+          result mustBe None
 
-        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockSippPsrFromEtmp, never).transform(any())
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockSippPsrFromEtmp, never).transform(any())
       }
     }
 
@@ -213,11 +214,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
       when(mockSippPsrFromEtmp.transform(any())).thenReturn(samplePsrSubmission)
 
-      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) { result: Option[PSRSubmissionResponse] =>
-        result mustBe Some(samplePsrSubmission)
+      whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) {
+        (result: Option[PSRSubmissionResponse]) =>
+          result mustBe Some(samplePsrSubmission)
 
-        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockSippPsrFromEtmp, times(1)).transform(any())
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockSippPsrFromEtmp, times(1)).transform(any())
       }
     }
   }

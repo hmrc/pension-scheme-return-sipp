@@ -214,15 +214,16 @@ trait SippEtmpTestValues {
     outstandingYearEndAmount = 12312.12
   )
 
-  protected val sippUnquotedSharesTransactionalDetail = SippUnquotedShares.TransactionDetail(
-    sharesCompanyDetails = sippSharesCompanyDetail,
-    acquiredFromName = "TestLongName TestLongSurname",
-    totalCost = 9999999.99,
-    independentValuation = Yes,
-    totalDividendsIncome = 2000.2,
-    sharesDisposed = Yes,
-    sharesDisposalDetails = Some(sippSharesDisposalDetails)
-  )
+  protected val sippUnquotedSharesTransactionalDetail: SippUnquotedShares.TransactionDetail =
+    SippUnquotedShares.TransactionDetail(
+      sharesCompanyDetails = sippSharesCompanyDetail,
+      acquiredFromName = "TestLongName TestLongSurname",
+      totalCost = 9999999.99,
+      independentValuation = Yes,
+      totalDividendsIncome = 2000.2,
+      sharesDisposed = Yes,
+      sharesDisposalDetails = Some(sippSharesDisposalDetails)
+    )
 
   protected val sippLandConnectedParty = SippLandConnectedParty(
     noOfTransactions = 1,

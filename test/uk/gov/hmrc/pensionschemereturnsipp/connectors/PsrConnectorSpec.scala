@@ -52,6 +52,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
+import scala.concurrent.duration.DurationInt
 
 class PsrConnectorSpec extends BaseConnectorSpec {
 
@@ -81,8 +82,10 @@ class PsrConnectorSpec extends BaseConnectorSpec {
           sampleSippPsrSubmissionEtmpRequest,
           None,
           None
-        )
-      ) { result: HttpResponse =>
+        ),
+        timeout(1.second),
+        interval(50.millis)
+      ) { (result: HttpResponse) =>
         WireMock.verify(postRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr")))
         result.status mustBe OK
       }
@@ -92,7 +95,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       val largeRequest = sampleSippPsrSubmissionEtmpRequest.copy(
         memberAndTransactions = Some(NonEmptyList.of(memberAndTransactions))
       )
-      val errorMessage = s"Request body size exceeds maximum limit of ${maxRequestSize} bytes"
+      val errorMessage = s"Request body size exceeds maximum limit of $maxRequestSize bytes"
 
       whenReady(
         connector
@@ -153,7 +156,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("testPstr", Some("testFbNumber"), None, None)) {
-        result: Option[SippPsrSubmissionEtmpResponse] =>
+        (result: Option[SippPsrSubmissionEtmpResponse]) =>
           WireMock.verify(
             getRequestedFor(urlEqualTo("/pension-online/scheme-return/SIPP/testPstr?psrFormBundleNumber=testFbNumber"))
           )
@@ -169,7 +172,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("testPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion"))) {
-        result: Option[SippPsrSubmissionEtmpResponse] =>
+        (result: Option[SippPsrSubmissionEtmpResponse]) =>
           WireMock.verify(
             getRequestedFor(
               urlEqualTo(
@@ -189,7 +192,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
       )
 
       whenReady(connector.getSippPsr("notFoundTestPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion"))) {
-        result: Option[_] =>
+        (result: Option[?]) =>
           WireMock.verify(
             getRequestedFor(
               urlEqualTo(

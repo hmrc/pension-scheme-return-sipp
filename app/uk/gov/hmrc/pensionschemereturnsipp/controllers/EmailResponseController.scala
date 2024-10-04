@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import com.google.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
@@ -39,8 +39,8 @@ class EmailResponseController @Inject() (
   val authConnector: AuthConnector
 )(implicit executionContext: ExecutionContext)
     extends BackendController(cc)
-    with AuthorisedFunctions {
-  private val logger = Logger(classOf[EmailResponseController])
+    with AuthorisedFunctions
+    with Logging {
 
   def sendAuditEvents(
     submittedBy: String,

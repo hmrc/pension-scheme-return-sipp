@@ -17,10 +17,10 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
-import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.dsl.transformInto
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HeaderCarrier

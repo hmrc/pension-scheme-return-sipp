@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.google.inject.ImplementedBy
-import play.api.Logger
+import play.api.Logging
 import play.api.http.Status.{FORBIDDEN, NOT_FOUND}
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
@@ -68,9 +68,7 @@ class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpCli
 }
 
 @ImplementedBy(classOf[MinimalDetailsConnectorImpl])
-trait MinimalDetailsConnector {
-
-  protected val logger: Logger = Logger(classOf[MinimalDetailsConnector])
+trait MinimalDetailsConnector extends Logging {
 
   def fetch(
     psaId: PsaId

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class SippPsrJourneySubmissionEtmpResponse(
   formBundleNumber: String
 )
 
 object SippPsrJourneySubmissionEtmpResponse {
-  implicit val format = Json.format[SippPsrJourneySubmissionEtmpResponse]
+  implicit val format: OFormat[SippPsrJourneySubmissionEtmpResponse] = Json.format[SippPsrJourneySubmissionEtmpResponse]
 }

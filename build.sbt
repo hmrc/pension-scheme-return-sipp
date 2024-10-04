@@ -3,7 +3,9 @@ import uk.gov.hmrc.DefaultBuildSettings
 import sbt.*
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "3.5.1"
+ThisBuild / scalacOptions ++= Seq("-Werror", "-Wconf:src=routes/.*:s", "-Wconf:msg=Flag.*repeatedly:s")
+ThisBuild / scalafmtOnCompile := true
 
 lazy val microservice = Project("pension-scheme-return-sipp", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -15,10 +17,6 @@ lazy val microservice = Project("pension-scheme-return-sipp", file("."))
       "uk.gov.hmrc.pensionschemereturnsipp.config.Binders._"
     ),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
-    // suppress warnings in generated routes files
-    scalacOptions += "-Wconf:src=routes/.*:s",
-    scalafmtOnCompile := true
   )
   .settings(CodeCoverageSettings.settings)
   .settings(PlayKeys.playDefaultPort := 10704)

@@ -41,6 +41,8 @@ final case class PsrAuthContext[A](
 trait PsrAuth extends AuthorisedFunctions with Logging {
 
   private val AuthPredicate = Enrolment(psaEnrolmentKey).or(Enrolment(pspEnrolmentKey))
+
+  @annotation.nowarn("msg=deprecated") // TODO: address this!
   private val PsrRetrievals = Retrievals.externalId.and(Retrievals.allEnrolments).and(Retrievals.name)
 
   private type PsrAction[A] = PsrAuthContext[A] => Future[Result]
