@@ -16,13 +16,16 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, Json, Writes}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.PSA
 
 trait AuditEvent {
   def auditType: String
 
   def details: JsObject
+
+  def createOptionalJsonObject[T](key: String, value: Option[T])(implicit writes: Writes[T]): JsObject =
+    value.fold(Json.obj())(v => Json.obj(key -> v))
 
   def psaOrPspIdDetails(
     credentialRole: String,
