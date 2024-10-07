@@ -36,15 +36,11 @@ case class PsrPostAuditEvent(
   override def auditType: String = "PSRPost"
 
   override def details: JsObject = {
-
-    val optStatus = status.fold[JsObject](Json.obj())(s => Json.obj("httpStatus" -> s))
-    val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("response" -> s))
-    val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("errorMessage" -> s))
-
-    val optTaxYear =
-      taxYear.fold[JsObject](Json.obj())(tY => Json.obj("taxYear" -> s"${tY.from.getYear}-${tY.to.getYear}"))
-    val optSchemeName =
-      schemeName.fold[JsObject](Json.obj())(s => Json.obj("schemeName" -> s))
+    val optStatus = createOptionalJsonObject("httpStatus", status)
+    val optResponse = createOptionalJsonObject("response", response)
+    val optErrorMessage = createOptionalJsonObject("errorMessage", errorMessage)
+    val optTaxYear = createOptionalJsonObject("taxYear", taxYear.map(tY => s"${tY.from.getYear}-${tY.to.getYear}"))
+    val optSchemeName = createOptionalJsonObject("schemeName", schemeName)
 
     def credentialRole: String = if (pensionSchemeId.isPSP) "PSP" else "PSA"
     def affinityGroup: String = if (minimalDetails.organisationName.nonEmpty) "Organisation" else "Individual"

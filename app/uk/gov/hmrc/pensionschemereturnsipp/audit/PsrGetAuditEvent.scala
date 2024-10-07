@@ -30,19 +30,14 @@ case class PsrGetAuditEvent(
   override def auditType: String = "PSRGet"
 
   override def details: JsObject = {
+    val apiDetails = Json.obj("pensionSchemeTaxReference" -> pstr)
 
-    val optFbNumber = fbNumber.fold[JsObject](Json.obj())(s => Json.obj("FbNumber" -> s))
-    val optPeriodStartDate = periodStartDate.fold[JsObject](Json.obj())(s => Json.obj("PeriodStartDate" -> s))
-    val optPsrVersion = psrVersion.fold[JsObject](Json.obj())(s => Json.obj("PsrVersion" -> s))
-
-    val optStatus = status.fold[JsObject](Json.obj())(s => Json.obj("HttpStatus" -> s))
-    val optResponse = response.fold[JsObject](Json.obj())(s => Json.obj("Response" -> s))
-    val optErrorMessage = errorMessage.fold[JsObject](Json.obj())(s => Json.obj("ErrorMessage" -> s))
-
-    val apiDetails =
-      Json.obj(
-        "PensionSchemeTaxReference" -> pstr
-      )
-    apiDetails ++ optFbNumber ++ optPeriodStartDate ++ optPsrVersion ++ optStatus ++ optResponse ++ optErrorMessage
+    apiDetails ++
+      createOptionalJsonObject("fbNumber", fbNumber) ++
+      createOptionalJsonObject("periodStartDate", periodStartDate) ++
+      createOptionalJsonObject("psrVersion", psrVersion) ++
+      createOptionalJsonObject("httpStatus", status) ++
+      createOptionalJsonObject("response", response) ++
+      createOptionalJsonObject("errorMessage", errorMessage)
   }
 }

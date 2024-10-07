@@ -36,10 +36,8 @@ case class PSRSubmissionEvent(
 
     def credentialRole: String = if (pensionSchemeId.isPSP) "PSP" else "PSA"
     def affinityGroup: String = if (minimalDetails.organisationName.nonEmpty) "Organisation" else "Individual"
-    val optTaxYear =
-      taxYear.fold[JsObject](Json.obj())(tY => Json.obj("taxYear" -> s"${tY.from.getYear}-${tY.to.getYear}"))
-    val optSchemeName =
-      schemeName.fold[JsObject](Json.obj())(s => Json.obj("schemeName" -> s))
+    val optTaxYear = createOptionalJsonObject("taxYear", taxYear.map(tY => s"${tY.from.getYear}-${tY.to.getYear}"))
+    val optSchemeName = createOptionalJsonObject("schemeName", schemeName)
 
     val psrDetails = psaOrPspIdDetails(
       credentialRole,
