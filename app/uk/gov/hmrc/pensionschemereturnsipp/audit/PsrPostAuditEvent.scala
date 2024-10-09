@@ -33,7 +33,7 @@ case class PsrPostAuditEvent(
   minimalDetails: MinimalDetails,
   auditDetailPsrStatus: Option[AuditDetailPsrStatus]
 ) extends AuditEvent {
-  override def auditType: String = "PSRPost"
+  override def auditType: String = "PensionSchemeReturnPost"
 
   override def details: JsObject = {
     val optStatus = createOptionalJsonObject("httpStatus", status)

@@ -27,7 +27,7 @@ case class PsrGetAuditEvent(
   response: Option[JsValue],
   errorMessage: Option[String]
 ) extends AuditEvent {
-  override def auditType: String = "PSRGet"
+  override def auditType: String = "PensionSchemeReturnGet"
 
   override def details: JsObject = {
     val apiDetails = Json.obj("pensionSchemeTaxReference" -> pstr)
