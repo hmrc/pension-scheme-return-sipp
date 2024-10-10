@@ -231,31 +231,31 @@ trait SippEtmpTestValues {
     transactionDetails = Some(List(sippLandConnectedPartyTransactionDetail))
   )
 
-  private val sippOtherAssetsConnectedParty = SippOtherAssetsConnectedParty(
+  protected val sippOtherAssetsConnectedParty = SippOtherAssetsConnectedParty(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippOtherAssetsConnectedPartyTransactionDetail))
   )
 
-  private val sippLandArmsLength = SippLandArmsLength(
+  protected val sippLandArmsLength = SippLandArmsLength(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippLandArmsLengthTransactionDetail))
   )
 
-  private val sippTangibleProperty = SippTangibleProperty(
+  protected val sippTangibleProperty = SippTangibleProperty(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippTangiblePropertyTransactionalDetail))
   )
 
-  private val sippLoanOutstanding = SippLoanOutstanding(
+  protected val sippLoanOutstanding = SippLoanOutstanding(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippLoanOutstandingTransactionalDetail))
   )
 
-  val sippUnquotedShares = SippUnquotedShares(
+  protected val sippUnquotedShares = SippUnquotedShares(
     noOfTransactions = 1,
     version = None,
     transactionDetails = Some(List(sippUnquotedSharesTransactionalDetail))
@@ -398,7 +398,7 @@ trait SippEtmpTestValues {
     unquotedShares = None
   )
 
-  lazy val sippAssetsFromConnectedPartyApi: AssetsFromConnectedPartyApi.TransactionDetails = {
+  protected lazy val sippAssetsFromConnectedPartyApi: AssetsFromConnectedPartyApi.TransactionDetails = {
     import sippOtherAssetsConnectedPartyTransactionDetail._
 
     AssetsFromConnectedPartyApi.TransactionDetails(
@@ -425,7 +425,7 @@ trait SippEtmpTestValues {
     )
   }
 
-  val sippTangibleApi = TangibleMoveablePropertyApi.TransactionDetails(
+  protected val sippTangibleApi = TangibleMoveablePropertyApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
@@ -441,7 +441,7 @@ trait SippEtmpTestValues {
     transactionCount = None
   )
 
-  val sippUnquotedShareApi = UnquotedShareApi.TransactionDetails(
+  protected val sippUnquotedShareApi = UnquotedShareApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     sharesCompanyDetails = SharesCompanyDetails(
@@ -460,7 +460,7 @@ trait SippEtmpTestValues {
     transactionCount = None
   )
 
-  val sippOutstandingLoansApi = OutstandingLoansApi.TransactionDetails(
+  protected val sippOutstandingLoansApi = OutstandingLoansApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     loanRecipientName = "test",
