@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import cats.implicits.catsSyntaxEitherId
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{never, reset, times, verify, when}
+import org.mockito.Mockito._
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
@@ -30,15 +30,16 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.PsrAssetCountsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrAssetCountsResponse, UpdateMemberDetailsRequest}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, ReportStatus}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 import scala.concurrent.Future
 
 class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
@@ -159,6 +160,55 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
   }
 
+  "getPsrVersions" should {
+
+    "return OK and the PSR versions when service returns valid data" in {
+      val pstr = "testPstr"
+      val startDate = LocalDate.now()
+
+      val psrVersionsResponse = Seq(
+        PsrVersionsResponse(
+          reportFormBundleNumber = "bundle1",
+          reportVersion = 1,
+          reportStatus = ReportStatus.Compiled,
+          compilationOrSubmissionDate = ZonedDateTime.now(),
+          reportSubmitterDetails = None,
+          psaDetails = None
+        )
+      )
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrVersions(any(), any())(any(), any()))
+        .thenReturn(Future.successful(psrVersionsResponse))
+
+      val request = FakeRequest(GET, s"/psr-versions/$pstr/${startDate.toString}")
+      val result = controller.getPsrVersions(pstr, startDate.toString).apply(request)
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.toJson(psrVersionsResponse)
+    }
+
+    "return BadRequest when the start date is invalid" in {
+      val pstr = "testPstr"
+      val invalidStartDate = "invalid-date"
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      val request = FakeRequest(GET, s"/psr-versions/$pstr/$invalidStartDate")
+      val result = controller.getPsrVersions(pstr, invalidStartDate).apply(request)
+
+      status(result) mustBe BAD_REQUEST
+      contentAsString(result) must include("Invalid startDate")
+    }
+  }
+
   "GET Member Details" must {
     "return 200" in {
 
@@ -186,6 +236,32 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result =
         controller.getMemberDetails("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
+    }
+  }
+
+  "Update Member " must {
+    "return BadRequest when update fails" in {
+      val oldPersonalDetails = PersonalDetails("John", "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
+      val newPersonalDetails = PersonalDetails("John", "Dow", Some("AB123456D"), None, LocalDate.of(1980, 1, 1))
+      val memberDetailsRequest = UpdateMemberDetailsRequest(oldPersonalDetails, newPersonalDetails)
+
+      val putRequest = FakeRequest(PUT, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(Json.toJson(memberDetailsRequest))
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(
+        mockSippPsrSubmissionService.updateMemberDetails(any(), any(), any(), any(), any(), any(), any())(any(), any())
+      )
+        .thenReturn(Future.failed(new Exception("Submission not found")))
+
+      val result = controller.updateMember(pstr, Standard, "fbNumber", None, None)(putRequest)
+
+      status(result) mustBe Status.BAD_REQUEST
     }
   }
 

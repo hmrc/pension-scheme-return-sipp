@@ -63,6 +63,9 @@ trait TestValues {
   val pstr = "testPstr"
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
 
+  val schemeName = "SchemeName"
+  val userName = "userName"
+
   val samplePsaId: PsaId = PsaId("PSA")
   val samplePspId: PspId = PspId("PSP")
   val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")

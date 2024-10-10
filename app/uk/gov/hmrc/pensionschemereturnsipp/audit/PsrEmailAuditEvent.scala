@@ -46,6 +46,6 @@ case class PsrEmailAuditEvent(
         "taxYear" -> taxYear
       )
 
-    psaOrPspIdDetails(submittedBy, psaPspId, userName) ++ emailDetails
+    psaOrPspIdDetails("PSP", psaPspId, userName) ++ emailDetails
   }
 }

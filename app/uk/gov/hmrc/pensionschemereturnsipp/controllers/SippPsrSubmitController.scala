@@ -204,6 +204,7 @@ class SippPsrSubmitController @Inject() (
   ) = Action(parse.json).async { implicit request =>
     authorisedAsPsrUser { user =>
       val updateMemberDetailsRequest = request.body.as[UpdateMemberDetailsRequest]
+
       sippPsrSubmissionService
         .updateMemberDetails(
           journeyType,

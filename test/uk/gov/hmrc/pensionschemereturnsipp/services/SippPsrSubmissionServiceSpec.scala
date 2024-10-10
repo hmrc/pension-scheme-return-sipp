@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either._
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
-import org.mockito.Mockito.{never, reset, times, verify, when}
+import org.mockito.Mockito._
 import play.api.http.Status.BAD_REQUEST
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
@@ -29,13 +29,25 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.Generators.minimalDetailsGen
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, PsrConnector}
-import uk.gov.hmrc.pensionschemereturnsipp.models.Journey
+import uk.gov.hmrc.pensionschemereturnsipp.models.Journey.{
+  ArmsLengthLandOrProperty,
+  AssetFromConnectedParty,
+  InterestInLandOrProperty,
+  OutstandingLoans,
+  TangibleMoveableProperty,
+  UnquotedShares
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AssetsFromConnectedPartyRequest,
   LandOrConnectedPropertyRequest,
+  OutstandingLoansRequest,
   PSRSubmissionResponse,
-  PsrSubmissionRequest
+  PsrSubmissionRequest,
+  TangibleMoveablePropertyRequest,
+  UnquotedShareRequest,
+  UpdateMemberDetailsRequest
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
@@ -46,7 +58,13 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.{
   SippPsrJourneySubmissionEtmpResponse,
   SippPsrSubmissionEtmpResponse
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpPsrStatus, EtmpSippReportDetails}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
+  EtmpPsrStatus,
+  EtmpSippReportDetails,
+  MemberDetails,
+  PersonalDetails
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
   PSRAssetsExistenceTransformer,
   PSRMemberDetailsTransformer,
@@ -172,6 +190,421 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       whenReady(
         service.submitLandOrConnectedProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+
+    }
+  }
+
+  "submitOutstandingLoans" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockOutstandingLoansTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = OutstandingLoansRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippOutstandingLoansApi))
+      )
+
+      whenReady(
+        service.submitOutstandingLoans(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockOutstandingLoansTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = OutstandingLoansRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippOutstandingLoansApi))
+      )
+
+      whenReady(
+        service.submitOutstandingLoans(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+
+    }
+  }
+
+  "submitLandArmsLength" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockArmsLengthTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = LandOrConnectedPropertyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(landConnectedTransaction))
+      )
+
+      whenReady(
+        service.submitLandArmsLength(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockArmsLengthTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = LandOrConnectedPropertyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(landConnectedTransaction))
+      )
+
+      whenReady(
+        service.submitLandArmsLength(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+
+    }
+  }
+
+  "submitAssetsFromConnectedParty" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockAssetsFromConnectedPartyTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = AssetsFromConnectedPartyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippAssetsFromConnectedPartyApi))
+      )
+
+      whenReady(
+        service.submitAssetsFromConnectedParty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockAssetsFromConnectedPartyTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = AssetsFromConnectedPartyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippAssetsFromConnectedPartyApi))
+      )
+
+      whenReady(
+        service.submitAssetsFromConnectedParty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+
+    }
+  }
+
+  "submitTangibleMoveableProperty" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockTangibleMovablePropertyTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = TangibleMoveablePropertyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippTangibleApi))
+      )
+
+      whenReady(
+        service.submitTangibleMoveableProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockTangibleMovablePropertyTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = TangibleMoveablePropertyRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippTangibleApi))
+      )
+
+      whenReady(
+        service.submitTangibleMoveableProperty(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(
+          any(),
+          any()
+        )
+      }
+
+    }
+  }
+
+  "submitUnquotedShare" should {
+    "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest =
+        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockUnquotedSharesTransformer.merge(any(), any())).thenReturn(List())
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = UnquotedShareRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippUnquotedShareApi))
+      )
+
+      whenReady(
+        service.submitUnquotedShares(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
+      ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
+        result mustBe sippResponse
+
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(
+          any(),
+          any(),
+          any(),
+          any(),
+          mockitoEq(etmpRequest),
+          any(),
+          any()
+        )(any(), any())
+      }
+
+    }
+
+    "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
+      val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
+      val response = HttpResponse(200, Json.toJson(sippResponse).toString())
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
+        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+        accountingPeriodDetails = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockUnquotedSharesTransformer.merge(any(), any())).thenReturn(List(etmpDataWithLandConnectedTx))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      val request = UnquotedShareRequest(
+        testReportDetails,
+        Some(NonEmptyList.one(sippUnquotedShareApi))
+      )
+
+      whenReady(
+        service.submitUnquotedShares(Standard, Some("fbNumber"), None, None, request, samplePensionSchemeId)
       ) { (result: SippPsrJourneySubmissionEtmpResponse) =>
         result mustBe sippResponse
 
@@ -390,6 +823,98 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
   }
 
+  "updateMemberDetails" should {
+
+    val currentPersonalDetails = PersonalDetails("John", "Doe", Some("AA123456A"), None, LocalDate.of(1980, 1, 1))
+    val updatedPersonalDetails = PersonalDetails("John", "Down", Some("AA123456B"), None, LocalDate.of(1990, 1, 1))
+    val request = UpdateMemberDetailsRequest(currentPersonalDetails, updatedPersonalDetails)
+
+    val fbNumber = "test-fbNumber"
+    val journeyType = JourneyType.Standard
+
+    "update member details when the record is found" in {
+      val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
+      val response = HttpResponse(200, sippResponse)
+
+      val sampleResponse = SippPsrSubmissionEtmpResponse(
+        reportDetails = EtmpSippReportDetails(
+          pstr,
+          EtmpPsrStatus.Compiled,
+          LocalDate.now(),
+          LocalDate.now(),
+          YesNo.Yes,
+          None
+        ),
+        accountingPeriodDetails = None,
+        memberAndTransactions = Some(
+          List(
+            etmpDataWithLandConnectedTx.copy(
+              memberDetails = MemberDetails(currentPersonalDetails)
+            )
+          )
+        ),
+        psrDeclaration = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleResponse)))
+
+      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(response))
+
+      whenReady(
+        service.updateMemberDetails(Standard, pstr, "test-fb-num", None, None, request, samplePensionSchemeId)
+      ) { _ =>
+        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+        verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any())
+      }
+    }
+
+    "return the submission response when the record is not found" in {
+      val sampleResponse = SippPsrSubmissionEtmpResponse(
+        reportDetails = EtmpSippReportDetails(
+          pstr,
+          EtmpPsrStatus.Compiled,
+          LocalDate.now(),
+          LocalDate.now(),
+          YesNo.Yes,
+          None
+        ),
+        accountingPeriodDetails = None,
+        memberAndTransactions = Some(
+          List(etmpSippMemberAndTransactions)
+        ),
+        psrDeclaration = None
+      )
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleResponse)))
+
+      whenReady(service.updateMemberDetails(journeyType, pstr, fbNumber, None, None, request, samplePensionSchemeId)) {
+        _ =>
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockPsrConnector, times(0)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
+            any(),
+            any()
+          )
+      }
+    }
+
+    "return None when no SippPsr data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      whenReady(service.updateMemberDetails(journeyType, pstr, fbNumber, None, None, request, samplePensionSchemeId)) {
+        _ =>
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockPsrConnector, times(0)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
+            any(),
+            any()
+          )
+      }
+    }
+  }
+
   "delete member" should {
     "successfully delete" in {
       val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
@@ -449,7 +974,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   }
 
   "delete assets" should {
-    "successfully delete a assets and mark member is changed if there is still some assets" in {
+    "successfully delete the correct assets for each journey type and mark member as changed" in {
       val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
       val response = HttpResponse(200, sippResponse)
       val sampleResponse = SippPsrSubmissionEtmpResponse(
@@ -465,6 +990,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         memberAndTransactions = Some(
           List(
             etmpDataWithLandConnectedTx.copy(
+              landConnectedParty = Some(sippLandConnectedParty),
+              otherAssetsConnectedParty = Some(sippOtherAssetsConnectedParty),
+              landArmsLength = Some(sippLandArmsLength),
+              tangibleProperty = Some(sippTangibleProperty),
+              loanOutstanding = Some(sippLoanOutstanding),
               unquotedShares = Some(sippUnquotedShares)
             )
           )
@@ -472,50 +1002,62 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         psrDeclaration = None
       )
 
-      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(Some(sampleResponse)))
+      val journeyTypes = Journey.values // All journey types
+      journeyTypes.foreach { journey =>
+        reset(mockPsrConnector)
 
-      when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(response))
+        when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some(sampleResponse)))
 
-      whenReady(
-        service.deleteAssets(
-          Journey.InterestInLandOrProperty,
-          Standard,
-          pstr,
-          None,
-          None,
-          None,
-          samplePensionSchemeId
-        )
-      ) { _ =>
-        verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
-        verify(mockPsrConnector, times(1)).submitSippPsr(
-          any(),
-          any(),
-          any(),
-          any(),
-          mockitoEq(
-            SippPsrSubmissionEtmpRequest(
-              reportDetails = sampleResponse.reportDetails.copy(version = None),
-              accountingPeriodDetails = None,
-              memberAndTransactions = Some(
-                NonEmptyList.one(
-                  etmpDataWithLandConnectedTx
-                    .copy(
-                      status = SectionStatus.Changed,
-                      version = None,
-                      landConnectedParty = None,
-                      unquotedShares = Some(sippUnquotedShares)
-                    )
-                )
-              ),
-              psrDeclaration = None
-            )
-          ),
-          any(),
-          any()
-        )(any(), any())
+        when(mockPsrConnector.submitSippPsr(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(response))
+
+        whenReady(
+          service.deleteAssets(
+            journey,
+            Standard,
+            pstr,
+            None,
+            None,
+            None,
+            samplePensionSchemeId
+          )
+        ) { _ =>
+          verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+          verify(mockPsrConnector, times(1)).submitSippPsr(
+            any(),
+            any(),
+            any(),
+            any(),
+            mockitoEq(
+              SippPsrSubmissionEtmpRequest(
+                reportDetails = sampleResponse.reportDetails.copy(version = None),
+                accountingPeriodDetails = None,
+                memberAndTransactions = Some(
+                  NonEmptyList.one(
+                    etmpDataWithLandConnectedTx
+                      .copy(
+                        status = SectionStatus.Changed,
+                        version = None,
+                        landConnectedParty =
+                          if (journey != InterestInLandOrProperty) Some(sippLandConnectedParty) else None,
+                        otherAssetsConnectedParty =
+                          if (journey != AssetFromConnectedParty) Some(sippOtherAssetsConnectedParty) else None,
+                        landArmsLength = if (journey != ArmsLengthLandOrProperty) Some(sippLandArmsLength) else None,
+                        tangibleProperty =
+                          if (journey != TangibleMoveableProperty) Some(sippTangibleProperty) else None,
+                        loanOutstanding = if (journey != OutstandingLoans) Some(sippLoanOutstanding) else None,
+                        unquotedShares = if (journey != UnquotedShares) Some(sippUnquotedShares) else None
+                      )
+                  )
+                ),
+                psrDeclaration = None
+              )
+            ),
+            any(),
+            any()
+          )(any(), any())
+        }
       }
     }
 

@@ -18,9 +18,10 @@ package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.common._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SharesCompanyDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippOtherAssetsConnectedParty.TransactionDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
@@ -30,36 +31,36 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
-import java.time.LocalDate
-
 class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+
+  import java.time.LocalDate
 
   private val transformer: AssetsFromConnectedPartyTransformer = new AssetsFromConnectedPartyTransformer()
 
-  val assetsFromConnectedPartyTx = AssetsFromConnectedPartyApi.TransactionDetails(
+  val assetsDataRow1 = AssetsFromConnectedPartyApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
     acquisitionDate = LocalDate.of(2020, 1, 1),
-    assetDescription = "Asset Description",
+    assetDescription = "Description",
     acquisitionOfShares = Yes,
     sharesCompanyDetails = Some(
       SharesCompanyDetails(
         companySharesName = "companySharesName",
-        companySharesCRN = Some("12345678"),
+        companySharesCRN = Some("companySharesCRN"),
         reasonNoCRN = None,
         sharesClass = "sharesClass",
         noOfShares = 1
       )
     ),
     acquiredFromName = "acquiredFromName",
-    totalCost = 20.0,
+    totalCost = 10,
     independentValuation = Yes,
     tangibleSchedule29A = Yes,
-    totalIncomeOrReceipts = 20.0,
+    totalIncomeOrReceipts = 10,
     isPropertyDisposed = No,
     disposalDetails = None,
-    disposalOfShares = Some(No),
-    noOfSharesHeld = Some(1),
+    disposalOfShares = None,
+    noOfSharesHeld = None,
     transactionCount = None
   )
 
@@ -76,23 +77,31 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
     landConnectedParty = None,
     otherAssetsConnectedParty = Some(
       SippOtherAssetsConnectedParty(
-        1,
-        None,
-        Some(
+        noOfTransactions = 1,
+        version = None,
+        transactionDetails = Some(
           List(
-            SippOtherAssetsConnectedParty.TransactionDetails(
+            TransactionDetails(
               acquisitionDate = LocalDate.of(2020, 1, 1),
-              assetDescription = "Asset Description",
+              assetDescription = "Description",
               acquisitionOfShares = Yes,
-              sharesCompanyDetails = None,
+              sharesCompanyDetails = Some(
+                SharesCompanyDetails(
+                  companySharesName = "companySharesName",
+                  companySharesCRN = Some("companySharesCRN"),
+                  reasonNoCRN = None,
+                  sharesClass = "sharesClass",
+                  noOfShares = 1
+                )
+              ),
               acquiredFromName = "acquiredFromName",
-              totalCost = 20.0,
+              totalCost = 10,
               independentValuation = Yes,
               tangibleSchedule29A = Yes,
-              totalIncomeOrReceipts = 20.0, // Updated
+              totalIncomeOrReceipts = 10,
               isPropertyDisposed = No,
               disposalDetails = None,
-              disposalOfShares = Some(Yes),
+              disposalOfShares = None,
               noOfSharesHeld = None
             )
           )
@@ -106,42 +115,42 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
   )
 
   "merge" should {
-    "put new member data if there is no previous data" in {
+    "add assets from connected data for a single member when member match is found" in {
       val testEtmpData = etmpData.copy(otherAssetsConnectedParty = None)
 
-      val result = transformer.merge(NonEmptyList.of(assetsFromConnectedPartyTx), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(assetsDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
           status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
-              1,
-              None,
-              Some(
+              noOfTransactions = 1,
+              version = None,
+              transactionDetails = Some(
                 List(
-                  SippOtherAssetsConnectedParty.TransactionDetails(
+                  TransactionDetails(
                     acquisitionDate = LocalDate.of(2020, 1, 1),
-                    assetDescription = "Asset Description",
+                    assetDescription = "Description",
                     acquisitionOfShares = Yes,
                     sharesCompanyDetails = Some(
                       SharesCompanyDetails(
                         companySharesName = "companySharesName",
-                        companySharesCRN = Some("12345678"),
+                        companySharesCRN = Some("companySharesCRN"),
                         reasonNoCRN = None,
                         sharesClass = "sharesClass",
                         noOfShares = 1
                       )
                     ),
                     acquiredFromName = "acquiredFromName",
-                    totalCost = 20.0,
+                    totalCost = 10,
                     independentValuation = Yes,
                     tangibleSchedule29A = Yes,
-                    totalIncomeOrReceipts = 20.0,
+                    totalIncomeOrReceipts = 10,
                     isPropertyDisposed = No,
                     disposalDetails = None,
-                    disposalOfShares = Some(No),
-                    noOfSharesHeld = Some(1)
+                    disposalOfShares = None,
+                    noOfSharesHeld = None
                   )
                 )
               )
@@ -152,49 +161,42 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     }
 
-    "replace assets from connected party data for a single member when member match is found" in {
-      val updateValues = assetsFromConnectedPartyTx.copy(
-        acquiredFromName = "test2",
-        noOfSharesHeld = Some(2),
-        sharesCompanyDetails = assetsFromConnectedPartyTx.sharesCompanyDetails.map(
-          _.copy(
-            companySharesName = "testCompanySharesName2"
-          )
-        )
-      )
-      val result = transformer.merge(NonEmptyList.of(updateValues), List(etmpData))
+    "update assets from connected data for a single member when member match is found" in {
+
+      val testLandArmsDataRow1 = assetsDataRow1.copy(acquiredFromName = "test22")
+      val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
           status = SectionStatus.Changed,
           otherAssetsConnectedParty = Some(
             SippOtherAssetsConnectedParty(
-              1,
-              None,
-              Some(
+              noOfTransactions = 1,
+              version = None,
+              transactionDetails = Some(
                 List(
-                  SippOtherAssetsConnectedParty.TransactionDetails(
+                  TransactionDetails(
                     acquisitionDate = LocalDate.of(2020, 1, 1),
-                    assetDescription = "Asset Description",
+                    assetDescription = "Description",
                     acquisitionOfShares = Yes,
                     sharesCompanyDetails = Some(
                       SharesCompanyDetails(
-                        companySharesName = "testCompanySharesName2",
-                        companySharesCRN = Some("12345678"),
+                        companySharesName = "companySharesName",
+                        companySharesCRN = Some("companySharesCRN"),
                         reasonNoCRN = None,
                         sharesClass = "sharesClass",
                         noOfShares = 1
                       )
                     ),
-                    acquiredFromName = "test2",
-                    totalCost = 20.0,
+                    acquiredFromName = "test22",
+                    totalCost = 10,
                     independentValuation = Yes,
                     tangibleSchedule29A = Yes,
-                    totalIncomeOrReceipts = 20.0,
+                    totalIncomeOrReceipts = 10,
                     isPropertyDisposed = No,
                     disposalDetails = None,
-                    disposalOfShares = Some(No),
-                    noOfSharesHeld = Some(2)
+                    disposalOfShares = None,
+                    noOfSharesHeld = None
                   )
                 )
               )
@@ -205,13 +207,12 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     }
 
-    "add assets from connected party data data with new member details for a single member when match is not found" in {
-      val testData = assetsFromConnectedPartyTx.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testData), List(etmpData))
+    "add assets from connected data with new member details for a single member when match is not found" in {
+      val testOtherAssetsRow1 = assetsDataRow1.copy(nino = NinoType(Some("otherNino"), None))
+      val result = transformer.merge(NonEmptyList.of(testOtherAssetsRow1), List(etmpData))
 
       result mustBe List(
-        etmpData
-          .copy(otherAssetsConnectedParty = None, status = Deleted), // No more tx for first member :/
+        etmpData.copy(otherAssetsConnectedParty = None, status = Deleted),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
@@ -219,45 +220,34 @@ class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDumm
             nino = Some("otherNino"),
             reasonNoNINO = None,
             dateOfBirth = LocalDate.of(2020, 1, 1)
-          ),
-          otherAssetsConnectedParty = Some(
-            SippOtherAssetsConnectedParty(
-              1,
-              None,
-              Some(
-                List(
-                  SippOtherAssetsConnectedParty.TransactionDetails(
-                    acquisitionDate = LocalDate.of(2020, 1, 1),
-                    assetDescription = "Asset Description",
-                    acquisitionOfShares = Yes,
-                    sharesCompanyDetails = Some(
-                      SharesCompanyDetails(
-                        companySharesName = "companySharesName",
-                        companySharesCRN = Some("12345678"),
-                        reasonNoCRN = None,
-                        sharesClass = "sharesClass",
-                        noOfShares = 1
-                      )
-                    ),
-                    acquiredFromName = "acquiredFromName",
-                    totalCost = 20.0,
-                    independentValuation = Yes,
-                    tangibleSchedule29A = Yes,
-                    totalIncomeOrReceipts = 20.0,
-                    isPropertyDisposed = No,
-                    disposalDetails = None,
-                    disposalOfShares = Some(No),
-                    noOfSharesHeld = Some(1)
-                  )
-                )
-              )
-            )
           )
         )
       )
 
     }
+  }
 
+  "transformToResponse" should {
+    "return correct response" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions)
+      )
+
+      result.transactions.length mustBe 1
+      result.transactions.head.transactionCount mustBe Some(1)
+      result.transactions.head.nino.nino mustBe sippMemberDetails.nino
+      result.transactions.head.nameDOB.firstName mustBe sippMemberDetails.firstName
+      result.transactions.head.nameDOB.lastName mustBe sippMemberDetails.lastName
+
+    }
+
+    "return no transaction if related not exist" in {
+      val result = transformer.transformToResponse(
+        List(etmpSippMemberAndTransactions.copy(otherAssetsConnectedParty = None))
+      )
+
+      result.transactions.length mustBe 0
+    }
   }
 
 }
