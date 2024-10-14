@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 
 case class UpdateMemberDetailsRequest(current: PersonalDetails, updated: PersonalDetails)
 
 object UpdateMemberDetailsRequest {
-  implicit val reads: Reads[UpdateMemberDetailsRequest] = Json.reads[UpdateMemberDetailsRequest]
+  implicit val memberDetailsRequest: OFormat[UpdateMemberDetailsRequest] = Json.format[UpdateMemberDetailsRequest]
 }

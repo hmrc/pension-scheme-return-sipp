@@ -17,35 +17,38 @@
 package uk.gov.hmrc.pensionschemereturnsipp.transformations
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.{NameDOB, NinoType}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.CostOrMarketType
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SharesCompanyDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.{No, Yes}
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippTangibleProperty.TransactionDetail
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippUnquotedShares.TransactionDetail
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
 
-class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class UnquotedSharesTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
 
   import java.time.LocalDate
 
-  private val transformer: TangibleMoveablePropertyTransformer = new TangibleMoveablePropertyTransformer()
+  private val transformer: UnquotedSharesTransformer = new UnquotedSharesTransformer()
 
-  val tangibleDataRow1 = TangibleMoveablePropertyApi.TransactionDetails(
+  val unquotedDataRow1 = UnquotedShareApi.TransactionDetails(
     nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
     nino = NinoType(nino = Some("nino"), reasonNoNino = None),
-    assetDescription = "assetDescription",
-    acquisitionDate = LocalDate.of(2020, 1, 1),
-    totalCost = 10,
+    sharesCompanyDetails = SharesCompanyDetails(
+      companySharesName = "companySharesName",
+      companySharesCRN = Some("companySharesCRN"),
+      reasonNoCRN = None,
+      sharesClass = "sharesClass",
+      noOfShares = 1
+    ),
     acquiredFromName = "acquiredFromName",
+    totalCost = 10,
     independentValuation = Yes,
-    totalIncomeOrReceipts = 10,
-    costOrMarket = CostOrMarketType.CostValue,
-    costMarketValue = 20,
-    isPropertyDisposed = No,
-    disposalDetails = None,
+    totalDividendsIncome = 20,
+    sharesDisposed = No,
+    sharesDisposalDetails = None,
     transactionCount = None
   )
 
@@ -62,58 +65,64 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
     landConnectedParty = None,
     otherAssetsConnectedParty = None,
     landArmsLength = None,
-    tangibleProperty = Some(
-      SippTangibleProperty(
+    tangibleProperty = None,
+    loanOutstanding = None,
+    unquotedShares = Some(
+      SippUnquotedShares(
         noOfTransactions = 1,
         version = None,
         transactionDetails = Some(
           List(
             TransactionDetail(
-              assetDescription = "assetDescription",
-              acquisitionDate = LocalDate.of(2020, 1, 1),
-              totalCost = 10,
+              sharesCompanyDetails = SharesCompanyDetails(
+                companySharesName = "companySharesName",
+                companySharesCRN = Some("companySharesCRN"),
+                reasonNoCRN = None,
+                sharesClass = "sharesClass",
+                noOfShares = 1
+              ),
               acquiredFromName = "acquiredFromName",
+              totalCost = 10,
               independentValuation = Yes,
-              totalIncomeOrReceipts = 10,
-              costOrMarket = CostOrMarketType.CostValue,
-              costMarketValue = 20,
-              isPropertyDisposed = No,
-              disposalDetails = None
+              totalDividendsIncome = 20,
+              sharesDisposed = No,
+              sharesDisposalDetails = None
             )
           )
         )
       )
-    ),
-    loanOutstanding = None,
-    unquotedShares = None
+    )
   )
 
   "merge" should {
-    "add tangible data for a single member when member match is found" in {
-      val testEtmpData = etmpData.copy(tangibleProperty = None)
+    "add unquoted data for a single member when member match is found" in {
+      val testEtmpData = etmpData.copy(unquotedShares = None)
 
-      val result = transformer.merge(NonEmptyList.of(tangibleDataRow1), List(testEtmpData))
+      val result = transformer.merge(NonEmptyList.of(unquotedDataRow1), List(testEtmpData))
 
       result mustBe List(
         etmpData.copy(
           status = SectionStatus.Changed,
-          tangibleProperty = Some(
-            SippTangibleProperty(
+          unquotedShares = Some(
+            SippUnquotedShares(
               noOfTransactions = 1,
               version = None,
               transactionDetails = Some(
                 List(
                   TransactionDetail(
-                    assetDescription = "assetDescription",
-                    acquisitionDate = LocalDate.of(2020, 1, 1),
-                    totalCost = 10,
+                    sharesCompanyDetails = SharesCompanyDetails(
+                      companySharesName = "companySharesName",
+                      companySharesCRN = Some("companySharesCRN"),
+                      reasonNoCRN = None,
+                      sharesClass = "sharesClass",
+                      noOfShares = 1
+                    ),
                     acquiredFromName = "acquiredFromName",
+                    totalCost = 10,
                     independentValuation = Yes,
-                    totalIncomeOrReceipts = 10,
-                    costOrMarket = CostOrMarketType.CostValue,
-                    costMarketValue = 20,
-                    isPropertyDisposed = No,
-                    disposalDetails = None
+                    totalDividendsIncome = 20,
+                    sharesDisposed = No,
+                    sharesDisposalDetails = None
                   )
                 )
               )
@@ -124,31 +133,34 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     }
 
-    "update tangible data for a single member when member match is found" in {
+    "update unquoted data for a single member when member match is found" in {
 
-      val testLandArmsDataRow1 = tangibleDataRow1.copy(acquiredFromName = "test22")
+      val testLandArmsDataRow1 = unquotedDataRow1.copy(acquiredFromName = "test2222")
       val result = transformer.merge(NonEmptyList.of(testLandArmsDataRow1), List(etmpData))
 
       result mustBe List(
         etmpData.copy(
           status = SectionStatus.Changed,
-          tangibleProperty = Some(
-            SippTangibleProperty(
+          unquotedShares = Some(
+            SippUnquotedShares(
               noOfTransactions = 1,
               version = None,
               transactionDetails = Some(
                 List(
                   TransactionDetail(
-                    assetDescription = "assetDescription",
-                    acquisitionDate = LocalDate.of(2020, 1, 1),
+                    sharesCompanyDetails = SharesCompanyDetails(
+                      companySharesName = "companySharesName",
+                      companySharesCRN = Some("companySharesCRN"),
+                      reasonNoCRN = None,
+                      sharesClass = "sharesClass",
+                      noOfShares = 1
+                    ),
+                    acquiredFromName = "test2222",
                     totalCost = 10,
-                    acquiredFromName = "test22",
                     independentValuation = Yes,
-                    totalIncomeOrReceipts = 10,
-                    costOrMarket = CostOrMarketType.CostValue,
-                    costMarketValue = 20,
-                    isPropertyDisposed = No,
-                    disposalDetails = None
+                    totalDividendsIncome = 20,
+                    sharesDisposed = No,
+                    sharesDisposalDetails = None
                   )
                 )
               )
@@ -159,12 +171,12 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     }
 
-    "add tangible data with new member details for a single member when match is not found" in {
-      val testTangibleRow1 = tangibleDataRow1.copy(nino = NinoType(Some("otherNino"), None))
-      val result = transformer.merge(NonEmptyList.of(testTangibleRow1), List(etmpData))
+    "add unquoted data with new member details for a single member when match is not found" in {
+      val testUnquotedRow1 = unquotedDataRow1.copy(nino = NinoType(Some("otherNino"), None))
+      val result = transformer.merge(NonEmptyList.of(testUnquotedRow1), List(etmpData))
 
       result mustBe List(
-        etmpData.copy(tangibleProperty = None, status = Deleted),
+        etmpData.copy(unquotedShares = None, status = Deleted),
         etmpData.copy(
           memberDetails = MemberDetails(
             firstName = "firstName",
@@ -195,7 +207,7 @@ class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDumm
 
     "return no transaction if related not exist" in {
       val result = transformer.transformToResponse(
-        List(etmpSippMemberAndTransactions.copy(tangibleProperty = None))
+        List(etmpSippMemberAndTransactions.copy(unquotedShares = None))
       )
 
       result.transactions.length mustBe 0
