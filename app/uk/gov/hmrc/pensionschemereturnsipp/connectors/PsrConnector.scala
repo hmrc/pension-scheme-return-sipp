@@ -85,22 +85,8 @@ class PsrConnector @Inject() (
     val jsonRequest = Json.toJson(request)
     val jsonSizeInBytes = jsonRequest.toString().getBytes("UTF-8").length
 
-    logger.info(s"PSR-1518 POST to ETMP pstr: $pstr" + request.memberAndTransactions.map(_.map { m =>
-      s"""
-         | landArmsLength tx count: ${m.landArmsLength.map(_.noOfTransactions)}
-         | landConnectedParty tx count: ${m.landConnectedParty.map(_.noOfTransactions)}
-         | otherAssetsConnectedParty tx count: ${m.otherAssetsConnectedParty.map(_.noOfTransactions)}
-         | tangibleProperty tx count: ${m.tangibleProperty.map(_.noOfTransactions)}
-         | unquotedShares tx count: ${m.unquotedShares.map(_.noOfTransactions)}
-         | loanOutstanding tx count: ${m.loanOutstanding.map(_.noOfTransactions)}
-         |""".stripMargin
-    }))
-
-    logger.info(s"PSR-1518 Payload Size: $jsonSizeInBytes Bytes, pstr: $pstr")
-
     if (jsonSizeInBytes > config.maxRequestSize) {
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
-      logger.error(errorMessage)
       // Fire the audit event for the size limit exceeded case
       apiAuditUtil
         .firePsrPostAuditEvent(

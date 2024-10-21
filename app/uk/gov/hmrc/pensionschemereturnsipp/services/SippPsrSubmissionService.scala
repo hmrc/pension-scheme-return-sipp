@@ -348,20 +348,6 @@ class SippPsrSubmissionService @Inject() (
           val merged = for {
             txs <- transactions
           } yield transformer.merge(txs, existingEtmpData.memberAndTransactions.getOrElse(List()))
-
-          logger.info(
-            s"PSR-1518 GET from ETMP pstr: ${reportDetails.pstr}, optFbNumber: $optFbNumber, optPeriodStartDate: $optPeriodStartDate, optPsrVersion: $optPsrVersion " + merged
-              .map(_.map { m =>
-                s"""
-               | landArmsLength tx count: ${m.landArmsLength.map(_.noOfTransactions)}
-               | landConnectedParty tx count: ${m.landConnectedParty.map(_.noOfTransactions)}
-               | otherAssetsConnectedParty tx count: ${m.otherAssetsConnectedParty.map(_.noOfTransactions)}
-               | tangibleProperty tx count: ${m.tangibleProperty.map(_.noOfTransactions)}
-               | unquotedShares tx count: ${m.unquotedShares.map(_.noOfTransactions)}
-               | loanOutstanding tx count: ${m.loanOutstanding.map(_.noOfTransactions)}
-               |""".stripMargin
-              })
-          )
           merged.toList.flatten
         case None =>
           transactions.toList.flatMap(txs => transformer.merge(txs, Nil))
