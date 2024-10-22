@@ -510,6 +510,7 @@ class SippPsrSubmissionService @Inject() (
                   if (compare(memberAndTransactions.memberDetails.personalDetails, request.current)) {
                     memberAndTransactions.copy(
                       memberDetails = memberAndTransactions.memberDetails.copy(personalDetails = request.updated),
+                      status = SectionStatus.Changed,
                       version = None
                     )
                   } else memberAndTransactions
