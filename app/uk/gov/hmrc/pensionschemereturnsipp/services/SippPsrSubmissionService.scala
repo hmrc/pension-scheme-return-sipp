@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.data.{EitherT, NonEmptyList}
+import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
@@ -321,14 +321,9 @@ class SippPsrSubmissionService @Inject() (
     hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[Option[V]] =
-    psrConnector
-      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map {
-        case Some(existingEtmpData) =>
-          Some(transformer.transformToResponse(existingEtmpData.memberAndTransactions.getOrElse(List.empty)))
-        case None =>
-          None
-      }
+    getSippPsrFiltered(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map(response => transformer.transformToResponse(response.memberAndTransactions.getOrElse(List.empty)))
+      .value
 
   private def mergeWithExistingEtmpData[A, V](
     optFbNumber: Option[String],
@@ -448,9 +443,21 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[PSRSubmissionResponse]] =
-    psrConnector
-      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(_.map(psrSubmissionTransformer.transform))
+    getSippPsrFiltered(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .map(psrSubmissionTransformer.transform)
+      .value
+
+  private def getSippPsrFiltered(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader) =
+    OptionT(psrConnector.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
+      .map(filterDeletedMembers)
+
+  private def filterDeletedMembers(response: SippPsrSubmissionEtmpResponse) =
+    response.copy(memberAndTransactions = response.memberAndTransactions.map(_.filter(_.status != Deleted)))
 
   def getPsrVersions(
     pstr: String,
