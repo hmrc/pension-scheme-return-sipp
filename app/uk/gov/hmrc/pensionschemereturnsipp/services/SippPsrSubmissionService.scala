@@ -471,9 +471,9 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[MemberDetailsResponse]] =
-    psrConnector
-      .getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(_.flatMap(memberDetailsTransformer.transform))
+    getSippPsrFiltered(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
+      .subflatMap(memberDetailsTransformer.transform)
+      .value
 
   def getPsrAssetsExistence(
     pstr: String,
