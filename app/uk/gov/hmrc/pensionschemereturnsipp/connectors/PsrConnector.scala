@@ -35,7 +35,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionE
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{
@@ -187,10 +186,7 @@ class PsrConnector @Inject() (
       .map { response =>
         response.status match {
           case OK =>
-            val etmpResponse = response.json.as[SippPsrSubmissionEtmpResponse]
-            val filteredMembers = etmpResponse.memberAndTransactions.map(_.filter(_.status != Deleted))
-            val updatedResponse = etmpResponse.copy(memberAndTransactions = filteredMembers)
-            Some(updatedResponse)
+            Some(response.json.as[SippPsrSubmissionEtmpResponse])
           case _ if isNotFound(response) =>
             logger.warn(s"$logMessage and returned (PSR_NOT_FOUND) ${response.status} ")
             None
