@@ -645,7 +645,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
-      when(mockSippPsrFromEtmp.transform(any())).thenReturn(samplePsrSubmission)
+      when(mockSippPsrFromEtmp.transform(any(), any())).thenReturn(samplePsrSubmission)
 
       whenReady(service.getSippPsr("testPstr", Some("fbNumber"), None, None)) {
         (result: Option[PSRSubmissionResponse]) =>
