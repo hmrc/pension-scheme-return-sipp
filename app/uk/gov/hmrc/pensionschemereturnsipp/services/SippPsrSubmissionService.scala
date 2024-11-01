@@ -429,8 +429,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Option[PSRSubmissionResponse]] =
-    getSippPsrFiltered(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(psrSubmissionTransformer.transform)
+    OptionT(psrConnector.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
+      .map(response => psrSubmissionTransformer.transform(response, true))
       .value
 
   private def getSippPsrFiltered(
