@@ -343,9 +343,9 @@ class SippPsrSubmissionService @Inject() (
   ): Future[SippPsrSubmissionEtmpRequest] =
     psrConnector
       .getSippPsr(reportDetails.pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map(maybeMergeTransactions(reportDetails, journey, _, transactions, transformer))
+      .map(merge(reportDetails, journey, _, transactions, transformer))
 
-  private def maybeMergeTransactions[A, V](
+  private def merge[A, V](
     reportDetails: ReportDetails,
     journey: Journey,
     response: Option[SippPsrSubmissionEtmpResponse],
