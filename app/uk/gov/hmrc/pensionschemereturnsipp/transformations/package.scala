@@ -29,6 +29,12 @@ package object transformations {
     _.into[EtmpSippReportDetails]
       .withFieldConst(_.memberTransactions, Yes)
       .withFieldConst(_.version, None) // Always None while sending to ETMP
+      .withFieldConst(_.memberTransLandPropCon, None)
+      .withFieldConst(_.memberTransAssetCon, None)
+      .withFieldConst(_.memberTransUnquotedShares, None)
+      .withFieldConst(_.memberTransOutstandingLoan, None)
+      .withFieldConst(_.memberTransLandPropArmsLen, None)
+      .withFieldConst(_.memberTransTangPropArmsLen, None)
       .transform
 
   def toMemberDetails(nameDoB: NameDOB, nino: NinoType): MemberDetails =

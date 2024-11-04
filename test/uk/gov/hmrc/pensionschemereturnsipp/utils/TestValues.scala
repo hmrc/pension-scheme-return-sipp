@@ -134,7 +134,20 @@ trait TestValues {
   )
 
   val sampleSippPsrSubmissionEtmpRequest: SippPsrSubmissionEtmpRequest = SippPsrSubmissionEtmpRequest(
-    reportDetails = EtmpSippReportDetails("12345678AA", Compiled, sampleToday, sampleToday, YesNo.Yes, None),
+    reportDetails = EtmpSippReportDetails(
+      "12345678AA",
+      Compiled,
+      sampleToday,
+      sampleToday,
+      YesNo.Yes,
+      memberTransLandPropCon = None,
+      memberTransAssetCon = None,
+      memberTransLandPropArmsLen = None,
+      memberTransTangPropArmsLen = None,
+      memberTransOutstandingLoan = None,
+      memberTransUnquotedShares = None,
+      None
+    ),
     accountingPeriodDetails = None,
     memberAndTransactions = None,
     psrDeclaration = None
@@ -312,6 +325,12 @@ trait TestValues {
         LocalDate.parse("2022-04-06"),
         LocalDate.parse("2023-04-05"),
         YesNo.Yes,
+        memberTransLandPropCon = None,
+        memberTransAssetCon = None,
+        memberTransLandPropArmsLen = None,
+        memberTransTangPropArmsLen = None,
+        memberTransOutstandingLoan = None,
+        memberTransUnquotedShares = None,
         Some("001")
       ),
       AccountingPeriodDetails(
@@ -361,6 +380,12 @@ trait TestValues {
       LocalDate.parse("2024-09-09"),
       LocalDate.parse("2024-09-09"),
       Yes,
+      memberTransLandPropCon = None,
+      memberTransAssetCon = None,
+      memberTransLandPropArmsLen = None,
+      memberTransTangPropArmsLen = None,
+      memberTransOutstandingLoan = None,
+      memberTransUnquotedShares = None,
       None
     ),
     Some(
