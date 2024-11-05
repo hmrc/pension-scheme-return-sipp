@@ -366,7 +366,7 @@ class SippPsrSubmissionService @Inject() (
     SippPsrSubmissionEtmpRequest(
       reportDetails = details
         .withAssetClassDeclaration(journey, transactions)
-        .copy(status = Compiled),
+        .copy(status = Compiled, version = None),
       accountingPeriodDetails = None,
       memberAndTransactions = NonEmptyList.fromList(merged),
       psrDeclaration = None
