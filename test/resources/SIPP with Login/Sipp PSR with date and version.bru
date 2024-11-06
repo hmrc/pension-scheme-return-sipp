@@ -1,19 +1,18 @@
 meta {
-  name: Sipp PSR with periodStartDate-psrVersion
+  name: Sipp PSR with date and version
   type: http
   seq: 10
 }
 
 get {
-  url: {{pension-scheme-return-sipp}}/psr/sipp/24000001IN?periodStartDate=2021-04-06&psrVersion=001
+  url: {{pension-scheme-return-sipp}}/psr/sipp/24000020IN?psrVersion=001&periodStartDate=2022-04-06
   body: none
   auth: bearer
 }
 
 query {
-  periodStartDate: 2021-04-06
   psrVersion: 001
-  ~fbNumber: 123
+  periodStartDate: 2022-04-06
 }
 
 auth:bearer {

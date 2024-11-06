@@ -5,9 +5,14 @@ meta {
 }
 
 put {
-  url: {{pension-scheme-return-sipp}}/psr/assets-from-connected-party
+  url: {{pension-scheme-return-sipp}}/psr/assets-from-connected-party?journeyType=Standard&fbNumber=000000021224
   body: json
   auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
 }
 
 auth:bearer {
@@ -17,12 +22,12 @@ auth:bearer {
 body:json {
   {
     "reportDetails": {
-      "pstr": "12345678",
+      "pstr": "24000020IN",
       "status": "Submitted",
       "periodStart": "2023-01-01",
       "periodEnd": "2023-12-31",
       "schemeName": "Sample Scheme Name",
-      "psrVersion": "1.0"
+      "version": "1.0"
     },
     "transactions": [
         {
