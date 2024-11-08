@@ -1,19 +1,18 @@
 meta {
   name: DELETE Member
   type: http
-  seq: 13
+  seq: 18
 }
 
-post {
-  url: {{pension-scheme-return-sipp}}/psr/delete-member/24000001IN?fbNumber=000000021221
+put {
+  url: {{pension-scheme-return-sipp}}/psr/delete-member/24000020IN?fbNumber=000000021224&journeyType=Standard
   body: json
   auth: bearer
 }
 
 query {
-  fbNumber: 000000021221
-  ~periodStartDate: 2021-04-06
-  ~psrVersion: 456
+  fbNumber: 000000021224
+  journeyType: Standard
 }
 
 auth:bearer {

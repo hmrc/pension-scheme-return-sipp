@@ -1,19 +1,17 @@
 meta {
-  name: Sipp Standard PSR with fbNumber
+  name: Sipp PSR with fbNumber
   type: http
-  seq: 11
+  seq: 16
 }
 
 get {
-  url: {{pension-scheme-return-sipp}}/psr/sipp/24000001IN?fbNumber=000000021221
+  url: {{pension-scheme-return-sipp}}/psr/sipp/24000020IN?fbNumber=000000021224
   body: none
   auth: bearer
 }
 
 query {
-  fbNumber: 000000021221
-  ~periodStartDate: 2021-04-06
-  ~psrVersion: 456
+  fbNumber: 000000021224
 }
 
 auth:bearer {

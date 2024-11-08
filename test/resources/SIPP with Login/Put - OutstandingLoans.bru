@@ -1,0 +1,87 @@
+meta {
+  name: Put - OutstandingLoans
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/outstanding-loans?journeyType=Standard&fbNumber=000000021224
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "24000020IN",
+      "version": "001",
+      "status": "Compiled",
+      "periodEnd": "2023-04-05",
+      "periodStart": "2022-04-06",
+      "schemeName": "Open Scheme 2"
+    },
+    "transactions": [
+      {
+        "row": 3,
+        "dateOfLoan": "2024-02-24",
+        "repayDate": "2005-02-09",
+        "outstandingYearEndAmount": 688668.58,
+        "arrearsOutstandingPrYears": "Yes",
+        "interestRate": 6.12,
+        "amountOfLoan": 8168912.9,
+        "loanSecurity": "Yes",
+        "nino": {
+          "nino": "EP200893B"
+        },
+        "loanRecipientName": "Humberto Kop",
+        "arrearsOutstandingPrYearsAmt": 250,
+        "loanConnectedParty": "No",
+        "capitalRepayments": 796691.4,
+        "nameDOB": {
+          "firstName": "Humberto",
+          "lastName": "Kop",
+          "dob": "1928-03-13"
+        }
+      },
+      {
+        "row": 4,
+        "dateOfLoan": "2021-10-12",
+        "repayDate": "2020-06-02",
+        "outstandingYearEndAmount": 186769.32,
+        "arrearsOutstandingPrYears": "Yes",
+        "interestRate": 16.68,
+        "amountOfLoan": 9231508.47,
+        "loanSecurity": "No",
+        "nino": {
+          "nino": "AA716047A"
+        },
+        "loanRecipientName": "Raddie O'Hagirtie",
+        "arrearsOutstandingPrYearsAmt": 100,
+        "loanConnectedParty": "No",
+        "capitalRepayments": 267262.08,
+        "nameDOB": {
+          "firstName": "Raddie",
+          "lastName": "O'Hagirtie",
+          "dob": "1987-03-04"
+        }
+      }
+    ]
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}

@@ -1,0 +1,95 @@
+meta {
+  name: Put - UnquotedShares
+  type: http
+  seq: 14
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/unquoted-shares?journeyType=Standard&fbNumber=000000021224
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "24000020IN",
+      "version": "001",
+      "status": "Compiled",
+      "periodEnd": "2023-04-05",
+      "periodStart": "2022-04-06",
+      "schemeName": "Open Scheme 2"
+    },
+    "transactions": [
+      {
+        "nino": {
+          "nino": "RC256097C"
+        },
+        "totalCost": 998112.43,
+        "totalDividendsIncome": 8814140.31,
+        "sharesDisposed": "Yes",
+        "nameDOB": {
+          "firstName": "Berkley",
+          "lastName": "Fawley",
+          "dob": "1997-11-07"
+        },
+        "independentValuation": "Yes",
+        "row": 3,
+        "sharesCompanyDetails": {
+          "companySharesName": "Kayveo",
+          "sharesClass": "Streamlined holistic hierarchy",
+          "noOfShares": 759509,
+          "companySharesCRN": "JP396032"
+        },
+        "acquiredFromName": "Flashpoint",
+        "sharesDisposalDetails": {
+          "disposedShareAmount": 447823.48,
+          "purchasersNames": "Twitterworks",
+          "independentValuationDisposal": "Yes",
+          "noOfSharesSold": 15,
+          "disposalConnectedParty": "Yes",
+          "noOfSharesHeld": 1
+        }
+      },
+      {
+        "nino": {
+          "nino": "CX813530D"
+        },
+        "totalCost": 406269.83,
+        "totalDividendsIncome": 5268250.83,
+        "sharesDisposed": "No",
+        "nameDOB": {
+          "firstName": "Gerladina",
+          "lastName": "Tuckwood",
+          "dob": "1998-01-05"
+        },
+        "independentValuation": "No",
+        "row": 4,
+        "sharesCompanyDetails": {
+          "companySharesName": "Bubblemix",
+          "sharesClass": "Automated neutral secured line",
+          "noOfShares": 622,
+          "companySharesCRN": "XS405832"
+        },
+        "acquiredFromName": "Browsezoom"
+      }
+    ]
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}

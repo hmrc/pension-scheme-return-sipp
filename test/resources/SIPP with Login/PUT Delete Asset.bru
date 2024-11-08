@@ -1,0 +1,44 @@
+meta {
+  name: PUT Delete Asset
+  type: http
+  seq: 20
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/delete-assets/24000020IN?fbNumber=000000021224&journeyType=Standard&journey=ArmsLengthLandOrProperty
+  body: json
+  auth: bearer
+}
+
+query {
+  fbNumber: 000000021224
+  journeyType: Standard
+  journey: ArmsLengthLandOrProperty
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "current": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1980-01-01",
+      "nino": "AB123456C"
+    },
+    "updated": {
+      "firstName": "Johna",
+      "lastName": "Doe",
+      "dateOfBirth": "1980-01-01",
+      "nino": "AB123456C"
+    }
+  }
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}

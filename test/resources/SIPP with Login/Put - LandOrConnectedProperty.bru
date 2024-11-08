@@ -1,0 +1,122 @@
+meta {
+  name: Put - LandOrConnectedProperty
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/land-or-connected-property?journeyType=Standard&fbNumber=000000021224
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "24000020IN",
+      "version": "001",
+      "status": "Compiled",
+      "periodEnd": "2023-04-05",
+      "periodStart": "2022-04-06",
+      "schemeName": "Open Scheme 2"
+    },
+    "transactions": [
+      {
+        "totalCost": 1038.09,
+        "isPropertyDisposed": "No",
+        "nameDOB": {
+          "firstName": "Natale",
+          "lastName": "Brodeau",
+          "dob": "1964-12-10"
+        },
+        "independentValuation": "Yes",
+        "acquisitionDate": "2008-05-16",
+        "row": 3,
+        "registryDetails": {
+          "registryRefExist": "Yes",
+          "registryReference": "AB123456"
+        },
+        "landOrPropertyInUK": "Yes",
+        "acquiredFromName": "Natale Brodeau",
+        "addressDetails": {
+          "addressLine1": "6th Floor",
+          "addressLine4": "Bendo",
+          "addressLine3": "622 Daystar Point",
+          "ukPostCode": "FJ678BX",
+          "countryCode": "GB",
+          "addressLine2": "Room 1504"
+        },
+        "residentialSchedule29A": "Yes",
+        "totalIncomeOrReceipts": 4255.31,
+        "nino": {
+          "nino": "SH956162C"
+        },
+        "jointlyHeld": "No",
+        "isLeased": "No"
+      },
+      {
+        "totalCost": 7461.26,
+        "isPropertyDisposed": "Yes",
+        "noOfPersons": 6,
+        "nameDOB": {
+          "firstName": "Price",
+          "lastName": "Shovelin",
+          "dob": "2003-11-02"
+        },
+        "independentValuation": "Yes",
+        "disposalDetails": {
+          "disposedPropertyProceedsAmt": 4968,
+          "purchasersNames": "Price Shovelin",
+          "propertyFullyDisposed": "No",
+          "independentValuationDisposal": "No",
+          "anyPurchaserConnectedParty": "No"
+        },
+        "acquisitionDate": "1994-03-27",
+        "row": 4,
+        "registryDetails": {
+          "registryRefExist": "Yes",
+          "registryReference": "CD123456"
+        },
+        "landOrPropertyInUK": "No",
+        "addressDetails": {
+          "addressLine1": "16th Floor",
+          "addressLine4": "4 Doe Crossing Avenue",
+          "addressLine3": "9115 Thompson Road",
+          "countryCode": "ID",
+          "addressLine2": "3rd Floor"
+        },
+        "residentialSchedule29A": "No",
+        "totalIncomeOrReceipts": 9355.27,
+        "nino": {
+          "nino": "SH584060B"
+        },
+        "acquiredFromName": "Price Shovelin",
+        "lesseeDetails": {
+          "numberOfLessees": 1,
+          "anyLesseeConnectedParty": "No",
+          "leaseGrantedDate": "2017-10-22",
+          "annualLeaseAmount": 5679.04
+        },
+        "jointlyHeld": "Yes",
+        "isLeased": "Yes"
+      }
+    ]
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}
