@@ -1,0 +1,122 @@
+meta {
+  name: Put - LandArmsLength
+  type: http
+  seq: 11
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/land-arms-length?journeyType=Standard&fbNumber=000000021224
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "24000020IN",
+      "version": "001",
+      "status": "Compiled",
+      "periodEnd": "2023-04-05",
+      "periodStart": "2022-04-06",
+      "schemeName": "Open Scheme 2"
+    },
+    "transactions": [
+      {
+        "totalCost": 18716.7,
+        "isPropertyDisposed": "No",
+        "noOfPersons": 10,
+        "nameDOB": {
+          "firstName": "Ruthann",
+          "lastName": "McLewd",
+          "dob": "2018-09-10"
+        },
+        "independentValuation": "Yes",
+        "acquisitionDate": "1990-11-06",
+        "row": 3,
+        "registryDetails": {
+          "registryRefExist": "Yes",
+          "registryReference": "AB123456"
+        },
+        "landOrPropertyInUK": "Yes",
+        "addressDetails": {
+          "addressLine1": "Room 916",
+          "addressLine4": "Quinta",
+          "addressLine3": "17 Crownhardt Point",
+          "ukPostCode": "HS499ZX",
+          "countryCode": "GB",
+          "addressLine2": "Room 1589"
+        },
+        "residentialSchedule29A": "No",
+        "totalIncomeOrReceipts": 23370.2,
+        "nino": {
+          "nino": "SH538748B"
+        },
+        "acquiredFromName": "Ruthann McLewd",
+        "lesseeDetails": {
+          "numberOfLessees": 1,
+          "anyLesseeConnectedParty": "No",
+          "leaseGrantedDate": "2015-11-23",
+          "annualLeaseAmount": 2175.35
+        },
+        "jointlyHeld": "Yes",
+        "isLeased": "Yes"
+      },
+      {
+        "totalCost": 23548.43,
+        "isPropertyDisposed": "Yes",
+        "nameDOB": {
+          "firstName": "Lancelot",
+          "lastName": "Sanderson",
+          "dob": "2023-12-01"
+        },
+        "independentValuation": "No",
+        "disposalDetails": {
+          "disposedPropertyProceedsAmt": 18393.57,
+          "purchasersNames": "Lancelot Sanderson",
+          "propertyFullyDisposed": "No",
+          "independentValuationDisposal": "No",
+          "anyPurchaserConnectedParty": "Yes"
+        },
+        "acquisitionDate": "1991-09-18",
+        "row": 4,
+        "registryDetails": {
+          "registryRefExist": "Yes",
+          "registryReference": "CD123456"
+        },
+        "landOrPropertyInUK": "No",
+        "acquiredFromName": "Lancelot Sanderson",
+        "addressDetails": {
+          "addressLine1": "PO Box 68389",
+          "addressLine4": "97 Prairie Rose Junction",
+          "addressLine3": "6 Harper Alley",
+          "countryCode": "ID",
+          "addressLine2": "Suite 60"
+        },
+        "residentialSchedule29A": "No",
+        "totalIncomeOrReceipts": 19260.3,
+        "nino": {
+          "nino": "SH617878A"
+        },
+        "jointlyHeld": "No",
+        "isLeased": "No"
+      }
+    ]
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}

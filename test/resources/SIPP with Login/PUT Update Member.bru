@@ -1,0 +1,43 @@
+meta {
+  name: PUT Update Member
+  type: http
+  seq: 19
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/member-details/24000020IN?fbNumber=000000021224&journeyType=Standard
+  body: json
+  auth: bearer
+}
+
+query {
+  fbNumber: 000000021224
+  journeyType: Standard
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "current": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1980-01-01",
+      "nino": "AB123456C"
+    },
+    "updated": {
+      "firstName": "Johna",
+      "lastName": "Doe",
+      "dateOfBirth": "1980-01-01",
+      "nino": "AB123456C"
+    }
+  }
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}

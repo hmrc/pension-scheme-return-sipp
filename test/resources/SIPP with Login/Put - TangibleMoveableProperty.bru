@@ -1,0 +1,90 @@
+meta {
+  name: Put - TangibleMoveableProperty
+  type: http
+  seq: 13
+}
+
+put {
+  url: {{pension-scheme-return-sipp}}/psr/tangible-moveable-property?journeyType=Standard&fbNumber=000000021224
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+  fbNumber: 000000021224
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "reportDetails": {
+      "pstr": "24000020IN",
+      "version": "001",
+      "status": "Compiled",
+      "periodEnd": "2023-04-05",
+      "periodStart": "2022-04-06",
+      "schemeName": "Open Scheme 2"
+    },
+    "transactions": [
+      {
+        "totalCost": 3692.51,
+        "isPropertyDisposed": "Yes",
+        "nameDOB": {
+          "firstName": "Udale",
+          "lastName": "Basley",
+          "dob": "1988-05-04"
+        },
+        "independentValuation": "No",
+        "acquisitionDate": "1999-06-03",
+        "row": 3,
+        "costMarketValue": 5385.82,
+        "acquiredFromName": "Udale Basley",
+        "costOrMarket": "Cost Value",
+        "totalIncomeOrReceipts": 7750.94,
+        "nino": {
+          "nino": "SH735042A"
+        },
+        "assetDescription": "Automated neutral open architecture",
+        "disposalDetails": {
+          "disposedPropertyProceedsAmt": 495.99,
+          "purchasersNames": "Udale Basley",
+          "propertyFullyDisposed": "Yes",
+          "independentValuationDisposal": "Yes",
+          "anyPurchaserConnectedParty": "Yes"
+        }
+      },
+      {
+        "totalCost": 3454.78,
+        "isPropertyDisposed": "No",
+        "nameDOB": {
+          "firstName": "Celie",
+          "lastName": "Cornwell",
+          "dob": "1968-03-07"
+        },
+        "independentValuation": "No",
+        "assetDescription": "User-friendly bi-directional system engine",
+        "acquisitionDate": "1995-08-01",
+        "row": 4,
+        "costMarketValue": 9795.28,
+        "acquiredFromName": "Celie Cornwell",
+        "costOrMarket": "Cost Value",
+        "totalIncomeOrReceipts": 4883.79,
+        "nino": {
+          "nino": "SH137044D"
+        }
+      }
+    ]
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}

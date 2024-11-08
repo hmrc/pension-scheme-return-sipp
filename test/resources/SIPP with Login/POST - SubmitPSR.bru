@@ -1,0 +1,41 @@
+meta {
+  name: POST - SubmitPSR
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{pension-scheme-return-sipp}}/psr/sipp?journeyType=Standard
+  body: json
+  auth: bearer
+}
+
+query {
+  journeyType: Standard
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+body:json {
+  {
+    "psrVersion": "001",
+    "periodStartDate": "2022-04-06",
+    "pstr": "24000020IN",
+    "taxYear": {
+      "from": "2022-04-06",
+      "to": "2023-04-05"
+    },
+    "schemeName": "Open Scheme 2",
+    "isPsa": false
+  }
+}
+
+tests {
+  test("Status code is 204", function () {
+      expect(res.getStatus()).to.equal(204);
+  });
+  
+  
+}
