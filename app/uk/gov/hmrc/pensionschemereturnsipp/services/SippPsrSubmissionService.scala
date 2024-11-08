@@ -18,16 +18,17 @@ package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
-import cats.syntax.either._
+import cats.syntax.either.*
 import com.google.inject.{Inject, Singleton}
 import io.scalaland.chimney.dsl.transformInto
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, MinimalDetailsError, PsrConnector}
-import uk.gov.hmrc.pensionschemereturnsipp.models.api._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
@@ -37,10 +38,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.{
   SippPsrJourneySubmissionEtmpResponse,
   SippPsrSubmissionEtmpResponse
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, _}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, *}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType, MinimalDetails, PensionSchemeId}
-import uk.gov.hmrc.pensionschemereturnsipp.transformations._
+import uk.gov.hmrc.pensionschemereturnsipp.transformations.*
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetDeclarationsTransformer,
   PSRAssetsExistenceTransformer,
   PSRMemberDetailsTransformer,
   PSRSubmissionTransformer
@@ -55,6 +57,7 @@ class SippPsrSubmissionService @Inject() (
   psrSubmissionTransformer: PSRSubmissionTransformer,
   memberDetailsTransformer: PSRMemberDetailsTransformer,
   psrAssetsExistenceTransformer: PSRAssetsExistenceTransformer,
+  psrAssetDeclarationsTransformer: PSRAssetDeclarationsTransformer,
   landConnectedPartyTransformer: LandConnectedPartyTransformer,
   armsLengthTransformer: LandArmsLengthTransformer,
   outstandingLoansTransformer: OutstandingLoansTransformer,
@@ -80,6 +83,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.InterestInLandOrProperty,
       request.transactions,
       landConnectedPartyTransformer,
       pensionSchemeId
@@ -110,6 +114,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.OutstandingLoans,
       request.transactions,
       outstandingLoansTransformer,
       pensionSchemeId
@@ -140,6 +145,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.ArmsLengthLandOrProperty,
       request.transactions,
       armsLengthTransformer,
       pensionSchemeId
@@ -170,6 +176,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.AssetFromConnectedParty,
       request.transactions,
       assetsFromConnectedPartyTransformer,
       pensionSchemeId
@@ -200,6 +207,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.TangibleMoveableProperty,
       request.transactions,
       tangibleMovablePropertyTransformer,
       pensionSchemeId
@@ -230,6 +238,7 @@ class SippPsrSubmissionService @Inject() (
       optPeriodStartDate,
       optPsrVersion,
       request.reportDetails,
+      Journey.UnquotedShares,
       request.transactions,
       unquotedSharesTransformer,
       pensionSchemeId
@@ -252,6 +261,7 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     reportDetails: ReportDetails,
+    journey: Journey,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V],
     pensionSchemeId: PensionSchemeId
@@ -268,16 +278,10 @@ class SippPsrSubmissionService @Inject() (
         optPeriodStartDate,
         optPsrVersion,
         reportDetails,
+        journey,
         transactions,
         transformer
-      ).map { etmpDataAfterMerge =>
-        SippPsrSubmissionEtmpRequest(
-          reportDetails = reportDetails.transformInto[EtmpSippReportDetails],
-          accountingPeriodDetails = None,
-          memberAndTransactions = NonEmptyList.fromList(etmpDataAfterMerge),
-          psrDeclaration = None
-        )
-      }
+      )
     )
 
   private def submitWithRequest(
@@ -330,23 +334,44 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     reportDetails: ReportDetails,
+    journey: Journey,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V]
   )(implicit
     hc: HeaderCarrier,
     requestHeader: RequestHeader
-  ): Future[List[EtmpMemberAndTransactions]] =
+  ): Future[SippPsrSubmissionEtmpRequest] =
     psrConnector
       .getSippPsr(reportDetails.pstr, optFbNumber, optPeriodStartDate, optPsrVersion)
-      .map {
-        case Some(existingEtmpData) =>
-          val merged = for {
-            txs <- transactions
-          } yield transformer.merge(txs, existingEtmpData.memberAndTransactions.getOrElse(List()))
-          merged.toList.flatten
-        case None =>
-          transactions.toList.flatMap(txs => transformer.merge(txs, Nil))
-      }
+      .map(merge(reportDetails, journey, _, transactions, transformer))
+
+  private def merge[A, V](
+    reportDetails: ReportDetails,
+    journey: Journey,
+    response: Option[SippPsrSubmissionEtmpResponse],
+    transactions: Option[NonEmptyList[A]],
+    transformer: Transformer[A, V]
+  ) = {
+    val (details, merged) = response match
+      case Some(existingEtmpData) =>
+        val merged = for {
+          txs <- transactions
+        } yield transformer.merge(txs, existingEtmpData.memberAndTransactions.getOrElse(List()))
+        existingEtmpData.reportDetails -> merged.toList.flatten
+      case None =>
+        reportDetails.transformInto[EtmpSippReportDetails] -> transactions.toList.flatMap(txs =>
+          transformer.merge(txs, Nil)
+        )
+
+    SippPsrSubmissionEtmpRequest(
+      reportDetails = details
+        .withAssetClassDeclaration(journey, transactions)
+        .copy(status = Compiled, version = None),
+      accountingPeriodDetails = None,
+      memberAndTransactions = NonEmptyList.fromList(merged),
+      psrDeclaration = None
+    )
+  }
 
   def submitSippPsr(
     journeyType: JourneyType,
@@ -479,6 +504,19 @@ class SippPsrSubmissionService @Inject() (
       counts <- EitherT.pure[Future, Unit](psrAssetsExistenceTransformer.transform(psr))
     } yield counts).value
 
+  def getPsrAssetDeclarations(
+    pstr: String,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[Option[PsrAssetDeclarationsResponse]] =
+    OptionT(psrConnector.getSippPsr(pstr, optFbNumber, optPeriodStartDate, optPsrVersion))
+      .map(psrAssetDeclarationsTransformer.transform)
+      .value
+
   def updateMemberDetails(
     journeyType: JourneyType,
     pstr: String,
@@ -584,7 +622,9 @@ class SippPsrSubmissionService @Inject() (
           }
 
           val updateRequest = SippPsrSubmissionEtmpRequest(
-            reportDetails = response.reportDetails.copy(status = EtmpPsrStatus.Compiled, version = None),
+            reportDetails = response.reportDetails
+              .copy(status = EtmpPsrStatus.Compiled, version = None)
+              .withAssetClassDeclaration(journey, None),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = updatedMembers,
             psrDeclaration = response.psrDeclaration.map(declaration =>

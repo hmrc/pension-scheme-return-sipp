@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.validators
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-object SchemaPaths {
-  val API_1997 = "/schemas/api-1997-submit-sipp-pension-scheme-return-request-schema-v1.5.0.json"
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
+
+case class PsrAssetDeclarationsResponse(
+  armsLengthLandOrProperty: Option[YesNo],
+  interestInLandOrProperty: Option[YesNo],
+  tangibleMoveableProperty: Option[YesNo],
+  outstandingLoans: Option[YesNo],
+  unquotedShares: Option[YesNo],
+  assetFromConnectedParty: Option[YesNo]
+)
+
+object PsrAssetDeclarationsResponse {
+  implicit val format: OFormat[PsrAssetDeclarationsResponse] =
+    Json.format[PsrAssetDeclarationsResponse]
 }

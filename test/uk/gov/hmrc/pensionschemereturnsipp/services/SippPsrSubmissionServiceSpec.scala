@@ -18,9 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
-import cats.syntax.either._
-import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
-import org.mockito.Mockito._
+import cats.syntax.either.*
+import org.mockito.ArgumentMatchers.{any, eq as mockitoEq}
+import org.mockito.Mockito.*
 import play.api.http.Status.BAD_REQUEST
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
@@ -66,6 +66,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
+  PSRAssetDeclarationsTransformer,
   PSRAssetsExistenceTransformer,
   PSRMemberDetailsTransformer,
   PSRSubmissionTransformer
@@ -106,12 +107,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val mockEmailSubmissionService = mock[EmailSubmissionService]
   private val mockMinimalDetailsConnector = mock[MinimalDetailsConnector]
   private val mockPsrExistenceTransformer = mock[PSRAssetsExistenceTransformer]
+  private val mockPsrAssetDeclarationsTransformer = mock[PSRAssetDeclarationsTransformer]
 
   private val service: SippPsrSubmissionService = new SippPsrSubmissionService(
     mockPsrConnector,
     mockSippPsrFromEtmp,
     mockMemberDetailsTransformer,
     mockPsrExistenceTransformer,
+    mockPsrAssetDeclarationsTransformer,
     mockLandConnectedPartyTransformer,
     mockArmsLengthTransformer,
     mockOutstandingLoansTransformer,
@@ -133,7 +136,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransLandPropCon = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -170,10 +177,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransLandPropCon = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -216,7 +227,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransOutstandingLoan = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -253,10 +268,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransOutstandingLoan = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -299,7 +318,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransLandPropArmsLen = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -336,10 +359,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransLandPropArmsLen = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -382,7 +409,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransAssetCon = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -419,10 +450,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransAssetCon = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -465,7 +500,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransTangPropArmsLen = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -502,10 +541,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransTangPropArmsLen = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -548,7 +591,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
       val etmpRequest =
-        fullSippPsrSubmissionEtmpRequest.copy(memberAndTransactions = None, accountingPeriodDetails = None)
+        fullSippPsrSubmissionEtmpRequest
+          .copy(memberAndTransactions = None, accountingPeriodDetails = None)
+          .copy(reportDetails =
+            fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransUnquotedShares = Some(YesNo.Yes))
+          )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -585,10 +632,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     "fetch and construct new ETMP request with transactions when no ETMP data exists, but transactions are passed in" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")
       val response = HttpResponse(200, Json.toJson(sippResponse).toString())
-      val etmpRequest = fullSippPsrSubmissionEtmpRequest.copy(
-        memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
-        accountingPeriodDetails = None
-      )
+      val etmpRequest = fullSippPsrSubmissionEtmpRequest
+        .copy(
+          memberAndTransactions = Some(NonEmptyList.one(etmpDataWithLandConnectedTx)),
+          accountingPeriodDetails = None
+        )
+        .copy(reportDetails =
+          fullSippPsrSubmissionEtmpRequest.reportDetails.copy(memberTransUnquotedShares = Some(YesNo.Yes))
+        )
 
       when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
@@ -677,6 +728,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         LocalDate.parse("2024-09-09"),
         LocalDate.parse("2024-09-09"),
         YesNo.Yes,
+        memberTransLandPropCon = None,
+        memberTransAssetCon = None,
+        memberTransLandPropArmsLen = None,
+        memberTransTangPropArmsLen = None,
+        memberTransOutstandingLoan = None,
+        memberTransUnquotedShares = None,
         None
       ),
       accountingPeriodDetails = AccountingPeriodDetails(
@@ -843,6 +900,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
+          memberTransLandPropCon = None,
+          memberTransAssetCon = None,
+          memberTransLandPropArmsLen = None,
+          memberTransTangPropArmsLen = None,
+          memberTransOutstandingLoan = None,
+          memberTransUnquotedShares = None,
           None
         ),
         accountingPeriodDetails = None,
@@ -878,6 +941,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
+          memberTransLandPropCon = None,
+          memberTransAssetCon = None,
+          memberTransLandPropArmsLen = None,
+          memberTransTangPropArmsLen = None,
+          memberTransOutstandingLoan = None,
+          memberTransUnquotedShares = None,
           None
         ),
         accountingPeriodDetails = None,
@@ -926,6 +995,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
+          memberTransLandPropCon = None,
+          memberTransAssetCon = None,
+          memberTransLandPropArmsLen = None,
+          memberTransTangPropArmsLen = None,
+          memberTransOutstandingLoan = None,
+          memberTransUnquotedShares = None,
           None
         ),
         accountingPeriodDetails = None,
@@ -984,6 +1059,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
+          memberTransLandPropCon = Some(YesNo.No),
+          memberTransAssetCon = None,
+          memberTransLandPropArmsLen = None,
+          memberTransTangPropArmsLen = None,
+          memberTransOutstandingLoan = None,
+          memberTransUnquotedShares = None,
           None
         ),
         accountingPeriodDetails = None,
@@ -1031,7 +1112,8 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             any(),
             mockitoEq(
               SippPsrSubmissionEtmpRequest(
-                reportDetails = sampleResponse.reportDetails.copy(version = None),
+                reportDetails =
+                  sampleResponse.reportDetails.copy(version = None).withAssetClassDeclaration(journey, None),
                 accountingPeriodDetails = None,
                 memberAndTransactions = Some(
                   NonEmptyList.one(
@@ -1071,6 +1153,12 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           LocalDate.now(),
           LocalDate.now(),
           YesNo.Yes,
+          memberTransLandPropCon = None,
+          memberTransAssetCon = None,
+          memberTransLandPropArmsLen = None,
+          memberTransTangPropArmsLen = None,
+          memberTransOutstandingLoan = None,
+          memberTransUnquotedShares = None,
           None
         ),
         accountingPeriodDetails = None,
@@ -1103,7 +1191,9 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any(),
           mockitoEq(
             SippPsrSubmissionEtmpRequest(
-              reportDetails = sampleResponse.reportDetails.copy(version = None),
+              reportDetails = sampleResponse.reportDetails
+                .copy(version = None)
+                .withAssetClassDeclaration(Journey.InterestInLandOrProperty, None),
               accountingPeriodDetails = None,
               memberAndTransactions = Some(
                 NonEmptyList.one(

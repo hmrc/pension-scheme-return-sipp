@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.models.etmp
 
+import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.pensionschemereturnsipp.models.Journey
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
 import java.time.LocalDate
@@ -27,9 +29,32 @@ case class EtmpSippReportDetails(
   periodStart: LocalDate,
   periodEnd: LocalDate,
   memberTransactions: YesNo,
+  memberTransLandPropCon: Option[YesNo],
+  memberTransAssetCon: Option[YesNo],
+  memberTransLandPropArmsLen: Option[YesNo],
+  memberTransTangPropArmsLen: Option[YesNo],
+  memberTransOutstandingLoan: Option[YesNo],
+  memberTransUnquotedShares: Option[YesNo],
   version: Option[String]
 )
 
 object EtmpSippReportDetails {
   implicit val format: OFormat[EtmpSippReportDetails] = Json.format[EtmpSippReportDetails]
+
+  implicit class EtmpSippReportDetailsOps(val etmpSippReportDetails: EtmpSippReportDetails) extends AnyVal {
+    def withAssetClassDeclaration[A](
+      journey: Journey,
+      transactions: Option[NonEmptyList[A]]
+    ): EtmpSippReportDetails = {
+      val declaration = Some(if (transactions.isEmpty) YesNo.No else YesNo.Yes)
+
+      journey match
+        case Journey.InterestInLandOrProperty => etmpSippReportDetails.copy(memberTransLandPropCon = declaration)
+        case Journey.ArmsLengthLandOrProperty => etmpSippReportDetails.copy(memberTransLandPropArmsLen = declaration)
+        case Journey.TangibleMoveableProperty => etmpSippReportDetails.copy(memberTransTangPropArmsLen = declaration)
+        case Journey.OutstandingLoans => etmpSippReportDetails.copy(memberTransOutstandingLoan = declaration)
+        case Journey.UnquotedShares => etmpSippReportDetails.copy(memberTransUnquotedShares = declaration)
+        case Journey.AssetFromConnectedParty => etmpSippReportDetails.copy(memberTransAssetCon = declaration)
+    }
+  }
 }
