@@ -28,11 +28,6 @@ class Module extends play.api.inject.Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[?]] =
     Seq(
       bind[AuthConnector].to(classOf[DefaultAuthConnector]).eagerly(),
-      bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC)),
-      if (configuration.get[Boolean]("mongodb.encryption.enabled")) {
-        bind[Crypto].to(classOf[CryptoImpl]).eagerly()
-      } else {
-        bind[Crypto].toInstance(Crypto.noop).eagerly()
-      }
+      bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
     )
 }
