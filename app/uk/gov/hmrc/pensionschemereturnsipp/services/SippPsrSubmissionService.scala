@@ -354,14 +354,13 @@ class SippPsrSubmissionService @Inject() (
   ) = {
     val (details, merged) = response match
       case Some(existingEtmpData) =>
-        val merged = for {
-          txs <- transactions
-        } yield transformer.merge(txs, existingEtmpData.memberAndTransactions.getOrElse(List()))
-        existingEtmpData.reportDetails -> merged.toList.flatten
+        val existingMemberAndTransactions = existingEtmpData.memberAndTransactions.getOrElse(List())
+        val merged =
+          transactions.fold(existingMemberAndTransactions)(transformer.merge(_, existingMemberAndTransactions))
+        existingEtmpData.reportDetails -> merged
+
       case None =>
-        reportDetails.transformInto[EtmpSippReportDetails] -> transactions.toList.flatMap(txs =>
-          transformer.merge(txs, Nil)
-        )
+        reportDetails.transformInto[EtmpSippReportDetails] -> transactions.toList.flatMap(transformer.merge(_, Nil))
 
     SippPsrSubmissionEtmpRequest(
       reportDetails = details
