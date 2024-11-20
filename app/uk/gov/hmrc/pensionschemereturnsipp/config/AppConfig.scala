@@ -27,7 +27,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
 
   val pensionsAdministrator: Service = config.get[Service]("microservice.services.pensionAdministrator")
-  val pensionsScheme: Service = config.get[Service]("microservice.services.pensionsScheme")
 
   private val ifURL: String = servicesConfig.baseUrl(serviceName = "if-hod")
 
