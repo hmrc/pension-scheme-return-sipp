@@ -44,7 +44,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common._
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 
 import java.time.LocalDate
-import scala.annotation.unused
 import io.scalaland.chimney.dsl._
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.reportDetailsApiToEtmp
 
@@ -65,20 +64,6 @@ trait SippEtmpTestValues {
     registryRefExist = Yes,
     registryReference = Some("RegistryReference"),
     noRegistryRefReason = Some("I have a registry and I have entered my registry reference")
-  )
-
-  @unused
-  private val sippJointPropertyDetail1: EtmpSippJointPropertyDetail = EtmpSippJointPropertyDetail(
-    personName = "AnotherLongName Surname",
-    nino = Some("QQ123456A"),
-    reasonNoNINO = Some("I have a Nino!")
-  )
-
-  @unused
-  private val sippJointPropertyDetail2: EtmpSippJointPropertyDetail = EtmpSippJointPropertyDetail(
-    personName = "Another AgainLongName Surname",
-    nino = Some("QQ123457A"),
-    reasonNoNINO = Some("I have a Nino !!!!")
   )
 
   protected val testReportDetails: ReportDetails = ReportDetails(
