@@ -76,17 +76,15 @@ class PsrPostAuditEventSpec extends AnyWordSpec with Matchers {
       )
 
       val expectedDetails = Json.obj(
-        "details" -> Json.obj(
-          "pensionSchemeTaxReference" -> "test-pstr",
-          "affinityGroup" -> "Organisation",
-          "pensionSchemeAdministratorId" -> "test-id",
-          "schemeAdministratorName" -> "",
-          "credentialRolePsaPsp" -> "PSA",
-          "psrStatus" -> "ChangedSubmitted",
-          "schemeName" -> "Test Scheme",
-          "taxYear" -> "2023-2024",
-          "payload" -> Json.obj("key" -> "value")
-        ),
+        "pensionSchemeTaxReference" -> "test-pstr",
+        "affinityGroup" -> "Organisation",
+        "pensionSchemeAdministratorId" -> "test-id",
+        "schemeAdministratorName" -> "",
+        "credentialRolePsaPsp" -> "PSA",
+        "psrStatus" -> "ChangedSubmitted",
+        "schemeName" -> "Test Scheme",
+        "taxYear" -> "2023-2024",
+        "payload" -> Json.obj("key" -> "value"),
         "httpStatus" -> 200,
         "response" -> Json.obj("responseKey" -> "responseValue"),
         "errorMessage" -> "Test error"
