@@ -56,10 +56,6 @@ case class PsrPostAuditEvent(
       optSchemeName ++
       optTaxYear ++ Json.obj("payload" -> payload)
 
-    val details = Json.obj(
-      "details" -> psrDetails
-    )
-
-    details ++ optStatus ++ optResponse ++ optErrorMessage
+    psrDetails ++ optStatus ++ optResponse ++ optErrorMessage
   }
 }
