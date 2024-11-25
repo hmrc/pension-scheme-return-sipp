@@ -37,8 +37,8 @@ case class PsrEmailAuditEvent(
     val emailDetails =
       Json.obj(
         fields = "emailInitiationRequestId" -> requestId,
-        "emailAddress" -> emailAddress,
-        "event" -> event.event.entryName,
+        "email" -> emailAddress,
+        "status" -> event.event.entryName,
         "submittedBy" -> submittedBy,
         "reportVersion" -> reportVersion,
         "pensionSchemeTaxReference" -> pstr,

@@ -38,9 +38,9 @@ class PsrEmailAuditEventSpec extends AnyWordSpec with Matchers {
 
       val expectedDetails: JsObject = Json.obj(
         "emailInitiationRequestId" -> "request123",
-        "emailAddress" -> "test@example.com",
+        "email" -> "test@example.com",
         "credentialRolePsaPsp" -> "PSP",
-        "event" -> "Sent",
+        "status" -> "Sent",
         "submittedBy" -> "John Doe",
         "reportVersion" -> "1.0",
         "pensionSchemeTaxReference" -> "test-pstr",
