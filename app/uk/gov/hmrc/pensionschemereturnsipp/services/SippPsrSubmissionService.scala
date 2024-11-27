@@ -375,20 +375,16 @@ class SippPsrSubmissionService @Inject() (
   def submitSippPsr(
     journeyType: JourneyType,
     submission: PsrSubmissionRequest,
-    submittedBy: SubmittedBy,
-    submitterId: String,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
     for {
-      response <- psrSubmission(journeyType, submission, submittedBy, submitterId, pensionSchemeId)
+      response <- psrSubmission(journeyType, submission, pensionSchemeId)
       emailResponse <- emailSubmissionService.submitEmail(submission.schemeName, response, pensionSchemeId)
     } yield emailResponse
 
   private def psrSubmission(
     journeyType: JourneyType,
     submission: PsrSubmissionRequest,
-    submittedBy: SubmittedBy,
-    submitterId: String,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrSubmissionEtmpResponse] = {
     import submission._
@@ -397,14 +393,15 @@ class SippPsrSubmissionService @Inject() (
       .getSippPsr(pstr, fbNumber, periodStartDate, psrVersion)
       .flatMap {
         case Some(response) =>
+          val submittedBy = pensionSchemeId.submittedBy
           val updateRequest = SippPsrSubmissionEtmpRequest(
             response.reportDetails.copy(status = EtmpPsrStatus.Submitted, version = None),
             response.accountingPeriodDetails,
             response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             EtmpSippPsrDeclaration(
               submittedBy = submittedBy,
-              submitterID = submitterId,
-              psaID = pensionSchemeId.value.some,
+              submitterID = pensionSchemeId.value,
+              psaID = Some(submission.psaId),
               psaDeclaration =
                 Option.when(SubmittedBy.PSA == submittedBy)(Declaration(declaration1 = true, declaration2 = true)),
               pspDeclaration =

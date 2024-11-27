@@ -49,7 +49,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   UnquotedShareRequest,
   UpdateMemberDetailsRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.{PSA, PSP}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails, YesNo}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
@@ -130,6 +130,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
 
   private val minimalDetails = minimalDetailsGen.sample.get
   when(mockMinimalDetailsConnector.fetch(samplePsaId)).thenReturn(Future.successful(minimalDetails.asRight))
+  when(mockMinimalDetailsConnector.fetch(samplePspId)).thenReturn(Future.successful(minimalDetails.asRight))
 
   "submitLandOrConnectedProperty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
@@ -709,15 +710,13 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   }
 
   "submitSippPsr" should {
-    val submittedBy = PSA
-    val submitterId = "submitterId"
     val psaPspId = samplePsaId
     val req = PsrSubmissionRequest(
       pstr,
       "fb".some,
       "2024-04-06".some,
       psrVersion = None,
-      isPsa = true,
+      psaId = samplePsaId.value,
       taxYear = DateRange(LocalDate.now(), LocalDate.now()),
       schemeName = None
     )
@@ -755,7 +754,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
-      whenReady(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId)) { _ =>
+      whenReady(service.submitSippPsr(Standard, req, samplePensionSchemeId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(any(), any(), any(), any(), any(), any(), any())(
           any(),
@@ -765,7 +764,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
 
     "successfully submit SIPP submission with correctly set declaration for PSA" in {
-      val submittedBy = PSA
       val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
       val expectedResponse = HttpResponse(200, sippResponse)
 
@@ -776,7 +774,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
-      whenReady(service.submitSippPsr(Standard, req, submittedBy, samplePensionSchemeId.value, psaPspId)) { _ =>
+      whenReady(service.submitSippPsr(Standard, req, samplePensionSchemeId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
           any(),
@@ -794,8 +792,6 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
 
     "successfully submit SIPP submission with correctly set declaration for PSP" in {
-      val submittedBy = PSP
-
       val sippResponse = Json.toJson(SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")).toString()
       val expectedResponse = HttpResponse(200, sippResponse)
 
@@ -806,7 +802,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
       when(mockEmailSubmissionService.submitEmail(any(), any(), any())(any()))
         .thenReturn(Future.successful(Right(())))
 
-      whenReady(service.submitSippPsr(Standard, req, submittedBy, psaPspId.value, psaPspId)) { _ =>
+      whenReady(service.submitSippPsr(Standard, req, samplePspId)) { _ =>
         verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
         verify(mockPsrConnector, times(1)).submitSippPsr(
           any(),
@@ -817,7 +813,14 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             submittedETMPRequest
               .copy(
                 psrDeclaration = submittedETMPRequest.psrDeclaration
-                  .map(_.copy(pspDeclaration = Some(Declaration(true, true)), psaDeclaration = None, submittedBy = PSP))
+                  .map(
+                    _.copy(
+                      pspDeclaration = Some(Declaration(true, true)),
+                      psaDeclaration = None,
+                      submittedBy = PSP,
+                      submitterID = samplePspId.value
+                    )
+                  )
               )
           ),
           any(),
@@ -836,7 +839,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         .thenReturn(Future.failed(new BadRequestException("invalid-request")))
 
       val thrown = intercept[BadRequestException] {
-        await(service.submitSippPsr(Standard, req, submittedBy, submitterId, psaPspId))
+        await(service.submitSippPsr(Standard, req, psaPspId))
 
       }
       thrown.responseCode mustBe BAD_REQUEST
