@@ -30,7 +30,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   ReportDetails,
   UpdateMemberDetailsRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSA
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -74,11 +73,8 @@ class SippPsrSubmitController @Inject() (
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
-      // TODO: it is not confirmed that psaPspId (PensionSchemeId) is correct one to use. Need to confirm with ETMP / architects [2024-09-09].
-      val submitterID = user.psaPspId
-
       sippPsrSubmissionService
-        .submitSippPsr(journeyType, submissionRequest, PSA /* todo */, submitterID.value, submitterID)
+        .submitSippPsr(journeyType, submissionRequest, user.psaPspId)
         .map(_.isRight)
         .map(emailSent => Created(Json.toJson(PsrSubmittedResponse(emailSent))))
     }

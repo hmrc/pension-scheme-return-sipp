@@ -56,7 +56,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
        |  "fbNumber": "fb",
        |  "periodStartDate" : "2022-04-06",
        |  "psrVersion": "1",
-       |  "isPsa": true,
+       |  "psaId": "A0001234",
        |  "taxYear": {"from": "2022-04-06", "to": "2023-04-06"},
        |  "schemeName": "testScheme"
        |}
@@ -96,7 +96,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       thrown.reason mustBe "Bearer token expired"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any(), any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -113,7 +113,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       thrown.reason mustBe "Bearer token not supplied"
 
-      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any(), any(), any())(any(), any())
+      verify(mockSippPsrSubmissionService, never).submitSippPsr(any(), any(), any())(any(), any())
       verify(mockAuthConnector, times(1)).authorise(any(), any())(any(), any())
     }
 
@@ -123,7 +123,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
         )
 
-      when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any(), any(), any())(any(), any()))
+      when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(().asRight))
 
       val result = controller.submitSippPsr(Standard)(fakeRequest.withJsonBody(requestJson))

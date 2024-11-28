@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.models
 
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy
 
 sealed trait PensionSchemeId { self =>
 
@@ -39,5 +40,11 @@ object PensionSchemeId {
   case class PspId(value: String) extends PensionSchemeId
 
   case class PsaId(value: String) extends PensionSchemeId
+
+  implicit class Ops(value: PensionSchemeId) extends AnyVal {
+    def submittedBy: SubmittedBy = value match
+      case PspId(_) => SubmittedBy.PSP
+      case PsaId(_) => SubmittedBy.PSA
+  }
 
 }
