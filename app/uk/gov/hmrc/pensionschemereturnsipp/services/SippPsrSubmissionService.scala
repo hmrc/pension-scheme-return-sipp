@@ -594,7 +594,7 @@ class SippPsrSubmissionService @Inject() (
           )
           submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest))
         case None =>
-          Future.failed(new Exception(s"Submission with pstr $pstr not found"))
+          Future.failed(new RuntimeException(s"Submission with pstr $pstr not found"))
       }
 
   def deleteAssets(
@@ -636,7 +636,7 @@ class SippPsrSubmissionService @Inject() (
           submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest))
 
         case None =>
-          Future.failed(new Exception(s"Submission with pstr $pstr not found"))
+          Future.failed(new RuntimeException(s"Submission with pstr $pstr not found"))
       }
 
   private def deleteAssetForJourney(journey: Journey, member: EtmpMemberAndTransactions): EtmpMemberAndTransactions = {

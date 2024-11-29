@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxOptionId
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.RequestHeader

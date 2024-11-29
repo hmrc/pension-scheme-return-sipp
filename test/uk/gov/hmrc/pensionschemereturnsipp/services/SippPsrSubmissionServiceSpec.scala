@@ -41,12 +41,17 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AssetsFromConnectedPartyRequest,
+  AssetsFromConnectedPartyResponse,
   LandOrConnectedPropertyRequest,
+  LandOrConnectedPropertyResponse,
   OutstandingLoansRequest,
+  OutstandingLoansResponse,
   PSRSubmissionResponse,
   PsrSubmissionRequest,
   TangibleMoveablePropertyRequest,
+  TangibleMoveablePropertyResponse,
   UnquotedShareRequest,
+  UnquotedShareResponse,
   UpdateMemberDetailsRequest
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy.PSP
@@ -131,6 +136,142 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
   private val minimalDetails = minimalDetailsGen.sample.get
   when(mockMinimalDetailsConnector.fetch(samplePsaId)).thenReturn(Future.successful(minimalDetails.asRight))
   when(mockMinimalDetailsConnector.fetch(samplePspId)).thenReturn(Future.successful(minimalDetails.asRight))
+
+  "getLandOrConnectedProperty" should {
+    "return the LandOrConnectedPropertyResponse when data is found" in {
+      val sampleResponse = LandOrConnectedPropertyResponse(transactions = List(landConnectedTransaction))
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockLandConnectedPartyTransformer.transformToResponse(any()))
+        .thenReturn(sampleResponse)
+
+      val result = service.getLandOrConnectedProperty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe Some(sampleResponse)
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+
+    "return None when no data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getLandOrConnectedProperty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe None
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+  }
+
+  "getOutstandingLoans" should {
+    "return the OutstandingLoansResponse when data is found" in {
+      val sampleResponse = OutstandingLoansResponse(transactions = List(outstandingLoanTransaction))
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockOutstandingLoansTransformer.transformToResponse(any()))
+        .thenReturn(sampleResponse)
+
+      val result = service.getOutstandingLoans("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe Some(sampleResponse)
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+
+    "return None when no data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getOutstandingLoans("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe None
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+  }
+
+  "getTangibleMoveableProperty" should {
+    "return the TangibleMoveablePropertyResponse when data is found" in {
+      val sampleResponse = TangibleMoveablePropertyResponse(transactions = List(tangiblePropertyTransaction))
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockTangibleMovablePropertyTransformer.transformToResponse(any()))
+        .thenReturn(sampleResponse)
+
+      val result = service.getTangibleMoveableProperty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe Some(sampleResponse)
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+
+    "return None when no data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getTangibleMoveableProperty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe None
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+  }
+
+  "getUnquotedShares" should {
+    "return the UnquotedSharesResponse when data is found" in {
+      val sampleResponse = UnquotedShareResponse(transactions = List(unquotedShareTransaction))
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockUnquotedSharesTransformer.transformToResponse(any()))
+        .thenReturn(sampleResponse)
+
+      val result = service.getUnquotedShares("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe Some(sampleResponse)
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+
+    "return None when no data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getUnquotedShares("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe None
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+  }
+
+  "getAssetsFromConnectedParty" should {
+    "return the AssetsFromConnectedPartyResponse when data is found" in {
+      val sampleResponse = AssetsFromConnectedPartyResponse(transactions = List(assetsFromConnectedPartyTransaction))
+
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockAssetsFromConnectedPartyTransformer.transformToResponse(any()))
+        .thenReturn(sampleResponse)
+
+      val result = service.getAssetsFromConnectedParty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe Some(sampleResponse)
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+      verify(mockAssetsFromConnectedPartyTransformer, times(1)).transformToResponse(any())
+    }
+
+    "return None when no data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = service.getAssetsFromConnectedParty("testPstr", Some("fbNumber"), None, None).futureValue
+
+      result mustBe None
+      verify(mockPsrConnector, times(1)).getSippPsr(any(), any(), any(), any())(any(), any())
+    }
+  }
 
   "submitLandOrConnectedProperty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
@@ -1049,6 +1190,26 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
         )(any(), any())
       }
     }
+
+    "fail when no SippPsr data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      assertThrows[RuntimeException](
+        service
+          .deleteMember(
+            Standard,
+            pstr,
+            None,
+            None,
+            None,
+            etmpDataWithLandConnectedTx.memberDetails.personalDetails,
+            samplePensionSchemeId
+          )
+          .futureValue
+      )
+    }
+
   }
 
   "delete assets" should {
@@ -1211,6 +1372,25 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
           any()
         )(any(), any())
       }
+    }
+
+    "fail when no SippPsr data is found" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      assertThrows[RuntimeException](
+        service
+          .deleteAssets(
+            Journey.InterestInLandOrProperty,
+            Standard,
+            pstr,
+            None,
+            None,
+            None,
+            samplePensionSchemeId
+          )
+          .futureValue
+      )
     }
   }
 
