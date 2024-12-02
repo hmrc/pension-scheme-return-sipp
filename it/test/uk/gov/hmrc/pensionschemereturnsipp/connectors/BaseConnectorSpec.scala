@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.softwaremill.diffx.generic.AutoDerivation
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher

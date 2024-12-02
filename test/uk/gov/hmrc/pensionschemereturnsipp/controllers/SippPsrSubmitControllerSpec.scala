@@ -18,15 +18,15 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import cats.implicits.catsSyntaxEitherId
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
@@ -297,6 +297,18 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         controller.deleteMember("testPstr", Standard, None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.BAD_REQUEST
     }
+
+    "return 400 when request body is invalid" in {
+      val invalidRequest = FakeRequest(DELETE, "/").withHeaders("Content-Type" -> "application/json")
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(invalidRequest)
+      status(result) mustBe Status.BAD_REQUEST
+    }
   }
 
   "Delete Assets " must {
@@ -388,6 +400,35 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
       val result =
         controller.getPsrAssetsExistence("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
+      status(result) mustBe Status.NOT_FOUND
+    }
+  }
+
+  "GET PSR Asset Declarations" must {
+    "return 200" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrAssetDeclarations(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(samplePsrAssetDeclarationsResponse)))
+
+      val result = controller.getPsrAssetDeclarations("testPstr", Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.OK
+    }
+
+    "return 404" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+        )
+
+      when(mockSippPsrSubmissionService.getPsrAssetDeclarations(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result =
+        controller.getPsrAssetDeclarations("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
     }
   }

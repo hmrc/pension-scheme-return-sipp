@@ -295,6 +295,101 @@ trait SippEtmpTestValues {
       transactionCount = None
     )
 
+  protected val outstandingLoanTransaction: OutstandingLoansApi.TransactionDetails =
+    OutstandingLoansApi.TransactionDetails(
+      nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+      nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+      loanRecipientName = "loanRecipientName",
+      dateOfLoan = LocalDate.of(2020, 1, 1),
+      amountOfLoan = 1000.0,
+      loanConnectedParty = Yes,
+      repayDate = LocalDate.of(2025, 1, 1),
+      interestRate = 5.0,
+      loanSecurity = Yes,
+      capitalRepayments = 500.0,
+      arrearsOutstandingPrYears = Yes,
+      arrearsOutstandingPrYearsAmt = Some(50.0),
+      outstandingYearEndAmount = 450.0,
+      transactionCount = None
+    )
+
+  protected val tangiblePropertyTransaction: TangibleMoveablePropertyApi.TransactionDetails =
+    TangibleMoveablePropertyApi.TransactionDetails(
+      nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+      nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+      acquisitionDate = LocalDate.of(2020, 1, 1),
+      assetDescription = "Asset Description",
+      acquiredFromName = "acquiredFromName",
+      totalCost = 20.0,
+      independentValuation = Yes,
+      totalIncomeOrReceipts = 20.0,
+      costOrMarket = MarketValue,
+      costMarketValue = 20.0,
+      isPropertyDisposed = No,
+      disposalDetails = None,
+      transactionCount = None
+    )
+
+  protected val unquotedShareTransaction: UnquotedShareApi.TransactionDetails =
+    UnquotedShareApi.TransactionDetails(
+      nameDOB = NameDOB(firstName = "firstName", lastName = "lastName", dob = LocalDate.of(2020, 1, 1)),
+      nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+      sharesCompanyDetails = SharesCompanyDetails(
+        companySharesName = "test",
+        companySharesCRN = None,
+        reasonNoCRN = None,
+        sharesClass = "test",
+        noOfShares = 1
+      ),
+      acquiredFromName = "test",
+      totalCost = 1.0,
+      independentValuation = Yes,
+      totalDividendsIncome = 1.00,
+      sharesDisposed = Yes,
+      sharesDisposalDetails = None,
+      transactionCount = None
+    )
+
+  protected val assetsFromConnectedPartyTransaction: AssetsFromConnectedPartyApi.TransactionDetails =
+    AssetsFromConnectedPartyApi.TransactionDetails(
+      nameDOB = NameDOB(
+        firstName = "firstName",
+        lastName = "lastName",
+        dob = LocalDate.of(2020, 1, 1)
+      ),
+      nino = NinoType(nino = Some("nino"), reasonNoNino = None),
+      acquisitionDate = LocalDate.of(2020, 1, 1),
+      assetDescription = "Asset Description",
+      acquisitionOfShares = Yes,
+      sharesCompanyDetails = Some(
+        SharesCompanyDetails(
+          companySharesName = "test",
+          companySharesCRN = None,
+          reasonNoCRN = None,
+          sharesClass = "test",
+          noOfShares = 1
+        )
+      ),
+      acquiredFromName = "acquiredFromName",
+      totalCost = 1000.0,
+      independentValuation = Yes,
+      tangibleSchedule29A = Yes,
+      totalIncomeOrReceipts = 1000.0,
+      isPropertyDisposed = Yes,
+      disposalDetails = Some(
+        DisposalDetails(
+          disposedPropertyProceedsAmt = 1000.0,
+          purchasersNames = "purchaserName",
+          anyPurchaserConnectedParty = Yes,
+          independentValuationDisposal = Yes,
+          propertyFullyDisposed = Yes
+        )
+      ),
+      disposalOfShares = Some(Yes),
+      noOfSharesHeld = Some(1),
+      transactionCount = None
+    )
+
   val etmpDataWithLandConnectedTx: EtmpMemberAndTransactions = EtmpMemberAndTransactions(
     status = SectionStatus.New,
     version = None,

@@ -19,7 +19,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 import cats.implicits.toFunctorOps
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
@@ -39,6 +39,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
@@ -121,7 +122,7 @@ class SippPsrSubmitController @Inject() (
               user.psaPspId
             )
             .map(response => Ok(Json.toJson(response)))
-            .recover { case ex: Exception =>
+            .recover { case NonFatal(ex) =>
               logger.error(s"Failed to delete member with pstr $pstr", ex)
               BadRequest("Invalid personal details")
             }

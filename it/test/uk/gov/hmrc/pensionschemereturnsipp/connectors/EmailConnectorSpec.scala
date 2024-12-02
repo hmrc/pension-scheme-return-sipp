@@ -16,21 +16,20 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.EitherValues
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AsyncWordSpec
 import play.api.http.Status
+import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.PsaId
-import uk.gov.hmrc.pensionschemereturnsipp.utils.WireMockHelper
 
-class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper with EitherValues {
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  override protected def portConfigKey: String = "microservice.services.email.port"
+class EmailConnectorSpec extends BaseConnectorSpec with EitherValues {
+
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val url: String = "/hmrc/email"
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val testPsaId = PsaId("A1234567")
   private val testPstr = "87219363YN"
   private val requestId = "test-Request-Id"
@@ -41,12 +40,17 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
   private val testTaxYear = "2023-2024"
   private val testReportVersion = "001"
 
-  private lazy val connector = injector.instanceOf[EmailConnector]
+  override lazy val applicationBuilder: GuiceApplicationBuilder =
+    super.applicationBuilder.configure(
+      "microservice.services.if-hod.port" -> wireMockPort
+    )
+
+  private lazy val connector: EmailConnector = applicationBuilder.injector().instanceOf[EmailConnector]
 
   "Email Connector" must {
     "return an EmailSent" when {
       "email sent successfully with status 202 (Accepted)" in {
-        server.stubFor(
+        wireMockServer.stubFor(
           post(urlEqualTo(url)).willReturn(
             aResponse()
               .withStatus(Status.ACCEPTED)
@@ -74,7 +78,7 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
 
     "return an EmailNotSent" when {
       "email service is down" in {
-        server.stubFor(
+        wireMockServer.stubFor(
           post(urlEqualTo(url)).willReturn(
             serviceUnavailable()
               .withHeader("Content-Type", "application/json")
@@ -100,7 +104,7 @@ class EmailConnectorSpec extends AsyncWordSpec with Matchers with WireMockHelper
       }
 
       "email service returns back with 204 (No Content)" in {
-        server.stubFor(
+        wireMockServer.stubFor(
           post(urlEqualTo(url)).willReturn(
             noContent()
               .withHeader("Content-Type", "application/json")

@@ -24,10 +24,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, ps
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
-  MemberDetails => ApiMemberDetails,
+  MemberDetails as ApiMemberDetails,
   MemberDetailsResponse,
   PSRSubmissionResponse,
   PsrAssetCountsResponse,
+  PsrAssetDeclarationsResponse,
   ReportDetails,
   Version,
   Versions
@@ -48,7 +49,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.{Compiled, Submitted}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp._
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.New
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -371,6 +372,15 @@ trait TestValues {
     tangibleMoveablePropertyCount = 1,
     outstandingLoansCount = 1,
     unquotedSharesCount = 1
+  )
+
+  val samplePsrAssetDeclarationsResponse: PsrAssetDeclarationsResponse = PsrAssetDeclarationsResponse(
+    armsLengthLandOrProperty = YesNo.Yes.some,
+    interestInLandOrProperty = YesNo.Yes.some,
+    tangibleMoveableProperty = YesNo.Yes.some,
+    outstandingLoans = YesNo.Yes.some,
+    unquotedShares = YesNo.Yes.some,
+    assetFromConnectedParty = YesNo.Yes.some
   )
 
   val submittedETMPRequest = SippPsrSubmissionEtmpRequest(
