@@ -68,17 +68,15 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
       )
 
       val expectedDetails = Json.obj(
-        "details" -> Json.obj(
-          "pensionSchemeAdministratorId" -> "test-id",
-          "schemeAdministratorName" -> "",
-          "credentialRolePsaPsp" -> "PSA",
-          "pensionSchemeTaxReference" -> "test-pstr",
-          "affinityGroup" -> "Organisation",
-          "schemeName" -> "Test Scheme",
-          "taxYear" -> "2023-2024",
-          "date" -> LocalDate.now().toString,
-          "payload" -> Json.obj("key" -> "value") // Add the payload field
-        )
+        "pensionSchemeAdministratorId" -> "test-id",
+        "schemeAdministratorName" -> "",
+        "credentialRolePsaPsp" -> "PSA",
+        "pensionSchemeTaxReference" -> "test-pstr",
+        "affinityGroup" -> "Organisation",
+        "schemeName" -> "Test Scheme",
+        "taxYear" -> "2023-2024",
+        "date" -> LocalDate.now().toString,
+        "payload" -> Json.obj("key" -> "value") // Add the payload field
       )
 
       event.details mustBe expectedDetails

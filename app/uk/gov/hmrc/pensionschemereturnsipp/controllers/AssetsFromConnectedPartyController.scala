@@ -82,7 +82,7 @@ class AssetsFromConnectedPartyController @Inject() (
   ): Action[AnyContent] = Action.async { implicit request =>
     authorisedAsPsrUser { _ =>
       logger.debug(
-        s"Retrieving SIPP PSR for AssetsFromConnectedParty - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
+        s"Retrieving SIPP PSR for AssetsFromConnectedParty - fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
       service
         .getAssetsFromConnectedParty(pstr, optFbNumber, optPeriodStartDate, optPsrVersion)

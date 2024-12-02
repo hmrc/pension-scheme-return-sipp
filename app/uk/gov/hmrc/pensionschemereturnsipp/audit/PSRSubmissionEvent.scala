@@ -39,7 +39,7 @@ case class PSRSubmissionEvent(
     val optTaxYear = createOptionalJsonObject("taxYear", taxYear.map(tY => s"${tY.from.getYear}-${tY.to.getYear}"))
     val optSchemeName = createOptionalJsonObject("schemeName", schemeName)
 
-    val psrDetails = psaOrPspIdDetails(
+    psaOrPspIdDetails(
       credentialRole,
       pensionSchemeId.value,
       minimalDetails.individualDetails.map(_.fullName).getOrElse("")
@@ -51,9 +51,5 @@ case class PSRSubmissionEvent(
         "date" -> LocalDate.now().toString,
         "payload" -> payload
       )
-
-    Json.obj(
-      "details" -> psrDetails
-    )
   }
 }
