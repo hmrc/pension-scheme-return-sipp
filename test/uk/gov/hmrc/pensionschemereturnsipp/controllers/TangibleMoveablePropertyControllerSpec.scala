@@ -24,9 +24,9 @@ import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{~, Name}
+import play.api.test.Helpers.*
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.{formatReq, formatRes}
@@ -55,10 +55,9 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
     reset(mockAuthConnector)
     reset(mockService)
 
-    when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
-      .thenReturn(
-        Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
-      )
+    when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+      .thenReturn(Future.successful(new ~(Some(externalId), enrolments)))
+
   }
 
   val modules: Seq[GuiceableModule] =

@@ -18,28 +18,48 @@ package uk.gov.hmrc.pensionschemereturnsipp.validators
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{SippEtmpDummyTestValues, SippEtmpTestValues}
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
 
-class JSONSchemaValidatorSpec
-    extends AnyWordSpec
-    with Matchers
-    with JsonFileReader
-    with SippEtmpTestValues
-    with SippEtmpDummyTestValues {
+class JSONSchemaValidatorSpec extends AnyWordSpec with Matchers with JsonFileReader {
 
-  "validateJson for new SIPP Json" must {
+  private val mockAuthConnector = mock[AuthConnector]
 
-    // TODO! - Add a functional test - That test is creating request test data as a file!
-    "Create Request Data" in {
-//      val json = Json.toJson(fullSippPsrSubmissionRequestLong)
-//
-//      val filePath = "/Users/tolgahmrc/Documents/Test-RequestPayload-v2/test-7.json"
-//
-//      val writer = new BufferedWriter(new FileWriter(filePath))
-//
-//      val jsonString: String = Json.stringify(json)
-//      writer.write(jsonString)
-//      writer.close()
+  val modules: Seq[GuiceableModule] =
+    Seq(
+      bind[AuthConnector].toInstance(mockAuthConnector)
+    )
+  val app: Application = new GuiceApplicationBuilder()
+    .overrides(modules*)
+    .build()
+
+  private lazy val jsonPayloadSchemaValidator: JSONSchemaValidator = app.injector.instanceOf[JSONSchemaValidator]
+
+  "validate json payload against API 1997 schema" must {
+    "Do not fail when input is valid" in {
+      val json = readJsonFromFile("/api-1997-valid.json")
+      val result = jsonPayloadSchemaValidator.validatePayload(API_1997, json)
+
+      val actualErrors = result.errors.map(_.getMessage)
+
+      actualErrors mustBe Set()
+    }
+
+    "fail with validation errors when input Json is malformed" in {
+      val json = readJsonFromFile("/api-1997-invalid.json")
+      val result = jsonPayloadSchemaValidator.validatePayload(API_1997, json)
+      val actualErrors = result.errors.map(_.getMessage)
+
+      val expectedErrors = Set(
+        "$.memberAndTransactions[0].memberDetails.personalDetails.dateOfBirth: does not match the date pattern must be a valid RFC 3339 full-date",
+        "$.memberAndTransactions[0].landConnectedParty.transactionDetails[0]: required property 'addressDetails' not found"
+      )
+
+      actualErrors mustBe expectedErrors
     }
   }
 }

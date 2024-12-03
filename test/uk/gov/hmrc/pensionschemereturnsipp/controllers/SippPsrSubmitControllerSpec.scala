@@ -118,9 +118,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 200" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.submitSippPsr(any(), any(), any())(any(), any()))
@@ -134,9 +134,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   "GET SIPP PSR" must {
     "return 200" in {
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
@@ -147,9 +147,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 404" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getSippPsr(any(), any(), any(), any())(any(), any()))
@@ -177,9 +177,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         )
       )
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrVersions(any(), any())(any(), any()))
@@ -196,9 +196,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val pstr = "testPstr"
       val invalidStartDate = "invalid-date"
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       val request = FakeRequest(GET, s"/psr-versions/$pstr/$invalidStartDate")
@@ -212,9 +212,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   "GET Member Details" must {
     "return 200" in {
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getMemberDetails(any(), any(), any(), any())(any(), any()))
@@ -225,9 +225,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 404" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getMemberDetails(any(), any(), any(), any())(any(), any()))
@@ -249,9 +249,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(memberDetailsRequest))
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(
@@ -272,9 +272,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(personalDetails))
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
@@ -285,9 +285,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return bad request" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.deleteMember(any(), any(), any(), any(), any(), any(), any())(any(), any()))
@@ -301,9 +301,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     "return 400 when request body is invalid" in {
       val invalidRequest = FakeRequest(DELETE, "/").withHeaders("Content-Type" -> "application/json")
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(invalidRequest)
@@ -318,9 +318,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(personalDetails))
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.deleteAssets(any(), any(), any(), any(), any(), any(), any())(any(), any()))
@@ -334,9 +334,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return bad request" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.deleteAssets(any(), any(), any(), any(), any(), any(), any())(any(), any()))
@@ -358,9 +358,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   "GET Assets Existence" must {
     "return 200" in {
 
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
@@ -374,9 +374,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 200 when the PSR exists but has no members or transactions" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
@@ -390,9 +390,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 404 when the PSR does not exist" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetsExistence(any(), any(), any(), any())(any(), any()))
@@ -406,9 +406,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
   "GET PSR Asset Declarations" must {
     "return 200" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetDeclarations(any(), any(), any(), any())(any(), any()))
@@ -419,9 +419,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 404" in {
-      when(mockAuthConnector.authorise[Option[String] ~ Enrolments ~ Option[Name]](any(), any())(any(), any()))
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
-          Future.successful(new ~(new ~(Some(externalId), enrolments), Some(Name(Some("FirstName"), Some("lastName")))))
+          Future.successful(new ~(Some(externalId), enrolments))
         )
 
       when(mockSippPsrSubmissionService.getPsrAssetDeclarations(any(), any(), any(), any())(any(), any()))

@@ -17,23 +17,26 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.crypto.{ApplicationCrypto, PlainText}
+import uk.gov.hmrc.pensionschemereturnsipp.models.Event.{Complained, Delivered, Opened, PermanentBounce, Sent}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvent, EmailEvents}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.number
 
-  import EmailResponseControllerSpec._
+  import EmailResponseControllerSpec.*
 
   private val mockAuditService = mock[AuditService]
   private val mockAuthConnector = mock[AuthConnector]
@@ -60,6 +63,7 @@ class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.num
   private val encryptedPstr = crypto.encrypt(PlainText(pstr)).value
   private val encryptedSchemeName = crypto.encrypt(PlainText(schemeName)).value
   private val encryptedUserName = crypto.encrypt(PlainText(userName)).value
+  private val encryptedEmail = crypto.encrypt(PlainText(emailAddress)).value
 
   override def beforeEach(): Unit = {
     reset(mockAuditService)
@@ -71,7 +75,41 @@ class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.num
 
   "EmailResponseController" must {
 
-    // TODO add more tests?
+    "respond OK when given EmailEvents for PSA" in {
+      val result = controller.sendAuditEvents(
+        schemeAdministratorTypeAsPsp,
+        requestId,
+        email = encryptedEmail,
+        encryptedPsaId,
+        encryptedPstr,
+        encryptedSchemeName,
+        encryptedUserName,
+        taxYear,
+        reportVersion
+      )(
+        fakeRequest.withBody(Json.toJson(emailEvents))
+      )
+
+      status(result) mustBe OK
+    }
+
+    "respond BAD REQUEST when not given EmailEvents" in {
+      val result = controller.sendAuditEvents(
+        schemeAdministratorTypeAsPsp,
+        requestId,
+        email = encryptedEmail,
+        encryptedPsaId,
+        encryptedPstr,
+        encryptedSchemeName,
+        encryptedUserName,
+        taxYear,
+        reportVersion
+      )(
+        fakeRequest.withBody(Json.toJson(""))
+      )
+
+      status(result) mustBe BAD_REQUEST
+    }
 
     "respond with FORBIDDEN when email address is invalid" in {
       val invalidEmail = "invalid"
@@ -82,10 +120,10 @@ class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.num
         email = crypto.encrypt(PlainText(invalidEmail)).value,
         encryptedPsaId,
         encryptedPstr,
-        reportVersion,
         encryptedSchemeName,
+        encryptedUserName,
         taxYear,
-        encryptedUserName
+        reportVersion
       )(
         fakeRequest.withBody(Json.obj("name" -> "invalid"))
       )
@@ -102,6 +140,16 @@ object EmailResponseControllerSpec {
   private val requestId = "test-request-id"
   private val reportVersion = "1"
   private val taxYear = "Test tax year"
+  private val emailAddress = "test@test.com"
 
   private val fakeRequest = FakeRequest("", "")
+  private val emailEvents = EmailEvents(
+    Seq(
+      EmailEvent(Sent, LocalDateTime.now()),
+      EmailEvent(Delivered, LocalDateTime.now()),
+      EmailEvent(PermanentBounce, LocalDateTime.now()),
+      EmailEvent(Opened, LocalDateTime.now()),
+      EmailEvent(Complained, LocalDateTime.now())
+    )
+  )
 }
