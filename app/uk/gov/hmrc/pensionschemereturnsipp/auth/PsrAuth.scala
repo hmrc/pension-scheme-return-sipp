@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.auth
 
-import cats.implicits.catsSyntaxSemigroup
-import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, Enrolments}
-import uk.gov.hmrc.auth.core.retrieve.{~, Name}
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import play.api.Logging
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, Enrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey, pspEnrolmentKey, pspIdKey}
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
@@ -32,18 +31,14 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class PsrAuthContext[A](
   externalId: String,
   psaPspId: PensionSchemeId,
-  name: Option[Name],
   request: Request[A]
-) {
-  def fullName: Option[String] = name.flatMap(n => n.name |+| n.lastName)
-}
+)
 
 trait PsrAuth extends AuthorisedFunctions with Logging {
 
   private val AuthPredicate = Enrolment(psaEnrolmentKey).or(Enrolment(pspEnrolmentKey))
 
-  @annotation.nowarn("msg=deprecated") // TODO: address this!
-  private val PsrRetrievals = Retrievals.externalId.and(Retrievals.allEnrolments).and(Retrievals.name)
+  private val PsrRetrievals = Retrievals.externalId.and(Retrievals.allEnrolments)
 
   private type PsrAction[A] = PsrAuthContext[A] => Future[Result]
 
@@ -57,9 +52,9 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
   )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] =
     authorised(AuthPredicate)
       .retrieve(PsrRetrievals) {
-        case Some(externalId) ~ enrolments ~ name =>
+        case Some(externalId) ~ enrolments =>
           getPsaPspId(enrolments) match {
-            case Some(psaPspId) => block(PsrAuthContext(externalId, psaPspId, name, request))
+            case Some(psaPspId) => block(PsrAuthContext(externalId, psaPspId, request))
             case None => Future.failed(new BadRequestException(s"Bad Request without psaPspId"))
           }
         case _ =>

@@ -1,0 +1,190 @@
+{
+  "reportDetails": {
+    "pstr": "20000000AA",
+    "status": "Compiled",
+    "periodStart": "2022-04-06",
+    "periodEnd": "2023-04-05",
+    "memberTransactions": "Yes"
+  },
+  "accountingPeriodDetails": {
+    "version": "001",
+    "accountingPeriods": [
+      {
+        "accPeriodStart": "2022-04-01",
+        "accPeriodEnd": "2023-04-05"
+      }
+    ]
+  },
+  "memberAndTransactions": [
+    {
+      "status": "New",
+      "version": "001",
+      "memberDetails": {
+        "personalDetails": {
+          "firstName": "John",
+          "lastName": "John1",
+          "nino": "AA200000A",
+          "dateOfBirth": ""
+        }
+      },
+      "landConnectedParty": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "acquisitionDate": "2023-03-14",
+            "landOrPropertyInUK": "Yes",
+            "registryDetails": {
+              "registryRefExist": "No",
+              "registryReference": "Lost"
+            },
+            "acquiredFromName": "Sun Ltd",
+            "totalCost": 1234.99,
+            "independentValuation": "No",
+            "jointlyHeld": "Yes",
+            "noOfPersons": 1,
+            "residentialSchedule29A": "No",
+            "isLeased": "Yes",
+            "lesseeDetails": {
+              "numberOfLessees": 1,
+              "anyLesseeConnectedParty": "Yes",
+              "leaseGrantedDate": "2023-03-14",
+              "annualLeaseAmount": 999.99
+            },
+            "totalIncomeOrReceipts": 9999.99,
+            "isPropertyDisposed": "Yes",
+            "disposalDetails": {
+              "disposedPropertyProceedsAmt": 2000.99,
+              "purchasersNames": "Adam M",
+              "anyPurchaserConnectedParty": "Yes",
+              "independentValuationDisposal": "No",
+              "propertyFullyDisposed": "No"
+            }
+          }
+        ]
+      },
+      "otherAssetsConnectedParty": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "acquisitionDate": "2023-03-14",
+            "assetDescription": "Store",
+            "acquisitionOfShares": "No",
+            "acquiredFromName": "Josn DF",
+            "totalCost": 1299.99,
+            "independentValuation": "No",
+            "tangibleSchedule29A": "No",
+            "totalIncomeOrReceipts": 9999.99,
+            "isPropertyDisposed": "No",
+            "disposalOfShares": "No"
+          }
+        ]
+      },
+      "landArmsLength": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "acquisitionDate": "2023-03-14",
+            "landOrPropertyInUK": "Yes",
+            "addressDetails": {
+              "addressLine1": "Brighton3",
+              "addressLine2": "Brighton2",
+              "addressLine3": "Brighton33",
+              "addressLine4": "Brighton34",
+              "addressLine5": "Brighton35",
+              "ukPostCode": "BN34 1DF",
+              "countryCode": "GB"
+            },
+            "registryDetails": {
+              "registryRefExist": "Yes",
+              "registryReference": "123XYZ"
+            },
+            "acquiredFromName": "PQR Ltd",
+            "totalCost": 1200.00,
+            "independentValuation": "No",
+            "jointlyHeld": "No",
+            "residentialSchedule29A": "No",
+            "isLeased": "No",
+            "totalIncomeOrReceipts": 1000.99,
+            "isPropertyDisposed": "No"
+          }
+        ]
+      },
+      "tangibleProperty": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "assetDescription": "Printing Machine",
+            "acquisitionDate": "2023-03-14",
+            "totalCost": 99999.99,
+            "acquiredFromName": "Dave H",
+            "independentValuation": "No",
+            "totalIncomeOrReceipts": 9999.99,
+            "costOrMarket": "Cost Value",
+            "costMarketValue": 99999.99,
+            "isPropertyDisposed": "Yes",
+            "disposalDetails": {
+              "disposedPropertyProceedsAmt": 9999.99,
+              "purchasersNames": "Michel K",
+              "anyPurchaserConnectedParty": "Yes",
+              "independentValuationDisposal": "No",
+              "propertyFullyDisposed": "No"
+            }
+          }
+        ]
+      },
+      "loanOutstanding": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "loanRecipientName": "Loyds Ltd",
+            "dateOfLoan": "2023-03-14",
+            "amountOfLoan": 999.99,
+            "loanConnectedParty": "Yes",
+            "repayDate": "2023-03-14",
+            "interestRate": 10,
+            "loanSecurity": "No",
+            "capitalRepayments": 99999.99,
+            "arrearsOutstandingPrYears": "No",
+            "arrearsOutstandingPrYearsAmt": 999999.99,
+            "outstandingYearEndAmount": 9999.99
+          }
+        ]
+      },
+      "unquotedShares": {
+        "noOfTransactions": 1,
+        "transactionDetails": [
+          {
+            "sharesCompanyDetails": {
+              "companySharesName": "Boeing",
+              "companySharesCRN": "CRN456789",
+              "sharesClass": "Primary",
+              "noOfShares": 100
+            },
+            "acquiredFromName": "HL Ltd",
+            "totalCost": 9999.99,
+            "independentValuation": "No",
+            "totalDividendsIncome": 999.99,
+            "sharesDisposed": "Yes",
+            "sharesDisposalDetails": {
+              "disposedShareAmount": 9999.99,
+              "purchasersNames": "Dave SS",
+              "disposalConnectedParty": "Yes",
+              "independentValuationDisposal": "No",
+              "noOfSharesSold": 10,
+              "noOfSharesHeld": 90
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "psrDeclaration": {
+    "submittedBy": "PSP",
+    "submitterID": "20000008",
+    "psaID": "A0000001",
+    "pspDeclaration": {
+      "declaration1": true,
+      "declaration2": true
+    }
+  }
+}
