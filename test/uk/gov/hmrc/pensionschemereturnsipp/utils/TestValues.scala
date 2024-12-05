@@ -95,7 +95,8 @@ trait TestValues {
       periodStart = LocalDate.of(2020, 12, 12),
       periodEnd = LocalDate.of(2020, 12, 12),
       None,
-      None
+      None,
+      Yes
     ),
     accountingPeriodDetails = AccountingPeriodDetails(
       Some("1.0"),

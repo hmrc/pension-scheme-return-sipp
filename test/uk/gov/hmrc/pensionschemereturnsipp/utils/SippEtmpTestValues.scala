@@ -72,7 +72,8 @@ trait SippEtmpTestValues {
     periodStart = sampleDate,
     periodEnd = sampleDate,
     None,
-    None
+    None,
+    memberTransactions = Yes
   )
 
   protected val reportDetails: EtmpSippReportDetails = testReportDetails.transformInto[EtmpSippReportDetails]

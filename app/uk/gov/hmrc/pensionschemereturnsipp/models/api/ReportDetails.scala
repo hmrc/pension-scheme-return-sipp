@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 
 import java.time.LocalDate
@@ -28,7 +29,8 @@ case class ReportDetails(
   periodStart: LocalDate,
   periodEnd: LocalDate,
   schemeName: Option[String],
-  version: Option[String]
+  version: Option[String],
+  memberTransactions: YesNo
 ) {
   def taxYearDateRange: DateRange = DateRange(periodStart, periodEnd)
 }

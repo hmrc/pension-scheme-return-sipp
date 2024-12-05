@@ -36,6 +36,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   ReportDetails,
   TangibleMoveablePropertyRequest
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -112,7 +113,8 @@ class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
             periodStart = LocalDate.now,
             periodEnd = LocalDate.now,
             schemeName = Some("Schema Name"),
-            version = Some("001")
+            version = Some("001"),
+            memberTransactions = Yes
           ),
           transactions = None
         )

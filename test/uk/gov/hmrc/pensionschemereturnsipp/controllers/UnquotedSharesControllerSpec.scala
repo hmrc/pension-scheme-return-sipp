@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi.{formatReq, formatRes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{ReportDetails, UnquotedShareRequest, UnquotedShareResponse}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
@@ -106,7 +107,8 @@ class UnquotedSharesControllerSpec extends BaseSpec with TestValues {
             periodStart = LocalDate.now,
             periodEnd = LocalDate.now,
             schemeName = Some("Schema Name"),
-            version = Some("001")
+            version = Some("001"),
+            memberTransactions = Yes
           ),
           transactions = None
         )
