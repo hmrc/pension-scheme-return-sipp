@@ -27,6 +27,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   TangibleMoveablePropertyResponse,
   UnquotedShareResponse
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, AccountingPeriodDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
@@ -83,7 +84,8 @@ class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues
         LocalDate.parse("2022-04-06"),
         LocalDate.parse("2023-04-05"),
         None,
-        Some("001")
+        Some("001"),
+        Yes
       )
 
       resultApiResponse.accountingPeriodDetails mustBe Some(
