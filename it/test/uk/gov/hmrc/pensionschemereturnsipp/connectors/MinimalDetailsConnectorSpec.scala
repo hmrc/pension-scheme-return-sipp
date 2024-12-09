@@ -19,7 +19,6 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,7 +47,7 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
   val psaId = psaIdGen.sample.value
   val pspId = pspIdGen.sample.value
 
-  def connector(implicit app: Application): MinimalDetailsConnector = injected[MinimalDetailsConnector]
+  private lazy val connector: MinimalDetailsConnector = applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
 
   "fetch" should {
 
