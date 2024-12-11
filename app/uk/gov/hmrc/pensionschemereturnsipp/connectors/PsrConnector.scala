@@ -79,10 +79,10 @@ class PsrConnector @Inject() (
   ): Future[HttpResponse] = {
 
     val url: String = config.submitSippPsrUrl.format(pstr)
-    logger.info(s"Submit SIPP PSR called URL: $url with payload: $request")
 
     val jsonRequest = Json.toJson(request)
     val jsonSizeInBytes = jsonRequest.toString().getBytes("UTF-8").length
+    logger.info(s"Submit SIPP PSR called URL: $url with payload(Size as bytes: $jsonSizeInBytes)")
 
     if (jsonSizeInBytes > config.maxRequestSize) {
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
