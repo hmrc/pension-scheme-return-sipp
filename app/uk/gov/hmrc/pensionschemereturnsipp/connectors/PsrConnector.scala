@@ -18,18 +18,12 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
+import play.api.libs.ws.writeableOf_JsValue
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http.{
-  BadRequestException,
-  HeaderCarrier,
-  HttpErrorFunctions,
-  HttpResponse,
-  RequestEntityTooLargeException,
-  StringContextOps
-}
 import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpErrorFunctions, HttpResponse, RequestEntityTooLargeException, StringContextOps}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 import uk.gov.hmrc.pensionschemereturnsipp.config.AppConfig
@@ -37,12 +31,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.PsrVersionsResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.{
-  JourneyType,
-  MinimalDetails,
-  PensionSchemeId,
-  PensionSchemeReturnValidationFailureException
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId, PensionSchemeReturnValidationFailureException}
 import uk.gov.hmrc.pensionschemereturnsipp.utils.HttpResponseHelper
 import uk.gov.hmrc.pensionschemereturnsipp.validators.JSONSchemaValidator
 import uk.gov.hmrc.pensionschemereturnsipp.validators.SchemaPaths.API_1997
@@ -52,7 +41,6 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
-import play.api.libs.ws.writeableOf_JsValue
 
 class PsrConnector @Inject() (
   config: AppConfig,
@@ -79,10 +67,11 @@ class PsrConnector @Inject() (
   ): Future[HttpResponse] = {
 
     val url: String = config.submitSippPsrUrl.format(pstr)
-    logger.info(s"Submit SIPP PSR called URL: $url with payload: $request")
 
     val jsonRequest = Json.toJson(request)
     val jsonSizeInBytes = jsonRequest.toString().getBytes("UTF-8").length
+
+    logger.info(s"Submit SIPP PSR called URL: $url with payload (size of payload: $jsonSizeInBytes): $request")
 
     if (jsonSizeInBytes > config.maxRequestSize) {
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
