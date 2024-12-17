@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
+import cats.syntax.option._
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either.*
@@ -364,7 +365,7 @@ class SippPsrSubmissionService @Inject() (
 
     SippPsrSubmissionEtmpRequest(
       reportDetails = details
-        .withAssetClassDeclaration(journey, transactions)
+        .transactionsAssetClassDeclaration(journey, transactions)
         .copy(status = Compiled, version = None),
       accountingPeriodDetails = None,
       memberAndTransactions = NonEmptyList.fromList(merged),
@@ -395,7 +396,9 @@ class SippPsrSubmissionService @Inject() (
         case Some(response) =>
           val submittedBy = pensionSchemeId.submittedBy
           val updateRequest = SippPsrSubmissionEtmpRequest(
-            response.reportDetails.copy(status = EtmpPsrStatus.Submitted, version = None),
+            response.reportDetails
+              .copy(status = EtmpPsrStatus.Submitted, version = None)
+              .completeOutstandingAssetDeclarations(response.memberAndTransactions),
             response.accountingPeriodDetails,
             response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             EtmpSippPsrDeclaration(
@@ -620,7 +623,7 @@ class SippPsrSubmissionService @Inject() (
           val updateRequest = SippPsrSubmissionEtmpRequest(
             reportDetails = response.reportDetails
               .copy(status = EtmpPsrStatus.Compiled, version = None)
-              .withAssetClassDeclaration(journey, None),
+              .withAssetClassDeclaration(journey, declaration = none[YesNo]),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = updatedMembers,
             psrDeclaration = response.psrDeclaration.map(declaration =>

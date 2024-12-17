@@ -47,7 +47,8 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
   val psaId = psaIdGen.sample.value
   val pspId = pspIdGen.sample.value
 
-  private lazy val connector: MinimalDetailsConnector = applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
+  private lazy val connector: MinimalDetailsConnector =
+    applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
 
   "fetch" should {
 
