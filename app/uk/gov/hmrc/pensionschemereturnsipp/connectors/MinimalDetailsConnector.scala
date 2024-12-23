@@ -34,26 +34,27 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpClientV2) extends MinimalDetailsConnector {
 
-  private val url = s"${appConfig.pensionsAdministrator}/pension-administrator/get-minimal-psa"
+  private val url = s"${appConfig.pensionsAdministrator}/pension-administrator/get-minimal-details-self"
 
   override def fetch(
     psaId: PsaId
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    fetch("psaId", psaId.value)
+    fetch("psaId", psaId.value, true)
 
   override def fetch(
     pspId: PspId
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    fetch("pspId", pspId.value)
+    fetch("pspId", pspId.value, false)
 
   // API 1442 (Get psa/psp minimal details)
   private def fetch(
     idType: String,
-    idValue: String
+    idValue: String,
+    loggedInAsPsa: Boolean
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
     http
       .get(url"$url")
-      .setHeader(idType -> idValue)
+      .setHeader(idType -> idValue, "loggedInAsPsa" -> loggedInAsPsa.toString)
       .execute[MinimalDetails]
       .tapError(t =>
         Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}", t))

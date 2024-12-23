@@ -30,24 +30,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   override implicit lazy val applicationBuilder: GuiceApplicationBuilder =
     super.applicationBuilder.configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
-  val url = "/pension-administrator/get-minimal-psa"
+  val url = "/pension-administrator/get-minimal-details-self"
 
   def stubGet(key: String, id: String, response: ResponseDefinitionBuilder): StubMapping =
     wireMockServer.stubFor(
       get(urlEqualTo(url))
         .withHeader(key, equalTo(id))
+        .withHeader("loggedInAsPsa", equalTo((key == "psaId").toString))
         .willReturn(response)
     )
 
   val psaId = psaIdGen.sample.value
   val pspId = pspIdGen.sample.value
 
-  private lazy val connector: MinimalDetailsConnector = applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
+  private lazy val connector: MinimalDetailsConnector =
+    applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
 
   "fetch" should {
 
