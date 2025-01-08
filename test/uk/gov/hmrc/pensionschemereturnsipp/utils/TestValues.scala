@@ -391,12 +391,12 @@ trait TestValues {
       LocalDate.parse("2024-09-09"),
       LocalDate.parse("2024-09-09"),
       Yes,
-      memberTransLandPropCon = None,
-      memberTransAssetCon = None,
-      memberTransLandPropArmsLen = None,
-      memberTransTangPropArmsLen = None,
-      memberTransOutstandingLoan = None,
-      memberTransUnquotedShares = None,
+      memberTransLandPropCon = YesNo.No.some,
+      memberTransAssetCon = YesNo.No.some,
+      memberTransLandPropArmsLen = YesNo.No.some,
+      memberTransTangPropArmsLen = YesNo.No.some,
+      memberTransOutstandingLoan = YesNo.No.some,
+      memberTransUnquotedShares = YesNo.No.some,
       None
     ),
     Some(
