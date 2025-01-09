@@ -17,7 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
