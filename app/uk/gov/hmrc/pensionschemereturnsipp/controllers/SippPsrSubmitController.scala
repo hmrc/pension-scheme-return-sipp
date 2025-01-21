@@ -25,6 +25,8 @@ import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AccountingPeriodDetailsRequest,
+  MemberTransactions,
   PsrSubmissionRequest,
   PsrSubmittedResponse,
   ReportDetails,
@@ -65,6 +67,56 @@ class SippPsrSubmitController @Inject() (
 
       sippPsrSubmissionService
         .createEmptySippPsr(submissionRequest, user.psaPspId)
+        .as(Created)
+    }
+  }
+
+  def updateMemberTransactions(
+    pstr: String,
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ) = Action.async { implicit request =>
+    authorisedAsPsrUser { user =>
+      val submissionRequest = requiredBody.as[MemberTransactions]
+      logger.debug(s"Updating report details: member transactions - $request")
+
+      sippPsrSubmissionService
+        .updateMemberTransactions(
+          pstr,
+          journeyType,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          submissionRequest,
+          user.psaPspId
+        )
+        .as(Created)
+    }
+  }
+
+  def updateAccountingPeriodDetails(
+    pstr: String,
+    journeyType: JourneyType,
+    optFbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String]
+  ) = Action.async { implicit request =>
+    authorisedAsPsrUser { user =>
+      val submissionRequest = requiredBody.as[AccountingPeriodDetailsRequest]
+      logger.debug(s"Updating accounting periods - $request")
+
+      sippPsrSubmissionService
+        .updateAccountingPeriodDetails(
+          pstr,
+          journeyType,
+          optFbNumber,
+          optPeriodStartDate,
+          optPsrVersion,
+          submissionRequest,
+          user.psaPspId
+        )
         .as(Created)
     }
   }

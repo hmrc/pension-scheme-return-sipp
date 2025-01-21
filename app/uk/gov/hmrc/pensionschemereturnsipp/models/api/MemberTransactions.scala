@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.pensionschemereturnsipp.models.common
+package uk.gov.hmrc.pensionschemereturnsipp.models.api
 
-import cats.data.NonEmptyList
 import play.api.libs.json.{Json, OFormat}
-import java.time.LocalDate
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo
 
-case class AccountingPeriodDetails(
-  version: Option[String],
-  accountingPeriods: NonEmptyList[AccountingPeriod]
-)
+case class MemberTransactions(value: YesNo)
 
-case class AccountingPeriod(
-  accPeriodStart: LocalDate,
-  accPeriodEnd: LocalDate
-)
-
-object AccountingPeriod {
-  implicit val format: OFormat[AccountingPeriod] = Json.format[AccountingPeriod]
-}
-
-object AccountingPeriodDetails {
-  implicit val format: OFormat[AccountingPeriodDetails] = Json.format[AccountingPeriodDetails]
+object MemberTransactions {
+  implicit val format: OFormat[MemberTransactions] = Json.format[MemberTransactions]
 }

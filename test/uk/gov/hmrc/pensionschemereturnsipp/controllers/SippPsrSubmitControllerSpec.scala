@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -31,8 +32,18 @@ import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{PsrAssetCountsResponse, UpdateMemberDetailsRequest}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, ReportStatus}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  MemberTransactions,
+  PsrAssetCountsResponse,
+  UpdateMemberDetailsRequest
+}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AccountingPeriod,
+  AccountingPeriodDetails,
+  PsrVersionsResponse,
+  ReportStatus
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
@@ -430,6 +441,60 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result =
         controller.getPsrAssetDeclarations("testPstr", None, Some("periodStartDate"), Some("version"))(fakeRequest)
       status(result) mustBe Status.NOT_FOUND
+    }
+  }
+
+  "Update MemberTransactions" must {
+    "return created in" in {
+      val memberTransactions = MemberTransactions(Yes)
+      val fakeRequest = FakeRequest(PUT, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(Json.toJson(memberTransactions))
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(Some(externalId), enrolments))
+        )
+
+      when(
+        mockSippPsrSubmissionService.updateMemberTransactions(any(), any(), any(), any(), any(), any(), any())(
+          any(),
+          any()
+        )
+      )
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("000123456")))
+
+      val result = controller.updateMemberTransactions("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.CREATED
+    }
+  }
+
+  "Update AccountingPeriodDetails" must {
+    "return created in" in {
+      val accountingPeriodDetails = AccountingPeriodDetailsRequest(
+        None,
+        Some(NonEmptyList.one(AccountingPeriod(LocalDate.now, LocalDate.now().plusDays(1))))
+      )
+      val fakeRequest = FakeRequest(PUT, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(Json.toJson(accountingPeriodDetails))
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(
+          Future.successful(new ~(Some(externalId), enrolments))
+        )
+
+      when(
+        mockSippPsrSubmissionService.updateAccountingPeriodDetails(any(), any(), any(), any(), any(), any(), any())(
+          any(),
+          any()
+        )
+      )
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("000123456")))
+
+      val result =
+        controller.updateAccountingPeriodDetails("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
+      status(result) mustBe Status.CREATED
     }
   }
 }
