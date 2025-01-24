@@ -470,7 +470,10 @@ class SippPsrSubmissionService @Inject() (
         case Some(response) =>
           val reportDetails = response.reportDetails
           val updated = SippPsrSubmissionEtmpRequest(
-            reportDetails = reportDetails.copy(memberTransactions = memberTransactions.value),
+            reportDetails = reportDetails.copy(
+              memberTransactions = memberTransactions.value,
+              version = None
+            ),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
@@ -502,7 +505,7 @@ class SippPsrSubmissionService @Inject() (
       .flatMap {
         case Some(response) =>
           val updated = SippPsrSubmissionEtmpRequest(
-            reportDetails = response.reportDetails,
+            reportDetails = response.reportDetails.copy(version = None),
             accountingPeriodDetails = accountingPeriodDetailsRequest.toEtmp,
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
