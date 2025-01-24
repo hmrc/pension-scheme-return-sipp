@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
-import cats.implicits.toFunctorOps
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.*
@@ -67,7 +66,7 @@ class SippPsrSubmitController @Inject() (
 
       sippPsrSubmissionService
         .createEmptySippPsr(submissionRequest, user.psaPspId)
-        .as(Created)
+        .map(response => Created(Json.toJson(response)))
     }
   }
 
