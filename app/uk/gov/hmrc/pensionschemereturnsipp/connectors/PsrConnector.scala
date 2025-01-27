@@ -18,7 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{
@@ -53,6 +53,7 @@ import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.FileUploadAuditContext
 
 class PsrConnector @Inject() (
   config: AppConfig,
@@ -72,7 +73,8 @@ class PsrConnector @Inject() (
     minimalDetails: MinimalDetails,
     request: SippPsrSubmissionEtmpRequest,
     maybeTaxYear: Option[DateRange],
-    maybeSchemeName: Option[String]
+    maybeSchemeName: Option[String],
+    auditContext: Option[FileUploadAuditContext]
   )(implicit
     headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
@@ -86,7 +88,7 @@ class PsrConnector @Inject() (
 
     if (jsonSizeInBytes > config.maxRequestSize) {
       val errorMessage = s"Request body size exceeds maximum limit of ${config.maxRequestSize} bytes"
-      // Fire the audit event for the size limit exceeded case
+      // Fire the audit events for the size limit exceeded case
       apiAuditUtil
         .firePsrPostAuditEvent(
           pstr,
@@ -98,6 +100,14 @@ class PsrConnector @Inject() (
           maybeTaxYear
         )
         .apply(Failure(new Throwable(errorMessage)))
+
+      apiAuditUtil
+        .fireFileUploadAuditEvent(
+          pensionSchemeId = pensionSchemeId,
+          minimalDetails = minimalDetails,
+          auditContext = auditContext
+        )
+        .apply(Failure(new RequestEntityTooLargeException(errorMessage)))
 
       Future.failed(new RequestEntityTooLargeException(errorMessage))
     } else {

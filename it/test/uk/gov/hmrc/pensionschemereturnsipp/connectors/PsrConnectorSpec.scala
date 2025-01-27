@@ -81,6 +81,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
           minimalDetails,
           sampleSippPsrSubmissionEtmpRequest,
           None,
+          None,
           None
         ),
         timeout(1.second),
@@ -99,7 +100,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
       whenReady(
         connector
-          .submitSippPsr(Standard, "testPstr", samplePensionSchemeId, minimalDetails, largeRequest, None, None)
+          .submitSippPsr(Standard, "testPstr", samplePensionSchemeId, minimalDetails, largeRequest, None, None, None)
           .failed
       ) { exception =>
         exception mustBe a[RequestEntityTooLargeException]
@@ -119,6 +120,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
             minimalDetails,
             sampleSippPsrSubmissionEtmpRequest,
             None,
+            None,
             None
           )
         )
@@ -137,6 +139,7 @@ class PsrConnectorSpec extends BaseConnectorSpec {
             samplePensionSchemeId,
             minimalDetails,
             sampleSippPsrSubmissionEtmpRequest,
+            None,
             None,
             None
           )

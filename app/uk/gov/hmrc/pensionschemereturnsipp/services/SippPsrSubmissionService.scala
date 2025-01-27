@@ -87,7 +87,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.InterestInLandOrProperty,
       request.transactions,
       landConnectedPartyTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      request.auditContext
     )
 
   def getLandOrConnectedProperty(
@@ -107,7 +108,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: OutstandingLoansRequest,
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] =
     submitJourney(
       journeyType,
@@ -118,7 +120,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.OutstandingLoans,
       request.transactions,
       outstandingLoansTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      auditContext
     )
 
   def getOutstandingLoans(
@@ -138,7 +141,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: LandOrConnectedPropertyRequest,
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] =
     submitJourney(
       journeyType,
@@ -149,7 +153,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.ArmsLengthLandOrProperty,
       request.transactions,
       armsLengthTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      auditContext
     )
 
   def getLandArmsLength(
@@ -169,7 +174,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: AssetsFromConnectedPartyRequest,
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] =
     submitJourney(
       journeyType,
@@ -180,7 +186,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.AssetFromConnectedParty,
       request.transactions,
       assetsFromConnectedPartyTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      auditContext
     )
 
   def getAssetsFromConnectedParty(
@@ -200,7 +207,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: TangibleMoveablePropertyRequest,
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] =
     submitJourney(
       journeyType,
@@ -211,7 +219,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.TangibleMoveableProperty,
       request.transactions,
       tangibleMovablePropertyTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      auditContext
     )
 
   def getTangibleMoveableProperty(
@@ -231,7 +240,8 @@ class SippPsrSubmissionService @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String],
     request: UnquotedShareRequest,
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] =
     submitJourney(
       journeyType,
@@ -242,7 +252,8 @@ class SippPsrSubmissionService @Inject() (
       Journey.UnquotedShares,
       request.transactions,
       unquotedSharesTransformer,
-      pensionSchemeId
+      pensionSchemeId,
+      auditContext
     )
 
   def getUnquotedShares(
@@ -265,7 +276,8 @@ class SippPsrSubmissionService @Inject() (
     journey: Journey,
     transactions: Option[NonEmptyList[A]],
     transformer: Transformer[A, V],
-    pensionSchemeId: PensionSchemeId
+    pensionSchemeId: PensionSchemeId,
+    auditContext: Option[FileUploadAuditContext]
   )(implicit
     hc: HeaderCarrier,
     requestHeader: RequestHeader
@@ -282,7 +294,8 @@ class SippPsrSubmissionService @Inject() (
         journey,
         transactions,
         transformer
-      )
+      ),
+      auditContext
     )
 
   private def submitWithRequest(
@@ -290,6 +303,7 @@ class SippPsrSubmissionService @Inject() (
     pstr: String,
     pensionSchemeId: PensionSchemeId,
     thunk: => Future[SippPsrSubmissionEtmpRequest],
+    auditContext: Option[FileUploadAuditContext] = None,
     maybeTaxYear: Option[DateRange] = None,
     maybeSchemeName: Option[String] = None
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] = {
@@ -298,7 +312,16 @@ class SippPsrSubmissionService @Inject() (
       details <- EitherT(getMinimalDetails(pensionSchemeId))
       result <- EitherT(
         psrConnector
-          .submitSippPsr(journeyType, pstr, pensionSchemeId, details, submissionRequest, maybeTaxYear, maybeSchemeName)
+          .submitSippPsr(
+            journeyType,
+            pstr,
+            pensionSchemeId,
+            details,
+            submissionRequest,
+            maybeTaxYear,
+            maybeSchemeName,
+            auditContext
+          )
           .map(_.asRight[MinimalDetailsError])
       )
     } yield result
@@ -388,7 +411,7 @@ class SippPsrSubmissionService @Inject() (
     submission: PsrSubmissionRequest,
     pensionSchemeId: PensionSchemeId
   )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrSubmissionEtmpResponse] = {
-    import submission._
+    import submission.*
 
     psrConnector
       .getSippPsr(pstr, fbNumber, periodStartDate, psrVersion)

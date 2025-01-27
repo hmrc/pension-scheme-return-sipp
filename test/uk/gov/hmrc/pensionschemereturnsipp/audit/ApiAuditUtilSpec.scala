@@ -24,16 +24,19 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HttpException, HttpResponse, RequestEntityTooLargeException, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.Generators.minimalDetailsGen
+import uk.gov.hmrc.pensionschemereturnsipp.models.SchemeStatus.Open
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.FileUploadAuditContext
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.SubmittedBy
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{Establisher, MinimalDetails, PensionSchemeId, SchemeDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
@@ -194,6 +197,70 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
         pensionSchemeId = pensionSchemeId
       )
       verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
+    }
+  }
+
+  "fireFileUploadAuditEvent" must {
+
+    doNothing().when(mockAuditService).sendEvent(any())(any(), any())
+
+    val fileUploadAuditContext = FileUploadAuditContext(
+      schemeDetails = SchemeDetails(
+        schemeName = "test",
+        pstr = "test",
+        schemeStatus = Open,
+        schemeType = "test",
+        authorisingPSAID = None,
+        establishers = List.empty[Establisher]
+      ),
+      fileUploadType = "test",
+      fileUploadStatus = "test",
+      fileName = "test.csv",
+      fileReference = "test",
+      fileSize = 12345L,
+      validationCompleted = LocalDate.of(2020, 1, 1),
+      taxYear = DateRange(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 1))
+    )
+
+    val fireFileUploadAuditEventPf =
+      service.fireFileUploadAuditEvent(
+        pensionSchemeId,
+        minimalDetails,
+        Some(fileUploadAuditContext)
+      )
+
+    "do not send audit event for a successful response" in {
+      fireFileUploadAuditEventPf(Success(HttpResponse.apply(Status.OK, responseData, Map.empty)))
+      verify(mockAuditService, never()).sendEvent(any())(any(), any())
+    }
+
+    "do not send the audit event when a non RequestEntityTooLargeException error occurs" in {
+      val message = "The request had a network error"
+      val status = Status.SERVICE_UNAVAILABLE
+      fireFileUploadAuditEventPf(Failure(new HttpException(message, status)))
+      verify(mockAuditService, never()).sendEventWithSource(any(), any())(any(), any())
+    }
+
+    "send the audit event when a RequestEntityTooLargeException is thrown" in {
+      val message = "Too Large"
+      fireFileUploadAuditEventPf(Failure(new RequestEntityTooLargeException(message)))
+
+      val expectedAuditEvent = FileUploadAuditEvent(
+        fileUploadType = fileUploadAuditContext.fileUploadType,
+        fileUploadStatus = fileUploadAuditContext.fileUploadStatus,
+        fileName = fileUploadAuditContext.fileName,
+        fileReference = fileUploadAuditContext.fileReference,
+        typeOfError = FileUploadAuditEvent.ERROR_SIZE_LIMIT,
+        fileSize = fileUploadAuditContext.fileSize,
+        validationCompleted = LocalDate.now(),
+        pensionSchemeId = pensionSchemeId,
+        minimalDetails = minimalDetails,
+        schemeDetails = fileUploadAuditContext.schemeDetails,
+        taxYear = fileUploadAuditContext.taxYear
+      )
+
+      verify(mockAuditService, times(1))
+        .sendEventWithSource(ArgumentMatchers.eq(expectedAuditEvent), any())(any(), any())
     }
   }
 
