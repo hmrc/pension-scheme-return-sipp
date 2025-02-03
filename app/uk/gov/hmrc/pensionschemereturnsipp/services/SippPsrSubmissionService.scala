@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.option._
+import cats.syntax.option.*
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either.*
@@ -28,7 +28,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{MinimalDetailsConnector, MinimalDetailsError, PsrConnector}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{PsrVersionsResponse, SubmittedBy, YesNo}
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
+  AccountingPeriodDetails,
+  PsrVersionsResponse,
+  SubmittedBy,
+  YesNo
+}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus.Compiled
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.Declaration
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.MemberDetails.compare
@@ -469,6 +474,72 @@ class SippPsrSubmissionService @Inject() (
       maybeSchemeName = reportDetails.schemeName
     )
   }
+
+  def updateMemberTransactions(
+    pstr: String,
+    journeyType: JourneyType,
+    fbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    memberTransactions: MemberTransactions,
+    pensionSchemeId: PensionSchemeId
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[SippPsrJourneySubmissionEtmpResponse] =
+    psrConnector
+      .getSippPsr(pstr, fbNumber, optPeriodStartDate, optPsrVersion)
+      .flatMap {
+        case Some(response) =>
+          val reportDetails = response.reportDetails
+          val updated = SippPsrSubmissionEtmpRequest(
+            reportDetails = reportDetails.copy(
+              memberTransactions = memberTransactions.value,
+              version = None
+            ),
+            accountingPeriodDetails = response.accountingPeriodDetails,
+            memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
+            psrDeclaration = response.psrDeclaration
+          )
+          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updated))
+
+        case None =>
+          Future.failed(
+            new RuntimeException(
+              s"Failed to update report details member transactions: Submission with pstr $pstr not found"
+            )
+          )
+      }
+
+  def updateAccountingPeriodDetails(
+    pstr: String,
+    journeyType: JourneyType,
+    fbNumber: Option[String],
+    optPeriodStartDate: Option[String],
+    optPsrVersion: Option[String],
+    accountingPeriodDetailsRequest: AccountingPeriodDetailsRequest,
+    pensionSchemeId: PensionSchemeId
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    requestHeader: RequestHeader
+  ): Future[SippPsrJourneySubmissionEtmpResponse] =
+    psrConnector
+      .getSippPsr(pstr, fbNumber, optPeriodStartDate, optPsrVersion)
+      .flatMap {
+        case Some(response) =>
+          val updated = SippPsrSubmissionEtmpRequest(
+            reportDetails = response.reportDetails.copy(version = None),
+            accountingPeriodDetails = accountingPeriodDetailsRequest.toEtmp,
+            memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
+            psrDeclaration = response.psrDeclaration
+          )
+          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updated))
+
+        case None =>
+          Future.failed(
+            new RuntimeException(s"Failed to update accounting periods: Submission with pstr $pstr not found")
+          )
+      }
 
   def getSippPsr(
     pstr: String,
