@@ -62,7 +62,8 @@ class OutstandingLoansController @Inject() (
           optPeriodStartDate,
           optPsrVersion,
           outstandingLoansRequest,
-          user.psaPspId
+          user.psaPspId,
+          outstandingLoansRequest.auditContext
         )
         .map { response =>
           logger.debug(

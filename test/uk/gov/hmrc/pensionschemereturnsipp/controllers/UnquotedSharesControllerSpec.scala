@@ -110,7 +110,8 @@ class UnquotedSharesControllerSpec extends BaseSpec with TestValues {
             version = Some("001"),
             memberTransactions = Yes
           ),
-          transactions = None
+          transactions = None,
+          auditContext = None
         )
       )
 
@@ -118,7 +119,7 @@ class UnquotedSharesControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitUnquotedShares(any(), any(), any(), any(), any(), any())(any(), any()))
+      when(mockService.submitUnquotedShares(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
 
       val result = controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)

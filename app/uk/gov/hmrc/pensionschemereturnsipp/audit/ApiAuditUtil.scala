@@ -20,10 +20,11 @@ import cats.implicits.catsSyntaxOptionId
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HttpException, HttpResponse, RequestEntityTooLargeException, UpstreamErrorResponse}
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.AuditDetailPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.FileUploadAuditContext
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.requests.SippPsrSubmissionEtmpRequest
@@ -31,10 +32,46 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 import uk.gov.hmrc.pensionschemereturnsipp.models.{JourneyType, MinimalDetails, PensionSchemeId}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 class ApiAuditUtil @Inject() (auditService: AuditService) extends Logging {
+
+  def fireFileUploadAuditEvent(
+    pensionSchemeId: PensionSchemeId,
+    minimalDetails: MinimalDetails,
+    auditContext: Option[FileUploadAuditContext]
+  )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
+    case Failure(error: RequestEntityTooLargeException) =>
+      auditContext match
+        case Some(auditC) =>
+          logger.info(
+            s"FileUploadAuditEvent sent. FileUploadAuditEvent ->> ErrorMessage: ${Json.toJson(error.getMessage)}"
+          )
+          auditService.sendEventWithSource(
+            FileUploadAuditEvent(
+              fileUploadType = auditC.fileUploadType,
+              fileUploadStatus = auditC.fileUploadStatus,
+              fileName = auditC.fileName,
+              fileReference = auditC.fileReference,
+              typeOfError = FileUploadAuditEvent.ERROR_SIZE_LIMIT,
+              fileSize = auditC.fileSize,
+              validationCompleted = LocalDate.now(),
+              pensionSchemeId = pensionSchemeId,
+              minimalDetails = minimalDetails,
+              schemeDetails = auditC.schemeDetails,
+              taxYear = auditC.taxYear
+            ),
+            auditSource = "pension-scheme-return-sipp-frontend" // for auditing purposes this needs to be frontend
+          )
+
+        case None =>
+          logger.error(s"FileUploadAuditEvent not sent. Audit Context not found in request")
+
+    case _ =>
+      logger.debug(s"FileUploadAuditEvent not sent. Request did not fail with RequestEntityTooLargeException")
+  }
 
   def firePSRSubmissionEvent(
     pstr: String,

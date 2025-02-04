@@ -23,7 +23,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{SharesCompanyDetails, 
 
 case class UnquotedShareRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[UnquotedShareApi.TransactionDetails]]
+  transactions: Option[NonEmptyList[UnquotedShareApi.TransactionDetails]],
+  auditContext: Option[FileUploadAuditContext]
 )
 
 case class UnquotedShareResponse(

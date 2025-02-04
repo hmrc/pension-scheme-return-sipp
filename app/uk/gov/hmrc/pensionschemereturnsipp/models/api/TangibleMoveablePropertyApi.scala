@@ -25,7 +25,8 @@ import java.time.LocalDate
 
 case class TangibleMoveablePropertyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails]]
+  transactions: Option[NonEmptyList[TangibleMoveablePropertyApi.TransactionDetails]],
+  auditContext: Option[FileUploadAuditContext]
 )
 
 case class TangibleMoveablePropertyResponse(

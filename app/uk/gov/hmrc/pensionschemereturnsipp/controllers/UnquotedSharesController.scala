@@ -18,12 +18,12 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -62,7 +62,8 @@ class UnquotedSharesController @Inject() (
           optPeriodStartDate,
           optPsrVersion,
           unquotedSharesSubmission,
-          user.psaPspId
+          user.psaPspId,
+          unquotedSharesSubmission.auditContext
         )
         .map { response =>
           logger

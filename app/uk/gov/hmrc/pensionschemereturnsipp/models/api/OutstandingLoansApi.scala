@@ -25,7 +25,8 @@ import java.time.LocalDate
 
 case class OutstandingLoansRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[OutstandingLoansApi.TransactionDetails]]
+  transactions: Option[NonEmptyList[OutstandingLoansApi.TransactionDetails]],
+  auditContext: Option[FileUploadAuditContext]
 )
 
 case class OutstandingLoansResponse(

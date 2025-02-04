@@ -62,7 +62,8 @@ class TangibleMoveablePropertyController @Inject() (
           optPeriodStartDate,
           optPsrVersion,
           tangibleMoveablePropertySubmission,
-          user.psaPspId
+          user.psaPspId,
+          tangibleMoveablePropertySubmission.auditContext
         )
         .map { response =>
           logger

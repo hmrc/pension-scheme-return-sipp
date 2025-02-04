@@ -115,7 +115,8 @@ class LandOrConnectedPropertyControllerSpec extends BaseSpec with TestValues {
             version = Some("001"),
             memberTransactions = Yes
           ),
-          transactions = None
+          transactions = None,
+          auditContext = None
         )
       )
 

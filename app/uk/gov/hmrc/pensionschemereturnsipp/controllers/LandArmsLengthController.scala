@@ -53,7 +53,8 @@ class LandArmsLengthController @Inject() (
           optPeriodStartDate,
           optPsrVersion,
           requestContent,
-          user.psaPspId
+          user.psaPspId,
+          requestContent.auditContext
         )
         .map { response =>
           logger.debug(

@@ -25,7 +25,8 @@ import java.time.LocalDate
 
 case class AssetsFromConnectedPartyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]]
+  transactions: Option[NonEmptyList[AssetsFromConnectedPartyApi.TransactionDetails]],
+  auditContext: Option[FileUploadAuditContext]
 )
 
 case class AssetsFromConnectedPartyResponse(

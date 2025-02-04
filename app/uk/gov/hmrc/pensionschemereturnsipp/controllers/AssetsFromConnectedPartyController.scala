@@ -62,7 +62,8 @@ class AssetsFromConnectedPartyController @Inject() (
           optPeriodStartDate,
           optPsrVersion,
           assetsFromConnectedPartySubmission,
-          user.psaPspId
+          user.psaPspId,
+          assetsFromConnectedPartySubmission.auditContext
         )
         .map { response =>
           logger

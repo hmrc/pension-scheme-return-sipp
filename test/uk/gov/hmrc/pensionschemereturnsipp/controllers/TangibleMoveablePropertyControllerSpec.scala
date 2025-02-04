@@ -114,7 +114,8 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
             version = Some("001"),
             memberTransactions = Yes
           ),
-          transactions = None
+          transactions = None,
+          auditContext = None
         )
       )
 
@@ -122,7 +123,7 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
 
-      when(mockService.submitTangibleMoveableProperty(any(), any(), any(), any(), any(), any())(any(), any()))
+      when(mockService.submitTangibleMoveableProperty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
 
       val result = controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)

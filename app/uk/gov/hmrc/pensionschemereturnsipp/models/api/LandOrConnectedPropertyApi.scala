@@ -31,7 +31,8 @@ import java.time.LocalDate
 
 case class LandOrConnectedPropertyRequest(
   reportDetails: ReportDetails,
-  transactions: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]]
+  transactions: Option[NonEmptyList[LandOrConnectedPropertyApi.TransactionDetails]],
+  auditContext: Option[FileUploadAuditContext]
 )
 
 case class LandOrConnectedPropertyResponse(
