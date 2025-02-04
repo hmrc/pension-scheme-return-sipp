@@ -63,12 +63,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.{
   SippPsrJourneySubmissionEtmpResponse,
   SippPsrSubmissionEtmpResponse
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
-  EtmpPsrStatus,
-  EtmpSippReportDetails,
-  MemberDetails,
-  PersonalDetails
-}
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp.{
   PSRAssetDeclarationsTransformer,
@@ -1286,14 +1281,23 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
                         status = SectionStatus.Changed,
                         version = None,
                         landConnectedParty =
-                          if (journey != InterestInLandOrProperty) Some(sippLandConnectedParty) else None,
+                          if (journey != InterestInLandOrProperty) Some(sippLandConnectedParty)
+                          else Some(SippLandConnectedParty(0, None, None)),
                         otherAssetsConnectedParty =
-                          if (journey != AssetFromConnectedParty) Some(sippOtherAssetsConnectedParty) else None,
-                        landArmsLength = if (journey != ArmsLengthLandOrProperty) Some(sippLandArmsLength) else None,
+                          if (journey != AssetFromConnectedParty) Some(sippOtherAssetsConnectedParty)
+                          else Some(SippOtherAssetsConnectedParty(0, None, None)),
+                        landArmsLength =
+                          if (journey != ArmsLengthLandOrProperty) Some(sippLandArmsLength)
+                          else Some(SippLandArmsLength(0, None, None)),
                         tangibleProperty =
-                          if (journey != TangibleMoveableProperty) Some(sippTangibleProperty) else None,
-                        loanOutstanding = if (journey != OutstandingLoans) Some(sippLoanOutstanding) else None,
-                        unquotedShares = if (journey != UnquotedShares) Some(sippUnquotedShares) else None
+                          if (journey != TangibleMoveableProperty) Some(sippTangibleProperty)
+                          else Some(SippTangibleProperty(0, None, None)),
+                        loanOutstanding =
+                          if (journey != OutstandingLoans) Some(sippLoanOutstanding)
+                          else Some(SippLoanOutstanding(0, None, None)),
+                        unquotedShares =
+                          if (journey != UnquotedShares) Some(sippUnquotedShares)
+                          else Some(SippUnquotedShares(0, None, None))
                       )
                   )
                 ),
@@ -1362,7 +1366,11 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
               memberAndTransactions = Some(
                 NonEmptyList.one(
                   etmpDataWithLandConnectedTx
-                    .copy(status = SectionStatus.Deleted, version = None, landConnectedParty = None)
+                    .copy(
+                      status = SectionStatus.Deleted,
+                      version = None,
+                      landConnectedParty = Some(SippLandConnectedParty(0, None, None))
+                    )
                 )
               ),
               psrDeclaration = None

@@ -25,7 +25,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   MemberDetails,
   SippLandConnectedParty
 }
-import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.dsl.*
 
 import javax.inject.{Inject, Singleton}
 

@@ -90,7 +90,8 @@ class SippPsrSubmitController @Inject() (
           optPsrVersion,
           submissionRequest,
           user.psaPspId
-        ).map(response => Created(Json.toJson(response)))
+        )
+        .map(response => Created(Json.toJson(response)))
     }
   }
 
@@ -114,7 +115,8 @@ class SippPsrSubmitController @Inject() (
           optPsrVersion,
           submissionRequest,
           user.psaPspId
-        ).map(response => Created(Json.toJson(response)))
+        )
+        .map(response => Created(Json.toJson(response)))
     }
   }
 

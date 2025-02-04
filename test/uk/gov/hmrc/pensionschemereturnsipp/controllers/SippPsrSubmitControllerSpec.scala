@@ -32,13 +32,14 @@ import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.{AccountingPeriodDetailsRequest, MemberTransactions, PsrAssetCountsResponse, UpdateMemberDetailsRequest}
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
-  AccountingPeriod,
-  PsrVersionsResponse,
-  ReportStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
+  AccountingPeriodDetailsRequest,
+  MemberTransactions,
+  PsrAssetCountsResponse,
+  UpdateMemberDetailsRequest
 }
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, PsrVersionsResponse, ReportStatus}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
