@@ -258,7 +258,7 @@ object EtmpMemberAndTransactions {
   implicit val formatUnquotedShares: OFormat[SippUnquotedShares] = Json.format[SippUnquotedShares]
   implicit val formatMemberAndTrx: OFormat[EtmpMemberAndTransactions] = Json.format[EtmpMemberAndTransactions]
 
-  implicit class Ops(val etmpMemberAndTransactions: EtmpMemberAndTransactions) extends AnyVal {
+  extension (etmpMemberAndTransactions: EtmpMemberAndTransactions) {
     def landConnectedPartyTransactions: List[SippLandConnectedParty.TransactionDetail] =
       etmpMemberAndTransactions.landConnectedParty.toList.flatMap(_.transactionDetails).flatten
 
@@ -276,5 +276,14 @@ object EtmpMemberAndTransactions {
 
     def unquotedSharesTransactions: List[SippUnquotedShares.TransactionDetail] =
       etmpMemberAndTransactions.unquotedShares.toList.flatMap(_.transactionDetails).flatten
+
+    def areJourneysEmpty: Boolean =
+      etmpMemberAndTransactions.landConnectedParty.forall(_.noOfTransactions == 0) &&
+        etmpMemberAndTransactions.landArmsLength.forall(_.noOfTransactions == 0) &&
+        etmpMemberAndTransactions.loanOutstanding.forall(_.noOfTransactions == 0) &&
+        etmpMemberAndTransactions.tangibleProperty.forall(_.noOfTransactions == 0) &&
+        etmpMemberAndTransactions.unquotedShares.forall(_.noOfTransactions == 0) &&
+        etmpMemberAndTransactions.otherAssetsConnectedParty.forall(_.noOfTransactions == 0)
+
   }
 }

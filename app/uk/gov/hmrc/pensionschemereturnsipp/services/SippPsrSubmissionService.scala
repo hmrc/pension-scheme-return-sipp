@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.syntax.option.*
+import cats.syntax.functor.*
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either.*
@@ -742,28 +743,30 @@ class SippPsrSubmissionService @Inject() (
     // Attempt to delete the specific asset based on the journey
     val updatedMember = journey match {
       case Journey.InterestInLandOrProperty =>
-        member.landConnectedParty.map(_ => member.copy(landConnectedParty = None))
+        member.landConnectedParty.as(member.copy(landConnectedParty = Some(SippLandConnectedParty(0, None, None))))
 
       case Journey.ArmsLengthLandOrProperty =>
-        member.landArmsLength.map(_ => member.copy(landArmsLength = None))
+        member.landArmsLength.as(member.copy(landArmsLength = Some(SippLandArmsLength(0, None, None))))
 
       case Journey.TangibleMoveableProperty =>
-        member.tangibleProperty.map(_ => member.copy(tangibleProperty = None))
+        member.tangibleProperty.as(member.copy(tangibleProperty = Some(SippTangibleProperty(0, None, None))))
 
       case Journey.OutstandingLoans =>
-        member.loanOutstanding.map(_ => member.copy(loanOutstanding = None))
+        member.loanOutstanding.as(member.copy(loanOutstanding = Some(SippLoanOutstanding(0, None, None))))
 
       case Journey.UnquotedShares =>
-        member.unquotedShares.map(_ => member.copy(unquotedShares = None))
+        member.unquotedShares.as(member.copy(unquotedShares = Some(SippUnquotedShares(0, None, None))))
 
       case Journey.AssetFromConnectedParty =>
-        member.otherAssetsConnectedParty.map(_ => member.copy(otherAssetsConnectedParty = None))
+        member.otherAssetsConnectedParty.as(
+          member.copy(otherAssetsConnectedParty = Some(SippOtherAssetsConnectedParty(0, None, None)))
+        )
     }
 
     // Check if an asset was deleted and determine the status
     updatedMember
       .map { m =>
-        if (noRemainingAssets(m)) {
+        if (m.areJourneysEmpty) {
           m.copy(status = SectionStatus.Deleted, version = None)
         } else {
           m.copy(status = SectionStatus.Changed, version = None)
@@ -771,13 +774,5 @@ class SippPsrSubmissionService @Inject() (
       }
       .getOrElse(member) // Return original member if no asset was deleted
   }
-
-  private def noRemainingAssets(updatedMember: EtmpMemberAndTransactions): Boolean =
-    updatedMember.landConnectedParty.isEmpty &&
-      updatedMember.landArmsLength.isEmpty &&
-      updatedMember.tangibleProperty.isEmpty &&
-      updatedMember.loanOutstanding.isEmpty &&
-      updatedMember.unquotedShares.isEmpty &&
-      updatedMember.otherAssetsConnectedParty.isEmpty
 
 }
