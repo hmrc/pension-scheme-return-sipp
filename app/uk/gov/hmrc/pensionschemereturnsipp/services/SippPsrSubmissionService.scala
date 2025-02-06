@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.option.*
 import cats.syntax.functor.*
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
