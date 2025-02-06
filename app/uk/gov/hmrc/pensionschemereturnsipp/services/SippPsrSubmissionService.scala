@@ -718,7 +718,7 @@ class SippPsrSubmissionService @Inject() (
           val updateRequest = SippPsrSubmissionEtmpRequest(
             reportDetails = response.reportDetails
               .copy(status = EtmpPsrStatus.Compiled, version = None)
-              .withAssetClassDeclaration(journey, declaration = none[YesNo]),
+              .withAssetClassDeclaration(journey, declaration = YesNo.No.some),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = updatedMembers,
             psrDeclaration = response.psrDeclaration.map(declaration =>
