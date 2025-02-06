@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.option.*
 import cats.syntax.functor.*
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxOptionId
@@ -718,7 +717,7 @@ class SippPsrSubmissionService @Inject() (
           val updateRequest = SippPsrSubmissionEtmpRequest(
             reportDetails = response.reportDetails
               .copy(status = EtmpPsrStatus.Compiled, version = None)
-              .withAssetClassDeclaration(journey, declaration = none[YesNo]),
+              .withAssetClassDeclaration(journey, declaration = YesNo.No.some),
             accountingPeriodDetails = response.accountingPeriodDetails,
             memberAndTransactions = updatedMembers,
             psrDeclaration = response.psrDeclaration.map(declaration =>

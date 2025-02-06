@@ -1350,7 +1350,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             mockitoEq(
               SippPsrSubmissionEtmpRequest(
                 reportDetails =
-                  sampleResponse.reportDetails.copy(version = None).withAssetClassDeclaration(journey, None),
+                  sampleResponse.reportDetails.copy(version = None).withAssetClassDeclaration(journey, Some(YesNo.No)),
                 accountingPeriodDetails = None,
                 memberAndTransactions = Some(
                   NonEmptyList.one(
@@ -1440,7 +1440,7 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
             SippPsrSubmissionEtmpRequest(
               reportDetails = sampleResponse.reportDetails
                 .copy(version = None)
-                .withAssetClassDeclaration(Journey.InterestInLandOrProperty, None),
+                .withAssetClassDeclaration(Journey.InterestInLandOrProperty, Some(YesNo.No)),
               accountingPeriodDetails = None,
               memberAndTransactions = Some(
                 NonEmptyList.one(
