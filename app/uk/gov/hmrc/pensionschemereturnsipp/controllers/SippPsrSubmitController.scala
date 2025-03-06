@@ -22,6 +22,7 @@ import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions}
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   AccountingPeriodDetailsRequest,
@@ -47,10 +48,12 @@ import scala.util.{Failure, Success, Try}
 class SippPsrSubmitController @Inject() (
   cc: ControllerComponents,
   sippPsrSubmissionService: SippPsrSubmissionService,
-  val authConnector: AuthConnector
+  val authConnector: AuthConnector,
+  override protected val schemeDetailsConnector: SchemeDetailsConnector
 )(implicit
   ec: ExecutionContext
 ) extends BackendController(cc)
+    with PsrBaseController
     with HttpErrorFunctions
     with Results
     with PsrAuth
@@ -60,7 +63,8 @@ class SippPsrSubmitController @Inject() (
     request.body.asJson.getOrElse(throw new BadRequestException("Request does not contain Json body"))
 
   def createEmptySippPsr() = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val submissionRequest = requiredBody.as[ReportDetails]
       logger.debug(s"Submitting empty SIPP PSR - $request")
 
@@ -77,7 +81,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ) = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val submissionRequest = requiredBody.as[MemberTransactions]
       logger.debug(s"Updating report details: member transactions - $request")
 
@@ -102,7 +107,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ) = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val submissionRequest = requiredBody.as[AccountingPeriodDetailsRequest]
       logger.debug(s"Updating accounting periods - $request")
 
@@ -121,7 +127,8 @@ class SippPsrSubmitController @Inject() (
   }
 
   def submitSippPsr(journeyType: JourneyType): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val submissionRequest = requiredBody.as[PsrSubmissionRequest]
       logger.debug(s"Submitting SIPP PSR - $request")
 
@@ -138,7 +145,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR Member details - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
@@ -156,7 +164,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       request.body.asJson.map(_.as[PersonalDetails]) match {
         case Some(personalDetails) =>
           logger.debug(
@@ -191,7 +200,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       logger.debug(
         s"Deleting assets for $journey - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
@@ -219,7 +229,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
@@ -231,7 +242,8 @@ class SippPsrSubmitController @Inject() (
   }
 
   def getPsrVersions(pstr: String, startDateStr: String): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(s"Retrieving PSR versions with pstr $pstr and startDate $startDateStr")
       Try(LocalDate.parse(startDateStr, DateTimeFormatter.ISO_DATE)) match {
         case Success(startDate) =>
@@ -250,7 +262,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ) = Action(parse.json).async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val updateMemberDetailsRequest = request.body.as[UpdateMemberDetailsRequest]
 
       sippPsrSubmissionService
@@ -276,7 +289,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR Summary - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
@@ -294,7 +308,8 @@ class SippPsrSubmitController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR Asset declarations - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )

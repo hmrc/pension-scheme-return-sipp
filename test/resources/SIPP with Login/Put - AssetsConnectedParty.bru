@@ -15,6 +15,10 @@ query {
   fbNumber: 000000021224
 }
 
+headers {
+  srn: S2400000020
+}
+
 auth:bearer {
   token: {{bearer_token}}
 }
@@ -158,8 +162,8 @@ body:json {
 }
 
 tests {
-  test("Status code is 204", function () {
-      expect(res.getStatus()).to.equal(204);
+  test("Status code is 201", function () {
+      expect(res.getStatus()).to.equal(201);
   });
   
   

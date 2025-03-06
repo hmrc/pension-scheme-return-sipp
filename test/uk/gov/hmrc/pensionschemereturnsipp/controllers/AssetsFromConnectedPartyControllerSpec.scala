@@ -28,6 +28,7 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.AssetsFromConnectedPartyApi.{formatReq, formatRes}
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -47,9 +48,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val fakeRequest = FakeRequest("PUT", "/")
+  private val fakeRequest = FakeRequest("PUT", "/").withHeaders("srn" -> srn)
   private val mockService = mock[SippPsrSubmissionService]
   private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  private val mockSchemeDetailsConnector: SchemeDetailsConnector = mock[SchemeDetailsConnector]
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   override def beforeEach(): Unit = {
@@ -58,12 +60,15 @@ class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
 
     when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
       .thenReturn(Future.successful(new ~(Some(externalId), enrolments)))
+    when(mockSchemeDetailsConnector.checkAssociation(any(), any(), any())(any(), any()))
+      .thenReturn(Future.successful(true))
   }
 
   val modules: Seq[GuiceableModule] =
     Seq(
       bind[SippPsrSubmissionService].toInstance(mockService),
-      bind[AuthConnector].toInstance(mockAuthConnector)
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SchemeDetailsConnector].toInstance(mockSchemeDetailsConnector)
     )
 
   val application: Application = new GuiceApplicationBuilder()
@@ -121,6 +126,7 @@ class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
       val fakeRequestWithBody = FakeRequest("PUT", "/")
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
+        .withHeaders("srn" -> srn)
 
       when(mockService.submitAssetsFromConnectedParty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))

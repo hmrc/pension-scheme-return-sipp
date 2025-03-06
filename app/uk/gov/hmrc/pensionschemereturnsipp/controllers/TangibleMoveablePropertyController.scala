@@ -18,12 +18,13 @@ package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
-import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi._
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyRequest
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -35,10 +36,12 @@ import scala.concurrent.ExecutionContext
 class TangibleMoveablePropertyController @Inject() (
   cc: ControllerComponents,
   service: SippPsrSubmissionService,
-  override val authConnector: AuthConnector
+  override val authConnector: AuthConnector,
+  override protected val schemeDetailsConnector: SchemeDetailsConnector
 )(implicit
   ec: ExecutionContext
 ) extends BackendController(cc)
+    with PsrBaseController
     with HttpErrorFunctions
     with Results
     with PsrAuth
@@ -50,7 +53,8 @@ class TangibleMoveablePropertyController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[JsValue] = Action(parse.json).async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val tangibleMoveablePropertySubmission = request.body.as[TangibleMoveablePropertyRequest]
       logger.debug(
         s"Submitting TangibleMovableProperty PSR details - Incoming payload: $tangibleMoveablePropertySubmission"
@@ -79,7 +83,8 @@ class TangibleMoveablePropertyController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR for TangibleMovableProperty - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )
