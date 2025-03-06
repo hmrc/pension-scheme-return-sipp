@@ -22,6 +22,7 @@ import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.pensionschemereturnsipp.auth.PsrAuth
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareApi.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.UnquotedShareRequest
@@ -35,10 +36,12 @@ import scala.concurrent.ExecutionContext
 class UnquotedSharesController @Inject() (
   cc: ControllerComponents,
   service: SippPsrSubmissionService,
-  val authConnector: AuthConnector
+  val authConnector: AuthConnector,
+  override protected val schemeDetailsConnector: SchemeDetailsConnector
 )(implicit
   ec: ExecutionContext
 ) extends BackendController(cc)
+    with PsrBaseController
     with HttpErrorFunctions
     with Results
     with PsrAuth
@@ -50,7 +53,8 @@ class UnquotedSharesController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[JsValue] = Action(parse.json).async { implicit request =>
-    authorisedAsPsrUser { user =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { user =>
       val unquotedSharesSubmission = request.body.as[UnquotedShareRequest]
       logger.debug(
         s"Submitting UnquotedShares PSR details - Incoming payload: $unquotedSharesSubmission"
@@ -81,7 +85,8 @@ class UnquotedSharesController @Inject() (
     optPeriodStartDate: Option[String],
     optPsrVersion: Option[String]
   ): Action[AnyContent] = Action.async { implicit request =>
-    authorisedAsPsrUser { _ =>
+    val Seq(srnS) = requiredHeaders("srn")
+    authorisedAsPsrUser(srnS) { _ =>
       logger.debug(
         s"Retrieving SIPP PSR for UnquotedShares - with pstr: $pstr, fbNumber: $optFbNumber, periodStartDate: $optPeriodStartDate, psrVersion: $optPsrVersion"
       )

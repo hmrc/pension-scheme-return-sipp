@@ -28,6 +28,7 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.OutstandingLoansApi.formatRes
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.TangibleMoveablePropertyApi.formatReq
@@ -48,9 +49,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val fakeRequest = FakeRequest("PUT", "/")
+  private val fakeRequest = FakeRequest("PUT", "/").withHeaders("srn" -> srn)
   private val mockService = mock[SippPsrSubmissionService]
   private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  private val mockSchemeDetailsConnector: SchemeDetailsConnector = mock[SchemeDetailsConnector]
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   override def beforeEach(): Unit = {
@@ -61,12 +63,16 @@ class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
       .thenReturn(
         Future.successful(new ~(Some(externalId), enrolments))
       )
+    when(mockSchemeDetailsConnector.checkAssociation(any(), any(), any())(any(), any()))
+      .thenReturn(Future.successful(true))
+
   }
 
   val modules: Seq[GuiceableModule] =
     Seq(
       bind[SippPsrSubmissionService].toInstance(mockService),
-      bind[AuthConnector].toInstance(mockAuthConnector)
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SchemeDetailsConnector].toInstance(mockSchemeDetailsConnector)
     )
 
   val application: Application = new GuiceApplicationBuilder()
@@ -124,6 +130,7 @@ class OutstandingLoansControllerSpec extends BaseSpec with TestValues {
       val fakeRequestWithBody = FakeRequest("PUT", "/")
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
+        .withHeaders("srn" -> srn)
 
       when(mockService.submitOutstandingLoans(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))

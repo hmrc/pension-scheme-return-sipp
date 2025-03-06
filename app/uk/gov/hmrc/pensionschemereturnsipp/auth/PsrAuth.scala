@@ -17,14 +17,24 @@
 package uk.gov.hmrc.pensionschemereturnsipp.auth
 
 import play.api.Logging
+import play.api.mvc.Results.BadRequest
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, Enrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
-import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{psaEnrolmentKey, psaIdKey, pspEnrolmentKey, pspIdKey}
+import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{
+  psaEnrolmentKey,
+  psaIdKey,
+  pspEnrolmentKey,
+  pspIdKey,
+  PSA,
+  PSP
+}
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.SchemeId.Srn
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,30 +46,55 @@ final case class PsrAuthContext[A](
 
 trait PsrAuth extends AuthorisedFunctions with Logging {
 
+  protected val schemeDetailsConnector: SchemeDetailsConnector
+
   private val AuthPredicate = Enrolment(psaEnrolmentKey).or(Enrolment(pspEnrolmentKey))
 
   private val PsrRetrievals = Retrievals.externalId.and(Retrievals.allEnrolments)
 
   private type PsrAction[A] = PsrAuthContext[A] => Future[Result]
 
-  def authorisedAsPsrUser(
+  def authorisedAsPsrUser(srnS: String)(
     body: PsrAction[Any]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[Any]): Future[Result] =
-    authorisedUser(body)
+    authorisedUser(srnS)(body)
 
-  private def authorisedUser[A](
+  private def authorisedUser[A](srnS: String)(
     block: PsrAction[A]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] =
-    authorised(AuthPredicate)
-      .retrieve(PsrRetrievals) {
-        case Some(externalId) ~ enrolments =>
-          getPsaPspId(enrolments) match {
-            case Some(psaPspId) => block(PsrAuthContext(externalId, psaPspId, request))
-            case None => Future.failed(new BadRequestException(s"Bad Request without psaPspId"))
+    Srn(srnS) match {
+      case Some(srn) =>
+        authorised(AuthPredicate)
+          .retrieve(PsrRetrievals) {
+            case Some(externalId) ~ enrolments =>
+              checkPsaOrPsp(srn, externalId, enrolments)(block)
+
+            case _ =>
+              Future.failed(new UnauthorizedException("Not Authorised - Unable to retrieve credentials - externalId"))
           }
-        case _ =>
-          Future.failed(new UnauthorizedException("Not Authorised - Unable to retrieve credentials - externalId"))
-      }
+      case _ => Future.successful(BadRequest("Invalid scheme reference number"))
+    }
+
+  private def checkPsaOrPsp[A](srn: Srn, externalId: String, enrolments: Enrolments)(
+    block: PsrAction[A]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] = {
+    val vPsaPspId = getPsaPspId(enrolments)
+    (vPsaPspId, getPsaPspIdAsString(enrolments)) match {
+      case (Some(v), Some((psaPspId, credentialRole, idType))) =>
+        schemeDetailsConnector.checkAssociation(psaPspId, idType, srn).flatMap {
+          // SIPP block block(PsrAuthContext(externalId, psaPspId, request))
+          case true => block(PsrAuthContext(externalId, v, request))
+          case false =>
+            Future
+              .failed(
+                new UnauthorizedException("Not Authorised - scheme is not associated with the user")
+              )
+        }
+
+      case psa =>
+        Future.failed(new BadRequestException(s"Bad Request without psaPspId/credentialRole $psa"))
+    }
+  }
 
   private def getPsaId(enrolments: Enrolments): Option[PsaId] =
     enrolments
@@ -75,4 +110,15 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
 
   private def getPsaPspId(enrolments: Enrolments): Option[PensionSchemeId] =
     getPsaId(enrolments).orElse(getPspId(enrolments))
+
+  private def getPsaPspIdAsString(enrolments: Enrolments): Option[(String, String, String)] =
+    getPsaId(enrolments) match {
+      case Some(id) => Some((id.value, PSA, psaIdKey))
+      case _ =>
+        getPspId(enrolments) match {
+          case Some(id) => Some((id.value, PSP, pspIdKey))
+          case _ => None
+        }
+    }
+
 }

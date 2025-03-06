@@ -15,6 +15,10 @@ query {
   journeyType: Standard
 }
 
+headers {
+  srn: S2400000020
+}
+
 auth:bearer {
   token: {{bearer_token}}
 }
@@ -37,7 +41,7 @@ body:json {
 }
 
 tests {
-  test("Status code is 200", function () {
-      expect(res.getStatus()).to.equal(200);
+  test("Status code is 201", function () {
+      expect(res.getStatus()).to.equal(201);
   });
 }

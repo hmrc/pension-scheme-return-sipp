@@ -30,6 +30,7 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.{~, Name}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.pensionschemereturnsipp.connectors.SchemeDetailsConnector
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType.Standard
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.OptionalResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
@@ -52,9 +53,10 @@ import scala.concurrent.Future
 class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val fakeRequest = FakeRequest("POST", "/")
+  private val fakeRequest = FakeRequest("POST", "/").withHeaders("srn" -> srn)
   private val mockSippPsrSubmissionService = mock[SippPsrSubmissionService]
   private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  private val mockSchemeDetailsConnector: SchemeDetailsConnector = mock[SchemeDetailsConnector]
 
   val requestJson: JsValue = Json.parse(
     s"""
@@ -73,12 +75,15 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
   override def beforeEach(): Unit = {
     reset(mockAuthConnector)
     reset(mockSippPsrSubmissionService)
+    when(mockSchemeDetailsConnector.checkAssociation(any(), any(), any())(any(), any()))
+      .thenReturn(Future.successful(true))
   }
 
   val modules: Seq[GuiceableModule] =
     Seq(
       bind[SippPsrSubmissionService].toInstance(mockSippPsrSubmissionService),
-      bind[AuthConnector].toInstance(mockAuthConnector)
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SchemeDetailsConnector].toInstance(mockSchemeDetailsConnector)
     )
 
   val application: Application = new GuiceApplicationBuilder()
@@ -192,7 +197,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       when(mockSippPsrSubmissionService.getPsrVersions(any(), any())(any(), any()))
         .thenReturn(Future.successful(psrVersionsResponse))
 
-      val request = FakeRequest(GET, s"/psr-versions/$pstr/${startDate.toString}")
+      val request = FakeRequest(GET, s"/psr-versions/$pstr/${startDate.toString}").withHeaders("srn" -> srn)
       val result = controller.getPsrVersions(pstr, startDate.toString).apply(request)
 
       status(result) mustBe OK
@@ -208,7 +213,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Future.successful(new ~(Some(externalId), enrolments))
         )
 
-      val request = FakeRequest(GET, s"/psr-versions/$pstr/$invalidStartDate")
+      val request = FakeRequest(GET, s"/psr-versions/$pstr/$invalidStartDate").withHeaders("srn" -> srn)
       val result = controller.getPsrVersions(pstr, invalidStartDate).apply(request)
 
       status(result) mustBe BAD_REQUEST
@@ -255,6 +260,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val putRequest = FakeRequest(PUT, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(memberDetailsRequest))
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
@@ -278,6 +284,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val fakeRequest = FakeRequest(DELETE, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(personalDetails))
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
@@ -306,7 +313,9 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
     }
 
     "return 400 when request body is invalid" in {
-      val invalidRequest = FakeRequest(DELETE, "/").withHeaders("Content-Type" -> "application/json")
+      val invalidRequest = FakeRequest(DELETE, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
@@ -324,6 +333,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val fakeRequest = FakeRequest(DELETE, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(personalDetails))
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
@@ -446,6 +456,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val fakeRequest = FakeRequest(PUT, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(memberTransactions))
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(
@@ -474,6 +485,7 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val fakeRequest = FakeRequest(PUT, "/")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(Json.toJson(accountingPeriodDetails))
+        .withHeaders("srn" -> srn)
 
       when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
         .thenReturn(

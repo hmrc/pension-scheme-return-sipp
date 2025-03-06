@@ -62,6 +62,7 @@ trait TestValues {
   val externalId: String = "externalId"
 
   val pstr = "testPstr"
+  val srn = "S2400000001"
   val sampleToday: LocalDate = LocalDate.of(2023, 10, 19)
 
   val schemeName = "SchemeName"
