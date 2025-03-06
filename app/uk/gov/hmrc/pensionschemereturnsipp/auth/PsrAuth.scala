@@ -82,7 +82,6 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
     (vPsaPspId, getPsaPspIdAsString(enrolments)) match {
       case (Some(v), Some((psaPspId, credentialRole, idType))) =>
         schemeDetailsConnector.checkAssociation(psaPspId, idType, srn).flatMap {
-          // SIPP block block(PsrAuthContext(externalId, psaPspId, request))
           case true => block(PsrAuthContext(externalId, v, request))
           case false =>
             Future
