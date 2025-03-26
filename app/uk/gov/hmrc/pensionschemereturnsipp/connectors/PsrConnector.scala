@@ -122,6 +122,7 @@ class PsrConnector @Inject() (
           .post(url"$url")
           .withBody(jsonRequest)
           .setHeader(integrationFrameworkHeaders*)
+          .transform(_.withRequestTimeout(config.ifsTimeout))
           .execute[HttpResponse]
           .map {
             case response if response.status == OK => response
@@ -178,6 +179,7 @@ class PsrConnector @Inject() (
     http
       .get(url"$url")
       .setHeader(integrationFrameworkHeaders*)
+      .transform(_.withRequestTimeout(config.ifsTimeout))
       .execute[HttpResponse]
       .map { response =>
         response.status match {
@@ -201,6 +203,7 @@ class PsrConnector @Inject() (
     http
       .get(url)
       .setHeader(integrationFrameworkHeaders*)
+      .transform(_.withRequestTimeout(config.ifsTimeout))
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 =>
