@@ -21,6 +21,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId
 
+import scala.concurrent.duration.Duration
+
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig, runModeConfiguration: Configuration) {
 
@@ -49,6 +51,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val emailSendForce: Boolean = config.getOptional[Boolean]("email.force").getOrElse(false)
 
   val maxRequestSize: Int = config.get[Int]("etmpConfig.maxRequestSize")
+  val ifsTimeout: Duration = config.get[Duration]("ifs.timeout")
 
   def emailCallback(
     pensionSchemeId: PensionSchemeId,
