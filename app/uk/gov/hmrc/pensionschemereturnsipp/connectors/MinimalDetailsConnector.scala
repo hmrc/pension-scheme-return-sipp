@@ -55,6 +55,7 @@ class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpCli
     http
       .get(url"$url")
       .setHeader(idType -> idValue, "loggedInAsPsa" -> loggedInAsPsa.toString)
+      .transform(_.withRequestTimeout(appConfig.ifsTimeout))
       .execute[MinimalDetails]
       .tapError(t =>
         Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}", t))
