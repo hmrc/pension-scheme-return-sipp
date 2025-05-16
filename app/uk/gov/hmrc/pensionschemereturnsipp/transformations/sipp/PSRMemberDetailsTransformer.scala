@@ -25,8 +25,8 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissio
 class PSRMemberDetailsTransformer @Inject() () {
 
   def transform(etmpResponse: SippPsrSubmissionEtmpResponse): Option[MemberDetailsResponse] =
-    etmpResponse.memberAndTransactions.map(mTxs =>
-      MemberDetailsResponse(mTxs.map(_.memberDetails.personalDetails.transformInto[ApiMemberDetails]))
-    )
+    etmpResponse.memberAndTransactions
+      .orElse(Some(List.empty))
+      .map(mTxs => MemberDetailsResponse(mTxs.map(_.memberDetails.personalDetails.transformInto[ApiMemberDetails])))
 
 }
