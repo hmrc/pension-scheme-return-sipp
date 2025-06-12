@@ -22,7 +22,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
 
-
 class PsrBaseControllerSpec extends BaseSpec with TestValues {
 
   "PsrBaseController PSR" must {

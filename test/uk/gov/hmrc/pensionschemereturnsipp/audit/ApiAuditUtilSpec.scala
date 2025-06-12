@@ -35,6 +35,10 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpSippPsrDeclaration.De
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Establisher, MinimalDetails, PensionSchemeId, SchemeDetails}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
+import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil._
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -335,5 +339,42 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
       )
       verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
     }
+
+    "return ChangedCompiled for JourneyType.Amend with EtmpPsrStatus.Compiled" in {
+      val request = sampleSippPsrSubmissionEtmpRequest.copy(
+        reportDetails = sampleSippPsrSubmissionEtmpRequest.reportDetails.copy(
+          status = EtmpPsrStatus.Compiled
+        )
+      )
+
+      val result = request.auditAmendDetailPsrStatus(JourneyType.Amend)
+
+      result mustBe Some(ChangedCompiled)
+    }
+
+    "return ChangedSubmitted for JourneyType.Amend with EtmpPsrStatus.Submitted" in {
+      val request = sampleSippPsrSubmissionEtmpRequest.copy(
+        reportDetails = sampleSippPsrSubmissionEtmpRequest.reportDetails.copy(
+          status = EtmpPsrStatus.Submitted
+        )
+      )
+
+      val result = request.auditAmendDetailPsrStatus(JourneyType.Amend)
+
+      result mustBe Some(ChangedSubmitted)
+    }
+
+    "return None for JourneyType.Standard" in {
+      val request = sampleSippPsrSubmissionEtmpRequest.copy(
+        reportDetails = sampleSippPsrSubmissionEtmpRequest.reportDetails.copy(
+          status = EtmpPsrStatus.Submitted
+        )
+      )
+
+      val result = request.auditAmendDetailPsrStatus(JourneyType.Standard)
+
+      result mustBe None
+    }
+
   }
 }
