@@ -569,6 +569,19 @@ class SippPsrSubmissionServiceSpec extends BaseSpec with TestValues with SippEtm
     }
   }
 
+  "getPsrAssetDeclarations" should {
+    "successfully return asset declaration" in {
+      when(mockPsrConnector.getSippPsr(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(sampleSippPsrSubmissionEtmpResponse)))
+
+      when(mockPsrAssetDeclarationsTransformer.transform(any())).thenReturn(samplePsrAssetDeclarationsResponse)
+
+      val result = service.getPsrAssetDeclarations(pstr, Some("test"), None, None).futureValue
+
+      result mustBe Some(samplePsrAssetDeclarationsResponse)
+    }
+  }
+
   "submitAssetsFromConnectedParty" should {
     "fetch and construct new ETMP request without transactions when no ETMP or transaction data exists" in {
       val sippResponse = SippPsrJourneySubmissionEtmpResponse("form-bundle-number-1")

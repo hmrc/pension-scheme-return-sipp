@@ -39,13 +39,15 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.api.{
   PsrAssetCountsResponse,
   UpdateMemberDetailsRequest
 }
-import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AccountingPeriod, PsrVersionsResponse, ReportStatus}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.PersonalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.models.{Journey, JourneyType}
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.models.api.ReportDetails
+import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
+import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 
 import java.time.{LocalDate, ZonedDateTime}
 import scala.concurrent.Future
@@ -503,6 +505,35 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result =
         controller.updateAccountingPeriodDetails("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest)
       status(result) mustBe Status.CREATED
+    }
+  }
+
+  "createEmptySippPsr" must {
+    "return 201 Created" in {
+      val reportDetails = ReportDetails(
+        pstr = "testPstr",
+        status = EtmpPsrStatus.Compiled,
+        periodStart = LocalDate.of(2022, 4, 6),
+        periodEnd = LocalDate.of(2023, 4, 5),
+        schemeName = Some("Test Scheme"),
+        version = Some("1"),
+        memberTransactions = Yes
+      )
+
+      val request = FakeRequest(POST, "/")
+        .withJsonBody(Json.toJson(reportDetails))
+        .withHeaders("srn" -> srn)
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(Future.successful(new ~(Some(externalId), enrolments)))
+
+      when(mockSippPsrSubmissionService.createEmptySippPsr(any(), any())(any(), any()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("12345678")))
+
+      val result = controller.createEmptySippPsr()(request)
+
+      status(result) mustBe Status.CREATED
+      contentAsJson(result) mustBe Json.toJson(SippPsrJourneySubmissionEtmpResponse("12345678"))
     }
   }
 }
