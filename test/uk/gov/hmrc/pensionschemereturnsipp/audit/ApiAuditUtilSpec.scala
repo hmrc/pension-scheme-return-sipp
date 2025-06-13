@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.audit
 
-import org.mockito.ArgumentMatchers
+import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, never, reset, times, verify}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsDefined, JsString, JsValue, Json}
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HttpException, HttpResponse, RequestEntityTooLargeException, UpstreamErrorResponse}
@@ -37,7 +37,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
 import uk.gov.hmrc.pensionschemereturnsipp.utils.BaseSpec
 import uk.gov.hmrc.pensionschemereturnsipp.models.JourneyType
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
-import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil._
+import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.*
 import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionEtmpRequestOps
 
 import java.time.LocalDate
@@ -266,6 +266,38 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
       verify(mockAuditService, times(1))
         .sendEventWithSource(ArgumentMatchers.eq(expectedAuditEvent), any())(any(), any())
     }
+
+    "send audit with correct JSON structure on RequestEntityTooLargeException" in {
+      val message = "Too Large"
+      val fixedNow = LocalDate.of(2024, 1, 1)
+
+      val context = fileUploadAuditContext.copy(validationCompleted = fixedNow)
+      
+      val handler = service.fireFileUploadAuditEvent(
+        pensionSchemeId,
+        minimalDetails,
+        Some(context)
+      )
+
+      handler(Failure(new RequestEntityTooLargeException(message)))
+
+      val eventCaptor = ArgumentCaptor.forClass(classOf[AuditEvent])
+      verify(mockAuditService).sendEventWithSource(eventCaptor.capture(), any())(any(), any())
+
+      val actualEvent = eventCaptor.getValue.asInstanceOf[FileUploadAuditEvent]
+      val actualDetails = actualEvent.details
+
+      actualDetails \ "fileUploadType" mustBe JsDefined(JsString(context.fileUploadType))
+      actualDetails \ "fileUploadStatus" mustBe JsDefined(JsString(context.fileUploadStatus))
+      actualDetails \ "fileName" mustBe JsDefined(JsString(context.fileName))
+      actualDetails \ "fileReference" mustBe JsDefined(JsString(context.fileReference))
+      actualDetails \ "fileSize" mustBe JsDefined(JsString(context.fileSize.toString))
+      actualDetails \ "taxYear" mustBe JsDefined(
+        JsString(s"${context.taxYear.from.getYear}-${context.taxYear.to.getYear}")
+      )
+      actualDetails \ "typeOfError" mustBe JsDefined(JsString(FileUploadAuditEvent.ERROR_SIZE_LIMIT))
+    }
+
   }
 
   "firePsrGetAuditEvent" must {
