@@ -1,0 +1,31 @@
+meta {
+  name: Sipp PSR as PSP - successful
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{pension-scheme-return-sipp}}/psr/sipp/24000020IN?psrVersion=001&periodStartDate=2022-04-06
+  body: none
+  auth: bearer
+}
+
+query {
+  psrVersion: 001
+  periodStartDate: 2022-04-06
+}
+
+headers {
+  srn: S2400000041
+  requestRole: PSP
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}

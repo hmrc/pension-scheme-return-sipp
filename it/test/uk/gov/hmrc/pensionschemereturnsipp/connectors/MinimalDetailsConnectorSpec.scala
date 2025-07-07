@@ -45,8 +45,8 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
         .willReturn(response)
     )
 
-  val psaId = psaIdGen.sample.value
-  val pspId = pspIdGen.sample.value
+  val psaGeneratedId = psaIdGen.sample.value
+  val pspGeneratedId = pspIdGen.sample.value
 
   private lazy val connector: MinimalDetailsConnector =
     applicationBuilder.injector().instanceOf[MinimalDetailsConnector]
@@ -55,26 +55,26 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
 
     "return psa minimal details" in runningApplication { implicit app =>
       val md = minimalDetailsGen.sample.value
-      stubGet("psaId", psaId.value, ok(Json.stringify(Json.toJson(md))))
+      stubGet("psaId", psaGeneratedId.value, ok(Json.stringify(Json.toJson(md))))
 
-      val result = connector.fetch(psaId).futureValue
+      val result = connector.fetch(psaGeneratedId).futureValue
 
       result mustBe Right(md)
     }
 
     "return psp minimal details" in runningApplication { implicit app =>
       val md = minimalDetailsGen.sample.value
-      stubGet("pspId", pspId.value, ok(Json.stringify(Json.toJson(md))))
+      stubGet("pspId", pspGeneratedId.value, ok(Json.stringify(Json.toJson(md))))
 
-      val result = connector.fetch(pspId).futureValue
+      val result = connector.fetch(pspGeneratedId).futureValue
 
       result mustBe Right(md)
     }
 
     "return a details not found when 404 returned with message" in runningApplication { implicit app =>
-      stubGet("psaId", psaId.value, notFound.withBody(Constants.detailsNotFound))
+      stubGet("psaId", psaGeneratedId.value, notFound.withBody(Constants.detailsNotFound))
 
-      val result = connector.fetch(psaId).futureValue
+      val result = connector.fetch(psaGeneratedId).futureValue
 
       result mustBe Left(DetailsNotFound)
     }
@@ -83,26 +83,26 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
       implicit app =>
         val body = stringContains(Constants.delimitedPSA).sample.value
 
-        stubGet("psaId", psaId.value, forbidden.withBody(body))
+        stubGet("psaId", psaGeneratedId.value, forbidden.withBody(body))
 
-        val result = connector.fetch(psaId).futureValue
+        val result = connector.fetch(psaGeneratedId).futureValue
 
         result mustBe Left(DelimitedAdmin)
     }
 
     "fail future when a 404 returned" in runningApplication { implicit app =>
-      stubGet("psaId", psaId.value, notFound)
+      stubGet("psaId", psaGeneratedId.value, notFound)
 
       assertThrows[Exception] {
-        connector.fetch(psaId).futureValue
+        connector.fetch(psaGeneratedId).futureValue
       }
     }
 
     "fail future for any other http failure code" in runningApplication { implicit app =>
-      stubGet("psaId", psaId.value, badRequest)
+      stubGet("psaId", psaGeneratedId.value, badRequest)
 
       assertThrows[Exception] {
-        connector.fetch(psaId).futureValue
+        connector.fetch(psaGeneratedId).futureValue
       }
     }
   }
