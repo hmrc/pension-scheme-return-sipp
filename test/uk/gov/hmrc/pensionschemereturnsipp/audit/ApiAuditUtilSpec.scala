@@ -272,7 +272,6 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
       val fixedNow = LocalDate.of(2024, 1, 1)
 
       val context = fileUploadAuditContext.copy(validationCompleted = fixedNow)
-      
       val handler = service.fireFileUploadAuditEvent(
         pensionSchemeId,
         minimalDetails,

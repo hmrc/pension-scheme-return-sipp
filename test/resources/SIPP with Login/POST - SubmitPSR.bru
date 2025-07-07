@@ -27,6 +27,7 @@ body:json {
     "psrVersion": "001",
     "periodStartDate": "2022-04-06",
     "pstr": "24000020IN",
+    "psaId": "A2100043",
     "taxYear": {
       "from": "2022-04-06",
       "to": "2023-04-05"
@@ -37,8 +38,8 @@ body:json {
 }
 
 tests {
-  test("Status code is 204", function () {
-      expect(res.getStatus()).to.equal(204);
+  test("Status code is 201", function () {
+      expect(res.getStatus()).to.equal(201);
   });
   
   
