@@ -18,6 +18,9 @@ package uk.gov.hmrc.pensionschemereturnsipp.config
 
 object Constants {
 
+  val psaId = "psaId"
+  val pspId = "pspId"
+
   val PSA = "PSA"
   val PSP = "PSP"
 
@@ -26,6 +29,8 @@ object Constants {
 
   val psaIdKey = "PSAID"
   val pspIdKey = "PSPID"
+
+  val requestRoleHeader = "requestRole"
 
   val delimitedPSA = "DELIMITED_PSAID"
   val detailsNotFound = "no match found"

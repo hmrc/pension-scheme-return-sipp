@@ -1,0 +1,31 @@
+meta {
+  name: Sipp PSR as PSA - unauthorised
+  type: http
+  seq: 24
+}
+
+get {
+  url: {{pension-scheme-return-sipp}}/psr/sipp/24000020IN?psrVersion=001&periodStartDate=2022-04-06
+  body: none
+  auth: bearer
+}
+
+query {
+  psrVersion: 001
+  periodStartDate: 2022-04-06
+}
+
+headers {
+  srn: S2400000041
+  requestRole: PSA
+}
+
+auth:bearer {
+  token: {{bearer_token}}
+}
+
+tests {
+  test("Status code is 401", function () {
+      expect(res.getStatus()).to.equal(401);
+  });
+}

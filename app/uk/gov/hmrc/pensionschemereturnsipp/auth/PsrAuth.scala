@@ -28,6 +28,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.{
   psaIdKey,
   pspEnrolmentKey,
   pspIdKey,
+  requestRoleHeader,
   PSA,
   PSP
 }
@@ -67,13 +68,60 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
         authorised(AuthPredicate)
           .retrieve(PsrRetrievals) {
             case Some(externalId) ~ enrolments =>
-              checkPsaOrPsp(srn, externalId, enrolments)(block)
+              request.headers.get(requestRoleHeader).map(_.toUpperCase()) match {
+                case Some(PSA) =>
+                  checkPsa(srn, externalId, enrolments)(block)
+                case Some(PSP) =>
+                  checkPsp(srn, externalId, enrolments)(block)
+                case None =>
+                  checkPsaOrPsp(srn, externalId, enrolments)(block)
+                case _ => Future.failed(new BadRequestException(s"Bad Request invalid $requestRoleHeader header value"))
+              }
 
             case _ =>
               Future.failed(new UnauthorizedException("Not Authorised - Unable to retrieve credentials - externalId"))
           }
       case _ => Future.successful(BadRequest("Invalid scheme reference number"))
     }
+
+  private def checkPsa[A](srn: Srn, externalId: String, enrolments: Enrolments)(
+    block: PsrAction[A]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] = {
+    val vPsaId = getPsaId(enrolments)
+    (vPsaId, getPsaIdAsString(enrolments)) match {
+      case (Some(v), Some((psaId, credentialRole, idType))) =>
+        schemeDetailsConnector.checkAssociation(psaId, idType, srn).flatMap {
+          case true => block(PsrAuthContext(externalId, v, request))
+          case false =>
+            Future
+              .failed(
+                new UnauthorizedException("Not Authorised - scheme is not associated with the PSA")
+              )
+        }
+      case psa =>
+        Future.failed(new BadRequestException(s"Bad Request without psaId/credentialRole $psa"))
+    }
+  }
+
+  private def checkPsp[A](srn: Srn, externalId: String, enrolments: Enrolments)(
+    block: PsrAction[A]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[A]): Future[Result] = {
+    val vPspId = getPspId(enrolments)
+    (vPspId, getPspIdAsString(enrolments)) match {
+      case (Some(v), Some((pspId, credentialRole, idType))) =>
+        schemeDetailsConnector.checkAssociation(pspId, idType, srn).flatMap {
+          case true => block(PsrAuthContext(externalId, v, request))
+          case false =>
+            Future
+              .failed(
+                new UnauthorizedException("Not Authorised - scheme is not associated with the PSP")
+              )
+        }
+
+      case psp =>
+        Future.failed(new BadRequestException(s"Bad Request without pspId/credentialRole $psp"))
+    }
+  }
 
   private def checkPsaOrPsp[A](srn: Srn, externalId: String, enrolments: Enrolments)(
     block: PsrAction[A]
@@ -109,6 +157,18 @@ trait PsrAuth extends AuthorisedFunctions with Logging {
 
   private def getPsaPspId(enrolments: Enrolments): Option[PensionSchemeId] =
     getPsaId(enrolments).orElse(getPspId(enrolments))
+
+  private def getPsaIdAsString(enrolments: Enrolments): Option[(String, String, String)] =
+    getPsaId(enrolments) match {
+      case Some(id) => Some((id.value, PSA, psaIdKey))
+      case _ => None
+    }
+
+  private def getPspIdAsString(enrolments: Enrolments): Option[(String, String, String)] =
+    getPspId(enrolments) match {
+      case Some(id) => Some((id.value, PSP, pspIdKey))
+      case _ => None
+    }
 
   private def getPsaPspIdAsString(enrolments: Enrolments): Option[(String, String, String)] =
     getPsaId(enrolments) match {

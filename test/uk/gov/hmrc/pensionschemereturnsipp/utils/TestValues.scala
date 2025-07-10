@@ -72,6 +72,9 @@ trait TestValues {
   val samplePspId: PspId = PspId("PSP")
   val samplePensionSchemeId: PensionSchemeId = PsaId("PSA")
 
+  val psaId = "A0000000"
+  val pspId = "21000005"
+
   val enrolments: Enrolments = Enrolments(
     Set(
       Enrolment(
