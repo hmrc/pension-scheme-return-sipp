@@ -40,12 +40,12 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestPayloads, TestValues}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
+class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues with TestPayloads {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   private val fakeRequest = FakeRequest("PUT", "/").withHeaders("srn" -> srn)
@@ -103,6 +103,17 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
       val result = controller.get("testPstr", Some("fbNumber"), Some("2022-04-06"), Some("1.0"))(fakeRequest)
       status(result) mustBe Status.NO_CONTENT
     }
+
+    "throw AuthorisationException when bearer token not supplied" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(Future.failed(new MissingBearerToken))
+      val thrown = intercept[AuthorisationException] {
+        await(
+          controller.get("testPstr", Some("fbNumber"), Some("2022-04-06"), Some("1.0"))(fakeRequest)
+        )
+      }
+      thrown.reason mustBe "Bearer token not supplied"
+    }
   }
 
   "PUT TangibleMoveableProperty" must {
@@ -124,17 +135,39 @@ class TangibleMoveablePropertyControllerSpec extends BaseSpec with TestValues {
         )
       )
 
-      val fakeRequestWithBody = FakeRequest("PUT", "/")
-        .withHeaders(CONTENT_TYPE -> "application/json")
-        .withBody(requestBody)
-        .withHeaders("srn" -> srn)
-
       when(mockService.submitTangibleMoveableProperty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
 
-      val result = controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)
+      val result =
+        controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(fakePutRequestWithBody(requestBody))
 
       status(result) mustBe Status.CREATED
+    }
+
+    "return 204 with data" in {
+      when(mockService.submitTangibleMoveableProperty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
+
+      val result = controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(
+        fakePutRequestWithBody(tangibleMoveablePropertyPayload)
+      )
+
+      status(result) mustBe Status.CREATED
+    }
+
+    "throws AuthorisationException when bearer token not supplied" in {
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(Future.failed(new MissingBearerToken))
+
+      val thrown = intercept[AuthorisationException] {
+        await(
+          controller.put(JourneyType.Standard, Some("fbNumber"), None, None)(
+            fakePutRequestWithBody(tangibleMoveablePropertyPayload)
+          )
+        )
+      }
+      thrown.reason mustBe "Bearer token not supplied"
     }
   }
 }

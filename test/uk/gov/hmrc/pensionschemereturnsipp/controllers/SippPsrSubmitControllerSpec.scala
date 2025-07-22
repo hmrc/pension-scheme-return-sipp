@@ -327,6 +327,21 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
       val result = controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(invalidRequest)
       status(result) mustBe Status.BAD_REQUEST
     }
+
+    "throw AuthorisationException when bearer token not supplied" in {
+      val personalDetails = PersonalDetails("John", "Doe", Some("AB123456C"), None, LocalDate.of(1980, 1, 1))
+      val fakeRequest = FakeRequest(DELETE, "/")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(Json.toJson(personalDetails))
+        .withHeaders("srn" -> srn)
+
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(Future.failed(new MissingBearerToken))
+      val thrown = intercept[AuthorisationException] {
+        await(controller.deleteMember("testPstr", Standard, Some("fbNumber"), None, None)(fakeRequest))
+      }
+      thrown.reason mustBe "Bearer token not supplied"
+    }
   }
 
   "Delete Assets " must {
@@ -371,6 +386,19 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
           Some("version")
         )(fakeRequest)
       status(result) mustBe Status.BAD_REQUEST
+    }
+
+    "throw AuthorisationException when bearer token not supplied" in {
+      when(mockAuthConnector.authorise[Option[String] ~ Enrolments](any(), any())(any(), any()))
+        .thenReturn(Future.failed(new MissingBearerToken))
+      val thrown = intercept[AuthorisationException] {
+        await(
+          controller.deleteAssets("testPstr", Journey.InterestInLandOrProperty, Standard, Some("fbNumber"), None, None)(
+            fakeRequest
+          )
+        )
+      }
+      thrown.reason mustBe "Bearer token not supplied"
     }
   }
 

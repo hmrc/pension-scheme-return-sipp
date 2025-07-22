@@ -17,10 +17,7 @@ object CodeCoverageSettings {
     "uk.gov.hmrc.pensionschemereturnsipp.config.Crypto",
     "uk.gov.hmrc.pensionschemereturnsipp.config.CryptoImpl",
     "uk.gov.hmrc.pensionschemereturnsipp.config.Module",
-    "uk.gov.hmrc.pensionschemereturnsipp.models.*",
-    "uk.gov.hmrc.pensionschemereturnsipp.utils.*",
-    "uk.gov.hmrc.pensionschemereturnsipp.auth.*",
-    "uk.gov.hmrc.pensionschemereturnsipp.validators.*"
+    "uk.gov.hmrc.pensionschemereturnsipp.models.*"
   )
 
   val settings: Seq[Setting[?]] = Seq(
