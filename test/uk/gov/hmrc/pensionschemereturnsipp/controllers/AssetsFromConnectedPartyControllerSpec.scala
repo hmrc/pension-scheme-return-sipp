@@ -40,12 +40,12 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.EtmpPsrStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrJourneySubmissionEtmpResponse
 import uk.gov.hmrc.pensionschemereturnsipp.services.SippPsrSubmissionService
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, TestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, PsrTestData, TestValues}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
+class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues with PsrTestData {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   private val fakeRequest = FakeRequest("PUT", "/").withHeaders("srn" -> srn)
@@ -126,6 +126,19 @@ class AssetsFromConnectedPartyControllerSpec extends BaseSpec with TestValues {
       val fakeRequestWithBody = FakeRequest("PUT", "/")
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(requestBody)
+        .withHeaders("srn" -> srn)
+
+      when(mockService.submitAssetsFromConnectedParty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(SippPsrJourneySubmissionEtmpResponse("form-bundle-no-1")))
+
+      val result = controller.put(Standard, Some("fbNumber"), None, None)(fakeRequestWithBody)
+
+      status(result) mustBe Status.CREATED
+    }
+    "return 204 with data" in {
+      val fakeRequestWithBody = FakeRequest("PUT", "/")
+        .withHeaders(CONTENT_TYPE -> "application/json")
+        .withBody(assetFromConnectedPartyPayload)
         .withHeaders("srn" -> srn)
 
       when(mockService.submitAssetsFromConnectedParty(any(), any(), any(), any(), any(), any(), any())(any(), any()))
