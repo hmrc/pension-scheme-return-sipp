@@ -29,8 +29,9 @@ import org.scalatest.verbs.BehaveWord
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
-import play.api.test.Helpers.running
+import play.api.test.Helpers.{running, CONTENT_TYPE}
 
 import java.net.URLEncoder
 import scala.annotation.nowarn
@@ -67,6 +68,11 @@ abstract class BaseSpec
   protected def messages(key: String, args: String*)(implicit m: Messages): String = m(key, args*)
 
   protected def injected[A: ClassTag](implicit app: Application): A = app.injector.instanceOf[A]
+
+  protected def fakePutRequestWithBody(body: JsValue): FakeRequest[JsValue] = FakeRequest("PUT", "/")
+    .withHeaders(CONTENT_TYPE -> "application/json")
+    .withBody(body)
+    .withHeaders("srn" -> srn)
 
   def runningApplication(block: Application => Unit): Unit =
     running(_ => applicationBuilder)(block)

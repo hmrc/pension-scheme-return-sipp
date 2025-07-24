@@ -49,6 +49,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{
   ReportSubmitterDetails
 }
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
+import uk.gov.hmrc.pensionschemereturnsipp.utils.UnrecognisedHttpResponseException
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
@@ -237,6 +238,29 @@ class PsrConnectorSpec extends BaseConnectorSpec {
 
       thrown.responseCode mustBe BAD_REQUEST
       thrown.message mustEqual "Missing url parameters"
+    }
+
+    "throws UpstreamErrorResponse when etmp returns forbidden" in {
+
+      stubGet(
+        "/pension-online/scheme-return/SIPP/invalidTestPstr?periodStartDate=testPeriodStartDate&psrVersion=testPsrVersion",
+        forbidden().withBody("FORBIDDEN")
+      )
+
+      intercept[UpstreamErrorResponse](
+        await(connector.getSippPsr("invalidTestPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion")))
+      )
+    }
+
+    "throws UnrecognisedHttpResponseException when etmp returns redirect" in {
+
+      stubGet(
+        "/pension-online/scheme-return/SIPP/invalidTestPstr?periodStartDate=testPeriodStartDate&psrVersion=testPsrVersion",
+        noContent()
+      )
+      intercept[UnrecognisedHttpResponseException](
+        await(connector.getSippPsr("invalidTestPstr", None, Some("testPeriodStartDate"), Some("testPsrVersion")))
+      )
     }
   }
 
