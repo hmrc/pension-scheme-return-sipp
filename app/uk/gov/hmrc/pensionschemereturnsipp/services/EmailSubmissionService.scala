@@ -18,6 +18,7 @@ package uk.gov.hmrc.pensionschemereturnsipp.services
 
 import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
+import org.apache.pekko.Done
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.{EmailConnector, MinimalDetailsConnector}
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.response.SippPsrSubmissionEtmpResponse
@@ -43,7 +44,7 @@ class EmailSubmissionService @Inject() (
     pensionSchemeId: PensionSchemeId
   )(implicit
     headerCarrier: HeaderCarrier
-  ): Future[Either[String, Unit]] = {
+  ): Future[Either[String, Done]] = {
     val reportDetails = sippPsrSubmissionEtmpResponse.reportDetails
 
     (for {
@@ -72,7 +73,7 @@ class EmailSubmissionService @Inject() (
       case id: PensionSchemeId.PsaId => minimalDetailsConnector.fetch(id)
     }).leftMap(failure => s"Failed to fetch minimum details: $failure")
 
-  private def sendEmail(
+  def sendEmail(
     pensionSchemeId: PensionSchemeId,
     pstr: String,
     psaName: Option[String],
@@ -81,7 +82,7 @@ class EmailSubmissionService @Inject() (
     periodStart: LocalDate,
     periodEnd: LocalDate,
     psrVersion: String
-  )(implicit hc: HeaderCarrier): EitherT[Future, String, Unit] = {
+  )(implicit hc: HeaderCarrier): EitherT[Future, String, Done] = {
     val requestId = hc.requestId.map(_.value).getOrElse("")
     val submittedDate = ZonedDateTime.now(clock).format(SubmissionDateTimeFormatter)
 

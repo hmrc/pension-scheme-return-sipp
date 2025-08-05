@@ -17,6 +17,7 @@
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.apache.pekko.Done
 import org.scalatest.EitherValues
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -71,7 +72,7 @@ class EmailConnectorSpec extends BaseConnectorSpec with EitherValues {
             testReportVersion
           )
           .map { result =>
-            result.value mustBe ()
+            result.value mustBe Done
           }
       }
     }

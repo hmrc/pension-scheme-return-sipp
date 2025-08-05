@@ -22,6 +22,7 @@ import cats.implicits.catsSyntaxOptionId
 import cats.syntax.either.*
 import com.google.inject.{Inject, Singleton}
 import io.scalaland.chimney.dsl.transformInto
+import org.apache.pekko.Done
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HeaderCarrier
@@ -405,7 +406,7 @@ class SippPsrSubmissionService @Inject() (
     journeyType: JourneyType,
     submission: PsrSubmissionRequest,
     pensionSchemeId: PensionSchemeId
-  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Unit]] =
+  )(implicit headerCarrier: HeaderCarrier, requestHeader: RequestHeader): Future[Either[String, Done]] =
     for {
       response <- psrSubmission(journeyType, submission, pensionSchemeId)
       emailResponse <- emailSubmissionService.submitEmail(submission.schemeName, response, pensionSchemeId)

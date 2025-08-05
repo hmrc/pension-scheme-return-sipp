@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
-import cats.syntax.either.*
 import com.google.inject.Inject
+import org.apache.pekko.Done
 import play.api.Logging
 import play.api.http.Status.*
 import play.api.libs.json.Json
@@ -92,7 +92,7 @@ class EmailConnector @Inject() (
     templateParams: Map[String, String],
     taxYear: String,
     reportVersion: String
-  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Either[String, Unit]] = {
+  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Either[String, Done]] = {
     val emailServiceUrl = s"${appConfig.emailApiUrl}/hmrc/email"
 
     val sendEmailReq = SendEmailRequest(
@@ -112,17 +112,17 @@ class EmailConnector @Inject() (
         response.status match {
           case ACCEPTED =>
             logger.debug(s"Email sent successfully")
-            ().asRight[String]
+            Right(Done)
           case status =>
             logger.warn(s"Sending Email failed with response status $status")
-            s"Failed to send email $status".asLeft[Unit]
+            Left(s"Failed to send email $status")
         }
       }
       .recoverWith(logExceptions)
   }
 
-  private def logExceptions: PartialFunction[Throwable, Future[Either[String, Unit]]] = { case t: Throwable =>
+  private def logExceptions: PartialFunction[Throwable, Future[Either[String, Done]]] = { case t: Throwable =>
     logger.warn("Unable to connect to Email Service", t)
-    Future.successful("Could not connect to email service".asLeft)
+    Future.successful(Left("Could not connect to email service"))
   }
 }

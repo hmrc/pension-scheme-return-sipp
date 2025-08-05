@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.services
 
-import cats.syntax.either._
+import cats.syntax.either.*
+import org.apache.pekko.Done
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.EitherValues
@@ -75,7 +76,7 @@ class EmailSubmissionServiceSpec
           s"${reportDetails.periodStart.getYear}-${reportDetails.periodEnd.getYear}",
           reportDetails.version.getOrElse("")
         )
-      ).thenReturn(Future.successful(().asRight))
+      ).thenReturn(Future.successful(Done.asRight))
 
       emailSubmissionService
         .submitEmail(
@@ -84,7 +85,7 @@ class EmailSubmissionServiceSpec
           psaId
         )
         .futureValue
-        .value mustBe ()
+        .value mustBe Done
     }
 
     "proxy errors from minimum details connector" in new TestScope {
