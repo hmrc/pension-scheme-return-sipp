@@ -27,7 +27,6 @@ import uk.gov.hmrc.pensionschemereturnsipp.config.{AppConfig, Constants}
 import uk.gov.hmrc.pensionschemereturnsipp.connectors.MinimalDetailsError.{DelimitedAdmin, DetailsNotFound}
 import uk.gov.hmrc.pensionschemereturnsipp.models.MinimalDetails
 import uk.gov.hmrc.pensionschemereturnsipp.models.PensionSchemeId.{PsaId, PspId}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.FutureUtils.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -57,10 +56,11 @@ class MinimalDetailsConnectorImpl @Inject() (appConfig: AppConfig, http: HttpCli
       .setHeader(idType -> idValue, "loggedInAsPsa" -> loggedInAsPsa.toString)
       .transform(_.withRequestTimeout(appConfig.ifsTimeout))
       .execute[MinimalDetails]
-      .tapError(t =>
-        Future.successful(logger.error(s"Failed to fetch minimal details with message ${t.getMessage}", t))
-      )
       .map(Right(_))
+      .recoverWith { case t =>
+        logger.error(s"Failed to fetch minimal details with message ${t.getMessage}", t)
+        Future.failed(t)
+      }
       .recover {
         case e @ WithStatusCode(NOT_FOUND) if e.message.contains(Constants.detailsNotFound) =>
           Left(DetailsNotFound)
