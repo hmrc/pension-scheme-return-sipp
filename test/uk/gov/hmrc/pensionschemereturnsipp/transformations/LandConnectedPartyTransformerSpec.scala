@@ -24,11 +24,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.{AddressDetails, Regist
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{MemberDetails, SippLandConnectedParty}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
 import java.time.LocalDate
 
-class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class LandConnectedPartyTransformerSpec extends BaseSpec with SippEtmpTestValues {
 
   private val transformer: LandConnectedPartyTransformer = new LandConnectedPartyTransformer()
 

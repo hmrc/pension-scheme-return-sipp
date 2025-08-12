@@ -25,9 +25,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippLandArmsLength.Transa
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLandArmsLength}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
-class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class LandArmsLengthTransformerSpec extends BaseSpec with SippEtmpTestValues {
 
   import java.time.LocalDate
 

@@ -25,9 +25,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippUnquotedShares.Transa
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippUnquotedShares}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
-class UnquotedSharesTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class UnquotedSharesTransformerSpec extends BaseSpec with SippEtmpTestValues {
 
   import java.time.LocalDate
 

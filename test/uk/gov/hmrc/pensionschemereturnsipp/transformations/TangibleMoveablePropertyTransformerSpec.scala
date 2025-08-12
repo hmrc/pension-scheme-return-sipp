@@ -25,9 +25,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.SippTangibleProperty.Tran
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippTangibleProperty}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
-class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class TangibleMoveablePropertyTransformerSpec extends BaseSpec with SippEtmpTestValues {
 
   import java.time.LocalDate
 

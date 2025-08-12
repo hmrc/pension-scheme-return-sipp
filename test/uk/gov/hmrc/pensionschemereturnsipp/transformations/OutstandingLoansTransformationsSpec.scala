@@ -22,11 +22,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.common.YesNo.Yes
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.common.SectionStatus.Deleted
 import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{EtmpMemberAndTransactions, MemberDetails, SippLoanOutstanding}
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
 import java.time.LocalDate
 
-class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpDummyTestValues {
+class OutstandingLoansTransformationsSpec extends BaseSpec with SippEtmpTestValues {
 
   private val transformer: OutstandingLoansTransformer = new OutstandingLoansTransformer()
 
