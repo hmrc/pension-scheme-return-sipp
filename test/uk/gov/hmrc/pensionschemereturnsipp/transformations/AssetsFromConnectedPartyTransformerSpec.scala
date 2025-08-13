@@ -29,9 +29,9 @@ import uk.gov.hmrc.pensionschemereturnsipp.models.etmp.{
   MemberDetails,
   SippOtherAssetsConnectedParty
 }
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
-class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpDummyTestValues {
+class AssetsFromConnectedPartyTransformerSpec extends BaseSpec with SippEtmpTestValues {
 
   import java.time.LocalDate
 

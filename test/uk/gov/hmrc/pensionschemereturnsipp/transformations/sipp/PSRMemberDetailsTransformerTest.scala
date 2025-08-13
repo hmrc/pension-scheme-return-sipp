@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.pensionschemereturnsipp.transformations.sipp
 
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues};
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues};
 
-class PSRMemberDetailsTransformerTest extends BaseSpec with SippEtmpDummyTestValues {
+class PSRMemberDetailsTransformerTest extends BaseSpec with SippEtmpTestValues {
 
   private val transformer: PSRMemberDetailsTransformer = new PSRMemberDetailsTransformer()
 

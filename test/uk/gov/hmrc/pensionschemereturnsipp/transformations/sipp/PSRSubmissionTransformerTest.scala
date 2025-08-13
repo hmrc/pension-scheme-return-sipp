@@ -38,11 +38,11 @@ import uk.gov.hmrc.pensionschemereturnsipp.transformations.{
   TangibleMoveablePropertyTransformer,
   UnquotedSharesTransformer
 }
-import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpDummyTestValues}
+import uk.gov.hmrc.pensionschemereturnsipp.utils.{BaseSpec, SippEtmpTestValues}
 
 import java.time.LocalDate
 
-class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpDummyTestValues {
+class PSRSubmissionTransformerTest extends BaseSpec with SippEtmpTestValues {
 
   private val assetsFromConnectedPartyTransformer = mock[AssetsFromConnectedPartyTransformer]
   private val landArmsLengthTransformer = mock[LandArmsLengthTransformer]
