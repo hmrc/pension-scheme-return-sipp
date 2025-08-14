@@ -20,7 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{IndividualDetails, MinimalDetails, PensionSchemeId}
 
 import java.time.LocalDate
 
@@ -79,7 +79,48 @@ class PsrPostAuditEventSpec extends AnyWordSpec with Matchers {
         "pensionSchemeTaxReference" -> "test-pstr",
         "affinityGroup" -> "Organisation",
         "pensionSchemeAdministratorId" -> "test-id",
-        "schemeAdministratorName" -> "",
+        "schemeAdministratorName" -> "Test Organisation",
+        "credentialRolePsaPsp" -> "PSA",
+        "psrStatus" -> "ChangedSubmitted",
+        "schemeName" -> "Test Scheme",
+        "taxYear" -> "2023-2024",
+        "payload" -> Json.obj("key" -> "value"),
+        "httpStatus" -> 200,
+        "response" -> Json.obj("responseKey" -> "responseValue"),
+        "errorMessage" -> "Test error"
+      )
+
+      event.details mustBe expectedDetails
+    }
+
+    "return the correct details with an individuals details" in {
+      val minimalDetails = MinimalDetails(
+        email = "test@example.com",
+        isPsaSuspended = false,
+        organisationName = None,
+        individualDetails = Some(IndividualDetails("First", None, "Last")),
+        rlsFlag = false,
+        deceasedFlag = false
+      )
+
+      val event = PsrPostAuditEvent(
+        pstr = "test-pstr",
+        payload = Json.obj("key" -> "value"),
+        status = Some(200),
+        response = Some(Json.obj("responseKey" -> "responseValue")),
+        errorMessage = Some("Test error"),
+        schemeName = Some("Test Scheme"),
+        taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
+        pensionSchemeId = PensionSchemeId.PsaId("test-id"),
+        minimalDetails = minimalDetails,
+        auditDetailPsrStatus = Some(ApiAuditUtil.ChangedSubmitted)
+      )
+
+      val expectedDetails = Json.obj(
+        "pensionSchemeTaxReference" -> "test-pstr",
+        "affinityGroup" -> "Individual",
+        "pensionSchemeAdministratorId" -> "test-id",
+        "schemeAdministratorName" -> "First Last",
         "credentialRolePsaPsp" -> "PSA",
         "psrStatus" -> "ChangedSubmitted",
         "schemeName" -> "Test Scheme",

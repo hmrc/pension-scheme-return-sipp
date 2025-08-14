@@ -20,7 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.pensionschemereturnsipp.models.api.common.DateRange
-import uk.gov.hmrc.pensionschemereturnsipp.models.{MinimalDetails, PensionSchemeId}
+import uk.gov.hmrc.pensionschemereturnsipp.models.{IndividualDetails, MinimalDetails, PensionSchemeId}
 
 import java.time.LocalDate
 
@@ -69,10 +69,44 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
 
       val expectedDetails = Json.obj(
         "pensionSchemeAdministratorId" -> "test-id",
-        "schemeAdministratorName" -> "",
+        "schemeAdministratorName" -> "Test Organisation",
         "credentialRolePsaPsp" -> "PSA",
         "pensionSchemeTaxReference" -> "test-pstr",
         "affinityGroup" -> "Organisation",
+        "schemeName" -> "Test Scheme",
+        "taxYear" -> "2023-2024",
+        "date" -> LocalDate.now().toString,
+        "payload" -> Json.obj("key" -> "value") // Add the payload field
+      )
+
+      event.details mustBe expectedDetails
+    }
+
+    "return the correct details with an individuals details" in {
+      val minimalDetails = MinimalDetails(
+        email = "test@example.com",
+        isPsaSuspended = false,
+        organisationName = None,
+        individualDetails = Some(IndividualDetails("First", None, "Last")),
+        rlsFlag = false,
+        deceasedFlag = false
+      )
+
+      val event = PSRSubmissionEvent(
+        pstr = "test-pstr",
+        pensionSchemeId = PensionSchemeId.PsaId("test-id"),
+        minimalDetails = minimalDetails,
+        schemeName = Some("Test Scheme"),
+        taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
+        payload = Json.obj("key" -> "value")
+      )
+
+      val expectedDetails = Json.obj(
+        "pensionSchemeAdministratorId" -> "test-id",
+        "schemeAdministratorName" -> "First Last",
+        "credentialRolePsaPsp" -> "PSA",
+        "pensionSchemeTaxReference" -> "test-pstr",
+        "affinityGroup" -> "Individual",
         "schemeName" -> "Test Scheme",
         "taxYear" -> "2023-2024",
         "date" -> LocalDate.now().toString,
