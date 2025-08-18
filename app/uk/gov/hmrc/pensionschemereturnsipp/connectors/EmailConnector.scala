@@ -18,10 +18,10 @@ package uk.gov.hmrc.pensionschemereturnsipp.connectors
 
 import com.google.inject.Inject
 import org.apache.pekko.Done
-import play.api.Logging
+import play.api.{Configuration, Logging}
 import play.api.http.Status.*
 import play.api.libs.json.Json
-import uk.gov.hmrc.crypto.{ApplicationCrypto, PlainText}
+import uk.gov.hmrc.crypto.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
@@ -36,8 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmailConnector @Inject() (
   appConfig: AppConfig,
   http: HttpClientV2,
-  crypto: ApplicationCrypto
+  config: Configuration
 ) extends Logging {
+
+  private lazy val jsonCrypto: Encrypter & Decrypter =
+    SymmetricCryptoFactory.aesCryptoFromConfig(baseConfigKey = "queryParameter.encryption", config.underlying)
 
   private def callBackUrl(
     pensionSchemeId: PensionSchemeId,
@@ -50,20 +53,20 @@ class EmailConnector @Inject() (
     reportVersion: String
   ): String = {
     val encryptedPsaOrPspId = URLEncoder.encode(
-      crypto.QueryParameterCrypto.encrypt(PlainText(pensionSchemeId.value)).value,
+      jsonCrypto.encrypt(PlainText(pensionSchemeId.value)).value,
       StandardCharsets.UTF_8.toString
     )
     val encryptedPstr =
-      URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(pstr)).value, StandardCharsets.UTF_8.toString)
+      URLEncoder.encode(jsonCrypto.encrypt(PlainText(pstr)).value, StandardCharsets.UTF_8.toString)
     val encryptedEmail =
-      URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(email)).value, StandardCharsets.UTF_8.toString)
+      URLEncoder.encode(jsonCrypto.encrypt(PlainText(email)).value, StandardCharsets.UTF_8.toString)
     val encryptedSchemeName =
       URLEncoder.encode(
-        crypto.QueryParameterCrypto.encrypt(PlainText(schemeName)).value,
+        jsonCrypto.encrypt(PlainText(schemeName)).value,
         StandardCharsets.UTF_8.toString
       )
     val encryptedUserName =
-      URLEncoder.encode(crypto.QueryParameterCrypto.encrypt(PlainText(userName)).value, StandardCharsets.UTF_8.toString)
+      URLEncoder.encode(jsonCrypto.encrypt(PlainText(userName)).value, StandardCharsets.UTF_8.toString)
 
     val emailCallback = appConfig.emailCallback(
       pensionSchemeId,
