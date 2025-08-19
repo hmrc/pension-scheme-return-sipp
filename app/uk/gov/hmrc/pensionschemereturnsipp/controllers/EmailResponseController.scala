@@ -17,11 +17,11 @@
 package uk.gov.hmrc.pensionschemereturnsipp.controllers
 
 import com.google.inject.Inject
-import play.api.Logging
+import play.api.{Configuration, Logging}
 import play.api.libs.json.JsValue
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted}
+import uk.gov.hmrc.crypto._
 import uk.gov.hmrc.pensionschemereturnsipp.audit.PsrEmailAuditEvent
 import uk.gov.hmrc.pensionschemereturnsipp.config.Constants.emailRegex
 import uk.gov.hmrc.pensionschemereturnsipp.models.EmailEvents
@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext
 
 class EmailResponseController @Inject() (
   cc: ControllerComponents,
-  crypto: ApplicationCrypto,
+  config: Configuration,
   parser: PlayBodyParsers,
   auditService: AuditService,
   val authConnector: AuthConnector
@@ -41,6 +41,9 @@ class EmailResponseController @Inject() (
     extends BackendController(cc)
     with AuthorisedFunctions
     with Logging {
+
+  lazy val jsonCrypto: Encrypter & Decrypter =
+    SymmetricCryptoFactory.aesCryptoFromConfig(baseConfigKey = "queryParameter.encryption", config.underlying)
 
   def sendAuditEvents(
     submittedBy: String,
@@ -114,5 +117,5 @@ class EmailResponseController @Inject() (
   }
 
   private def decrypt(encrypted: String): String =
-    crypto.QueryParameterCrypto.decrypt(Crypted(encrypted)).value
+    jsonCrypto.decrypt(Crypted(encrypted)).value
 }

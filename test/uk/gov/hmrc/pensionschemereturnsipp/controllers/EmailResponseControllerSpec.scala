@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.*
-import uk.gov.hmrc.crypto.{ApplicationCrypto, PlainText}
+import uk.gov.hmrc.crypto.*
 import uk.gov.hmrc.pensionschemereturnsipp.models.Event.{Complained, Delivered, Opened, PermanentBounce, Sent}
 import uk.gov.hmrc.pensionschemereturnsipp.models.{EmailEvent, EmailEvents}
 import uk.gov.hmrc.pensionschemereturnsipp.services.AuditService
@@ -58,12 +58,11 @@ class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.num
 
   private val injector = application.injector
   private val controller = injector.instanceOf[EmailResponseController]
-  private val crypto = injector.instanceOf[ApplicationCrypto].QueryParameterCrypto
-  private val encryptedPsaId = crypto.encrypt(PlainText(psaOrPspId)).value
-  private val encryptedPstr = crypto.encrypt(PlainText(pstr)).value
-  private val encryptedSchemeName = crypto.encrypt(PlainText(schemeName)).value
-  private val encryptedUserName = crypto.encrypt(PlainText(userName)).value
-  private val encryptedEmail = crypto.encrypt(PlainText(emailAddress)).value
+  private val encryptedPsaId = controller.jsonCrypto.encrypt(PlainText(psaOrPspId)).value
+  private val encryptedPstr = controller.jsonCrypto.encrypt(PlainText(pstr)).value
+  private val encryptedSchemeName = controller.jsonCrypto.encrypt(PlainText(schemeName)).value
+  private val encryptedUserName = controller.jsonCrypto.encrypt(PlainText(userName)).value
+  private val encryptedEmail = controller.jsonCrypto.encrypt(PlainText(emailAddress)).value
 
   override def beforeEach(): Unit = {
     reset(mockAuditService)
@@ -117,7 +116,7 @@ class EmailResponseControllerSpec extends BaseSpec { // scalastyle:off magic.num
       val result = controller.sendAuditEvents(
         schemeAdministratorTypeAsPsp,
         requestId,
-        email = crypto.encrypt(PlainText(invalidEmail)).value,
+        email = controller.jsonCrypto.encrypt(PlainText(invalidEmail)).value,
         encryptedPsaId,
         encryptedPstr,
         encryptedSchemeName,
