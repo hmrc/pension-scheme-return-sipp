@@ -44,6 +44,9 @@ case class PsrPostAuditEvent(
 
     def credentialRole: String = if (pensionSchemeId.isPSP) "PSP" else "PSA"
     def affinityGroup: String = if (minimalDetails.organisationName.nonEmpty) "Organisation" else "Individual"
+    val userName = minimalDetails.organisationName
+      .orElse(minimalDetails.individualDetails.map(_.fullName))
+      .getOrElse("")
 
     val psrDetails = Json.obj(
       "pensionSchemeTaxReference" -> pstr,
@@ -51,7 +54,7 @@ case class PsrPostAuditEvent(
     ) ++ psaOrPspIdDetails(
       credentialRole,
       pensionSchemeId.value,
-      minimalDetails.individualDetails.map(_.fullName).getOrElse("")
+      userName
     ) ++ JsObject(auditDetailPsrStatus.map(status => "psrStatus" -> JsString(status.name)).toList) ++
       optSchemeName ++
       optTaxYear ++ Json.obj("payload" -> payload)
