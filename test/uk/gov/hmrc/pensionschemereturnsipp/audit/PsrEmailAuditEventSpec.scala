@@ -38,16 +38,16 @@ class PsrEmailAuditEventSpec extends AnyWordSpec with Matchers {
 
       val expectedDetails: JsObject = Json.obj(
         "emailInitiationRequestId" -> "request123",
+        "pensionSchemeAdministratorId" -> "psa-123",
+        "schemeAdministratorName" -> "John Doe",
         "email" -> "test@example.com",
-        "credentialRolePsaPsp" -> "PSP",
+        "credentialRolePsaPsp" -> "PSA",
         "status" -> "Sent",
-        "submittedBy" -> "John Doe",
+        "submittedBy" -> "PSA",
         "reportVersion" -> "1.0",
         "pensionSchemeTaxReference" -> "test-pstr",
         "schemeName" -> "Test Scheme",
-        "taxYear" -> "2024-2025",
-        "pensionSchemePractitionerId" -> "psa-123",
-        "schemePractitionerName" -> "John Doe"
+        "taxYear" -> "2024-2025"
       )
 
       event.details shouldBe expectedDetails
@@ -58,7 +58,7 @@ class PsrEmailAuditEventSpec extends AnyWordSpec with Matchers {
     PsrEmailAuditEvent(
       psaPspId = "psa-123",
       pstr = "test-pstr",
-      submittedBy = "John Doe",
+      submittedBy = "PSA",
       emailAddress = "test@example.com",
       event = EmailEvent(Event.Sent, LocalDateTime.now),
       requestId = "request123",
