@@ -74,7 +74,8 @@ class PsrConnector @Inject() (
     request: SippPsrSubmissionEtmpRequest,
     maybeTaxYear: Option[DateRange],
     maybeSchemeName: Option[String],
-    auditContext: Option[FileUploadAuditContext]
+    auditContext: Option[FileUploadAuditContext],
+    maybeVersion: Option[String] = None
   )(implicit
     headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
@@ -149,7 +150,8 @@ class PsrConnector @Inject() (
                 minimalDetails,
                 maybeSchemeName,
                 maybeTaxYear,
-                request
+                request,
+                maybeVersion
               )
           )
       }
