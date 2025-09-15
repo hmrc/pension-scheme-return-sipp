@@ -27,7 +27,8 @@ case class PSRSubmissionEvent(
   minimalDetails: MinimalDetails,
   schemeName: Option[String],
   taxYear: Option[DateRange],
-  payload: JsValue
+  payload: JsValue,
+  isSubmissionAmendment: Boolean = false
 ) extends AuditEvent {
 
   override def auditType: String = "PensionSchemeReturnSubmitted"
@@ -49,7 +50,8 @@ case class PSRSubmissionEvent(
       userName
     ) ++ Json.obj(
       "pensionSchemeTaxReference" -> pstr,
-      "affinityGroup" -> affinityGroup
+      "affinityGroup" -> affinityGroup,
+      "submissionAmendment" -> isSubmissionAmendment
     ) ++ optSchemeName ++ optTaxYear ++
       Json.obj(
         "date" -> LocalDate.now().toString,

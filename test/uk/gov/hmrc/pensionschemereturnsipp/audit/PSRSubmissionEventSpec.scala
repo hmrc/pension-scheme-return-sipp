@@ -73,6 +73,7 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         "credentialRolePsaPsp" -> "PSA",
         "pensionSchemeTaxReference" -> "test-pstr",
         "affinityGroup" -> "Organisation",
+        "submissionAmendment" -> false,
         "schemeName" -> "Test Scheme",
         "taxYear" -> "2023-2024",
         "date" -> LocalDate.now().toString,
@@ -98,7 +99,8 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         minimalDetails = minimalDetails,
         schemeName = Some("Test Scheme"),
         taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
-        payload = Json.obj("key" -> "value")
+        payload = Json.obj("key" -> "value"),
+        isSubmissionAmendment = true
       )
 
       val expectedDetails = Json.obj(
@@ -107,6 +109,7 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         "credentialRolePsaPsp" -> "PSA",
         "pensionSchemeTaxReference" -> "test-pstr",
         "affinityGroup" -> "Individual",
+        "submissionAmendment" -> true,
         "schemeName" -> "Test Scheme",
         "taxYear" -> "2023-2024",
         "date" -> LocalDate.now().toString,
