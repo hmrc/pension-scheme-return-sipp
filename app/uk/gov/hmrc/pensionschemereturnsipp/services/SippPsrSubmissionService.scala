@@ -301,7 +301,8 @@ class SippPsrSubmissionService @Inject() (
         transactions,
         transformer
       ),
-      auditContext
+      auditContext,
+      maybeVersion = optPsrVersion.orElse(reportDetails.version)
     )
 
   private def submitWithRequest(
@@ -505,7 +506,13 @@ class SippPsrSubmissionService @Inject() (
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
           )
-          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updated))
+          submitWithRequest(
+            journeyType,
+            pstr,
+            pensionSchemeId,
+            Future.successful(updated),
+            maybeVersion = reportDetails.version
+          )
 
         case None =>
           Future.failed(
@@ -537,7 +544,13 @@ class SippPsrSubmissionService @Inject() (
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
           )
-          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updated))
+          submitWithRequest(
+            journeyType,
+            pstr,
+            pensionSchemeId,
+            Future.successful(updated),
+            maybeVersion = response.reportDetails.version
+          )
 
         case None =>
           Future.failed(
@@ -647,7 +660,13 @@ class SippPsrSubmissionService @Inject() (
               },
               psrDeclaration = response.psrDeclaration
             )
-            submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest)).map(_.some)
+            submitWithRequest(
+              journeyType,
+              pstr,
+              pensionSchemeId,
+              Future.successful(updateRequest),
+              maybeVersion = response.reportDetails.version
+            ).map(_.some)
           } else
             Future.successful(SippPsrJourneySubmissionEtmpResponse(fbNumber).some)
         case None =>
@@ -693,7 +712,13 @@ class SippPsrSubmissionService @Inject() (
               )
             )
           )
-          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest))
+          submitWithRequest(
+            journeyType,
+            pstr,
+            pensionSchemeId,
+            Future.successful(updateRequest),
+            maybeVersion = response.reportDetails.version
+          )
         case None =>
           Future.failed(new RuntimeException(s"Submission with pstr $pstr not found"))
       }
@@ -734,7 +759,13 @@ class SippPsrSubmissionService @Inject() (
             )
           )
 
-          submitWithRequest(journeyType, pstr, pensionSchemeId, Future.successful(updateRequest))
+          submitWithRequest(
+            journeyType,
+            pstr,
+            pensionSchemeId,
+            Future.successful(updateRequest),
+            maybeVersion = response.reportDetails.version
+          )
 
         case None =>
           Future.failed(new RuntimeException(s"Submission with pstr $pstr not found"))
