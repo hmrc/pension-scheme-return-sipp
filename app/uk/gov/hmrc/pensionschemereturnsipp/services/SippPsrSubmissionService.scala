@@ -288,6 +288,7 @@ class SippPsrSubmissionService @Inject() (
     hc: HeaderCarrier,
     requestHeader: RequestHeader
   ): Future[SippPsrJourneySubmissionEtmpResponse] =
+    logger.warn(s"submitJourney: reportVersion = ${reportDetails.version}")
     submitWithRequest(
       journeyType,
       reportDetails.pstr,
@@ -443,6 +444,7 @@ class SippPsrSubmissionService @Inject() (
                 Option.when(SubmittedBy.PSP == submittedBy)(Declaration(declaration1 = true, declaration2 = true))
             ).some
           )
+          logger.warn(s"psrSubmission: reportVersion = ${submission.psrVersion} / ${response.reportDetails.version}")
           submitWithRequest(
             journeyType,
             pstr,
@@ -450,7 +452,7 @@ class SippPsrSubmissionService @Inject() (
             Future.successful(updateRequest),
             maybeTaxYear = submission.taxYear.some,
             maybeSchemeName = submission.schemeName,
-            maybeVersion = submission.psrVersion
+            maybeVersion = response.reportDetails.version
           ).map(_ => response)
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))
@@ -506,6 +508,7 @@ class SippPsrSubmissionService @Inject() (
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
           )
+          logger.warn(s"updateMemberTransactions: reportVersion = ${reportDetails.version}")
           submitWithRequest(
             journeyType,
             pstr,
@@ -544,6 +547,7 @@ class SippPsrSubmissionService @Inject() (
             memberAndTransactions = response.memberAndTransactions.flatMap(NonEmptyList.fromList),
             psrDeclaration = response.psrDeclaration
           )
+          logger.warn(s"updateAccountingPeriodDetails: reportVersion = ${response.reportDetails.version}")
           submitWithRequest(
             journeyType,
             pstr,
@@ -660,6 +664,7 @@ class SippPsrSubmissionService @Inject() (
               },
               psrDeclaration = response.psrDeclaration
             )
+            logger.warn(s"updateMemberDetails: reportVersion = ${response.reportDetails.version}")
             submitWithRequest(
               journeyType,
               pstr,
@@ -712,6 +717,7 @@ class SippPsrSubmissionService @Inject() (
               )
             )
           )
+          logger.warn(s"deleteMember: reportVersion = ${response.reportDetails.version}")
           submitWithRequest(
             journeyType,
             pstr,
@@ -758,7 +764,7 @@ class SippPsrSubmissionService @Inject() (
               )
             )
           )
-
+          logger.warn(s"deleteAssets: reportVersion = ${response.reportDetails.version}")
           submitWithRequest(
             journeyType,
             pstr,
