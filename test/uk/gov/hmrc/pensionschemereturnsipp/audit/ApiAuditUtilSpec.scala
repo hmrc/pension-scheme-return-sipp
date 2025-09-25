@@ -97,7 +97,8 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
         minimalDetails = minimalDetails,
         schemeName = Some(schemeName),
         taxYear = None,
-        payload = payload
+        payload = payload,
+        checkReturnDates = None
       )
       verify(mockAuditService, times(1)).sendEventWithSource(
         ArgumentMatchers.eq(expectedAuditEvent),

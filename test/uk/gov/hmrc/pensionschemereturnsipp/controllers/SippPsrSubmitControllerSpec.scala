@@ -69,7 +69,8 @@ class SippPsrSubmitControllerSpec extends BaseSpec with TestValues {
        |  "psrVersion": "1",
        |  "psaId": "A0001234",
        |  "taxYear": {"from": "2022-04-06", "to": "2023-04-06"},
-       |  "schemeName": "testScheme"
+       |  "schemeName": "testScheme",
+       |  "checkReturnDates": "true"
        |}
        |""".stripMargin
   )

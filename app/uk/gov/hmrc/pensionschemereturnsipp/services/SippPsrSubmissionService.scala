@@ -313,7 +313,8 @@ class SippPsrSubmissionService @Inject() (
     auditContext: Option[FileUploadAuditContext] = None,
     maybeTaxYear: Option[DateRange] = None,
     maybeSchemeName: Option[String] = None,
-    maybeVersion: Option[String] = None
+    maybeVersion: Option[String] = None,
+    checkReturnDates: Option[String] = None
   )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[SippPsrJourneySubmissionEtmpResponse] = {
     val response = for {
       submissionRequest <- EitherT(thunk.map(_.asRight[MinimalDetailsError]))
@@ -329,7 +330,8 @@ class SippPsrSubmissionService @Inject() (
             maybeTaxYear,
             maybeSchemeName,
             auditContext,
-            maybeVersion
+            maybeVersion,
+            checkReturnDates
           )
           .map(_.asRight[MinimalDetailsError])
       )
@@ -450,7 +452,8 @@ class SippPsrSubmissionService @Inject() (
             Future.successful(updateRequest),
             maybeTaxYear = submission.taxYear.some,
             maybeSchemeName = submission.schemeName,
-            maybeVersion = response.reportDetails.version
+            maybeVersion = response.reportDetails.version,
+            checkReturnDates = submission.checkReturnDates
           ).map(_ => response)
         case None =>
           Future.failed(new Exception(s"Submission with pstr $pstr not found"))

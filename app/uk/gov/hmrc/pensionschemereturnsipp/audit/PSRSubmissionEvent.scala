@@ -28,7 +28,8 @@ case class PSRSubmissionEvent(
   schemeName: Option[String],
   taxYear: Option[DateRange],
   payload: JsValue,
-  isSubmissionAmendment: Boolean = false
+  isSubmissionAmendment: Boolean = false,
+  checkReturnDates: Option[String]
 ) extends AuditEvent {
 
   override def auditType: String = "PensionSchemeReturnSubmitted"
@@ -43,6 +44,7 @@ case class PSRSubmissionEvent(
 
     val optTaxYear = createOptionalJsonObject("taxYear", taxYear.map(tY => s"${tY.from.getYear}-${tY.to.getYear}"))
     val optSchemeName = createOptionalJsonObject("schemeName", schemeName)
+    val optCheckReturnDates = createOptionalJsonObject("checkReturnDates", checkReturnDates)
 
     psaOrPspIdDetails(
       credentialRole,
@@ -52,7 +54,7 @@ case class PSRSubmissionEvent(
       "pensionSchemeTaxReference" -> pstr,
       "affinityGroup" -> affinityGroup,
       "submissionAmendment" -> isSubmissionAmendment
-    ) ++ optSchemeName ++ optTaxYear ++
+    ) ++ optSchemeName ++ optTaxYear ++ optCheckReturnDates ++
       Json.obj(
         "date" -> LocalDate.now().toString,
         "payload" -> payload

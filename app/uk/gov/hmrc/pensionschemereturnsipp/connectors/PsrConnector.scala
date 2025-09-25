@@ -75,7 +75,8 @@ class PsrConnector @Inject() (
     maybeTaxYear: Option[DateRange],
     maybeSchemeName: Option[String],
     auditContext: Option[FileUploadAuditContext],
-    maybeVersion: Option[String] = None
+    maybeVersion: Option[String] = None,
+    checkReturnDates: Option[String] = None
   )(implicit
     headerCarrier: HeaderCarrier,
     requestHeader: RequestHeader
@@ -151,7 +152,8 @@ class PsrConnector @Inject() (
                 maybeSchemeName,
                 maybeTaxYear,
                 request,
-                maybeVersion
+                maybeVersion,
+                checkReturnDates
               )
           )
       }
