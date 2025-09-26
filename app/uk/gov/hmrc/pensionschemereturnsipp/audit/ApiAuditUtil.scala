@@ -81,7 +81,8 @@ class ApiAuditUtil @Inject() (auditService: AuditService) extends Logging {
     schemeName: Option[String],
     taxYear: Option[DateRange],
     psrRequest: SippPsrSubmissionEtmpRequest,
-    maybeVersion: Option[String] = None
+    maybeVersion: Option[String] = None,
+    checkReturnDates: Option[String] = None
   )(implicit ec: ExecutionContext, request: RequestHeader): PartialFunction[Try[HttpResponse], Unit] = {
 
     case Success(_) =>
@@ -96,7 +97,8 @@ class ApiAuditUtil @Inject() (auditService: AuditService) extends Logging {
               minimalDetails = minimalDetails,
               taxYear = taxYear,
               schemeName = schemeName,
-              isSubmissionAmendment = maybeVersion.exists(_.toInt > 1)
+              isSubmissionAmendment = maybeVersion.exists(_.toInt > 1),
+              checkReturnDates = checkReturnDates
             ),
             auditSource = "pension-scheme-return-sipp-frontend" // for auditing purposes this needs to be frontend
           )

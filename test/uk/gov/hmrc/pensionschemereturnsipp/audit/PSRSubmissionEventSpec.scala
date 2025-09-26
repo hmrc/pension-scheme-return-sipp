@@ -42,7 +42,8 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         ),
         schemeName = Some("Test Scheme"),
         taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
-        payload = Json.obj("key" -> "value")
+        payload = Json.obj("key" -> "value"),
+        checkReturnDates = Some("true")
       )
 
       event.auditType mustBe "PensionSchemeReturnSubmitted"
@@ -64,7 +65,8 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         minimalDetails = minimalDetails,
         schemeName = Some("Test Scheme"),
         taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
-        payload = Json.obj("key" -> "value")
+        payload = Json.obj("key" -> "value"),
+        checkReturnDates = Some("true")
       )
 
       val expectedDetails = Json.obj(
@@ -77,7 +79,8 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         "schemeName" -> "Test Scheme",
         "taxYear" -> "2023-2024",
         "date" -> LocalDate.now().toString,
-        "payload" -> Json.obj("key" -> "value") // Add the payload field
+        "payload" -> Json.obj("key" -> "value"),
+        "checkReturnDates" -> "true"
       )
 
       event.details mustBe expectedDetails
@@ -100,7 +103,8 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         schemeName = Some("Test Scheme"),
         taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
         payload = Json.obj("key" -> "value"),
-        isSubmissionAmendment = true
+        isSubmissionAmendment = true,
+        checkReturnDates = Some("true")
       )
 
       val expectedDetails = Json.obj(
@@ -113,10 +117,78 @@ class PSRSubmissionEventSpec extends AnyWordSpec with Matchers {
         "schemeName" -> "Test Scheme",
         "taxYear" -> "2023-2024",
         "date" -> LocalDate.now().toString,
-        "payload" -> Json.obj("key" -> "value") // Add the payload field
+        "payload" -> Json.obj("key" -> "value"),
+        "checkReturnDates" -> "true"
       )
 
       event.details mustBe expectedDetails
+    }
+
+    "handle checkReturnDates correctly" when {
+      val baseMinimalDetails = MinimalDetails(
+        email = "test@example.com",
+        isPsaSuspended = false,
+        organisationName = Some("Test Organisation"),
+        individualDetails = None,
+        rlsFlag = false,
+        deceasedFlag = false
+      )
+
+      val baseExpectedDetails = Json.obj(
+        "pensionSchemeAdministratorId" -> "test-id",
+        "schemeAdministratorName" -> "Test Organisation",
+        "credentialRolePsaPsp" -> "PSA",
+        "pensionSchemeTaxReference" -> "test-pstr",
+        "affinityGroup" -> "Organisation",
+        "submissionAmendment" -> false,
+        "schemeName" -> "Test Scheme",
+        "taxYear" -> "2023-2024",
+        "date" -> LocalDate.now().toString,
+        "payload" -> Json.obj("key" -> "value")
+      )
+
+      "checkReturnDates is Some(true)" in {
+        val event = PSRSubmissionEvent(
+          pstr = "test-pstr",
+          pensionSchemeId = PensionSchemeId.PsaId("test-id"),
+          minimalDetails = baseMinimalDetails,
+          schemeName = Some("Test Scheme"),
+          taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
+          payload = Json.obj("key" -> "value"),
+          checkReturnDates = Some("true")
+        )
+
+        event.details mustBe (baseExpectedDetails ++ Json.obj("checkReturnDates" -> "true"))
+      }
+
+      "checkReturnDates is Some(false)" in {
+        val event = PSRSubmissionEvent(
+          pstr = "test-pstr",
+          pensionSchemeId = PensionSchemeId.PsaId("test-id"),
+          minimalDetails = baseMinimalDetails,
+          schemeName = Some("Test Scheme"),
+          taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
+          payload = Json.obj("key" -> "value"),
+          checkReturnDates = Some("false")
+        )
+
+        event.details mustBe (baseExpectedDetails ++ Json.obj("checkReturnDates" -> "false"))
+      }
+
+      "checkReturnDates is None" in {
+        val event = PSRSubmissionEvent(
+          pstr = "test-pstr",
+          pensionSchemeId = PensionSchemeId.PsaId("test-id"),
+          minimalDetails = baseMinimalDetails,
+          schemeName = Some("Test Scheme"),
+          taxYear = Some(DateRange(LocalDate.of(2023, 4, 6), LocalDate.of(2024, 4, 5))),
+          payload = Json.obj("key" -> "value"),
+          checkReturnDates = None
+        )
+
+        event.details mustBe baseExpectedDetails
+        event.details.keys must not contain "checkReturnDates"
+      }
     }
   }
 }
