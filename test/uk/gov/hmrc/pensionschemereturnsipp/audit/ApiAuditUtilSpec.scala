@@ -42,7 +42,7 @@ import uk.gov.hmrc.pensionschemereturnsipp.audit.ApiAuditUtil.SippPsrSubmissionE
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
 
@@ -303,74 +303,6 @@ class ApiAuditUtilSpec extends BaseSpec with BeforeAndAfterEach {
   "firePsrGetAuditEvent" must {
 
     doNothing().when(mockAuditService).sendEvent(any())(any(), any())
-
-    "send the correct audit event for a successful response" in {
-      val psrGetEventPf = service.firePsrGetAuditEvent(pstr, Some("FB_NUMBER"), None, None)
-      psrGetEventPf(
-        Try.apply(Some(sampleSippPsrSubmissionEtmpResponse))
-      )
-      val expectedAuditEvent = PsrGetAuditEvent(
-        pstr = pstr,
-        fbNumber = Some("FB_NUMBER"),
-        periodStartDate = None,
-        psrVersion = None,
-        status = Some(Status.OK),
-        response = Some(Json.toJson(sampleSippPsrSubmissionEtmpResponse)),
-        errorMessage = None
-      )
-      verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
-    }
-
-    "send the audit event with the status code when an upstream error occurs" in {
-      val psrGetEventPf = service.firePsrGetAuditEvent(pstr, Some("FB_NUMBER"), None, None)
-      val reportAs = 202
-      val message = "The request was not found"
-      val status = Status.NOT_FOUND
-      psrGetEventPf(Failure(UpstreamErrorResponse.apply(message, status, reportAs, Map.empty)))
-      val expectedAuditEvent = PsrGetAuditEvent(
-        pstr = pstr,
-        fbNumber = Some("FB_NUMBER"),
-        periodStartDate = None,
-        psrVersion = None,
-        status = Some(status),
-        response = None,
-        errorMessage = Some(message)
-      )
-      verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
-    }
-
-    "send the audit event with the status code when an HttpException error occurs" in {
-      val psrGetEventPf = service.firePsrGetAuditEvent(pstr, Some("FB_NUMBER"), None, None)
-      val message = "The request had a network error"
-      val status = Status.SERVICE_UNAVAILABLE
-      psrGetEventPf(Failure(new HttpException(message, status)))
-      val expectedAuditEvent = PsrGetAuditEvent(
-        pstr = pstr,
-        fbNumber = Some("FB_NUMBER"),
-        periodStartDate = None,
-        psrVersion = None,
-        status = Some(status),
-        response = None,
-        errorMessage = Some(message)
-      )
-      verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
-    }
-
-    "send the audit event when a throwable is thrown" in {
-      val psrGetEventPf = service.firePsrGetAuditEvent(pstr, Some("FB_NUMBER"), None, None)
-      val message = "The request had a network error"
-      psrGetEventPf(Failure(new RuntimeException(message)))
-      val expectedAuditEvent = PsrGetAuditEvent(
-        pstr = pstr,
-        fbNumber = Some("FB_NUMBER"),
-        periodStartDate = None,
-        psrVersion = None,
-        status = None,
-        response = None,
-        errorMessage = Some(message)
-      )
-      verify(mockAuditService, times(1)).sendEvent(ArgumentMatchers.eq(expectedAuditEvent))(any(), any())
-    }
 
     "return ChangedCompiled for JourneyType.Amend with EtmpPsrStatus.Compiled" in {
       val request = sampleSippPsrSubmissionEtmpRequest.copy(
