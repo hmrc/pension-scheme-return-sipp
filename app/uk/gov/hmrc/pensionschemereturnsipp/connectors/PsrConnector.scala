@@ -189,9 +189,7 @@ class PsrConnector @Inject() (
         response.status match {
           case OK =>
             Some(response.json.as[SippPsrSubmissionEtmpResponse])
-          case _ if isNotFound(response) =>
-            logger.warn(s"$logMessage and returned (PSR_NOT_FOUND) ${response.status} ")
-            None
+          case _ if isNotFound(response) => None
           case _ => handleErrorResponse("GET", url)(response)
         }
       }
